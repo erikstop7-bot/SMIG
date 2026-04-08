@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>graphify - graphify-out/graph.html</title>
+<script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0f0f1a; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; display: flex; height: 100vh; overflow: hidden; }
+  #graph { flex: 1; }
+  #sidebar { width: 280px; background: #1a1a2e; border-left: 1px solid #2a2a4e; display: flex; flex-direction: column; overflow: hidden; }
+  #search-wrap { padding: 12px; border-bottom: 1px solid #2a2a4e; }
+  #search { width: 100%; background: #0f0f1a; border: 1px solid #3a3a5e; color: #e0e0e0; padding: 7px 10px; border-radius: 6px; font-size: 13px; outline: none; }
+  #search:focus { border-color: #4E79A7; }
+  #search-results { max-height: 140px; overflow-y: auto; padding: 4px 12px; border-bottom: 1px solid #2a2a4e; display: none; }
+  .search-item { padding: 4px 6px; cursor: pointer; border-radius: 4px; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .search-item:hover { background: #2a2a4e; }
+  #info-panel { padding: 14px; border-bottom: 1px solid #2a2a4e; min-height: 140px; }
+  #info-panel h3 { font-size: 13px; color: #aaa; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  #info-content { font-size: 13px; color: #ccc; line-height: 1.6; }
+  #info-content .field { margin-bottom: 5px; }
+  #info-content .field b { color: #e0e0e0; }
+  #info-content .empty { color: #555; font-style: italic; }
+  .neighbor-link { display: block; padding: 2px 6px; margin: 2px 0; border-radius: 3px; cursor: pointer; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 3px solid #333; }
+  .neighbor-link:hover { background: #2a2a4e; }
+  #neighbors-list { max-height: 160px; overflow-y: auto; margin-top: 4px; }
+  #legend-wrap { flex: 1; overflow-y: auto; padding: 12px; }
+  #legend-wrap h3 { font-size: 13px; color: #aaa; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .legend-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; cursor: pointer; border-radius: 4px; font-size: 12px; }
+  .legend-item:hover { background: #2a2a4e; padding-left: 4px; }
+  .legend-item.dimmed { opacity: 0.35; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .legend-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .legend-count { color: #666; font-size: 11px; }
+  #stats { padding: 10px 14px; border-top: 1px solid #2a2a4e; font-size: 11px; color: #555; }
+</style>
+</head>
+<body>
+<div id="graph"></div>
+<div id="sidebar">
+  <div id="search-wrap">
+    <input id="search" type="text" placeholder="Search nodes..." autocomplete="off">
+    <div id="search-results"></div>
+  </div>
+  <div id="info-panel">
+    <h3>Node Info</h3>
+    <div id="info-content"><span class="empty">Click a node to inspect it</span></div>
+  </div>
+  <div id="legend-wrap">
+    <h3>Communities</h3>
+    <div id="legend"></div>
+  </div>
+  <div id="stats">35 nodes &middot; 38 edges &middot; 6 communities</div>
+</div>
+<script>
+const RAW_NODES = [{"id": "smig_v2_phase1_H4RG10Detector", "label": "H4RG10Detector Orchestrator", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 40.0, "font": {"size": 12, "color": "#ffffff"}, "title": "H4RG10Detector Orchestrator", "community": 0, "community_name": "Detector Readout and Noise", "source_file": "graphify-out/converted/smig_v2_phase1_spec_d6fa7396.md", "file_type": "document", "degree": 12}, {"id": "smig_v2_phase1_FieldDependentIPC", "label": "FieldDependentIPC Module", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 17.5, "font": {"size": 12, "color": "#ffffff"}, "title": "FieldDependentIPC Module", "community": 3, "community_name": "IPC and Charge Physics", "source_file": "graphify-out/converted/smig_v2_phase1_spec_d6fa7396.md", "file_type": "document", "degree": 3}, {"id": "smig_v2_phase1_ChargeDiffusionModel", "label": "ChargeDiffusionModel + BFE", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "ChargeDiffusionModel + BFE", "community": 3, "community_name": "IPC and Charge Physics", "source_file": "graphify-out/converted/smig_v2_phase1_spec_d6fa7396.md", "file_type": "document", "degree": 2}, {"id": "smig_v2_phase1_DynamicPersistence", "label": "DynamicPersistence Module", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "DynamicPersistence Module", "community": 0, "community_name": "Detector Readout and Noise", "source_file": "graphify-out/converted/smig_v2_phase1_spec_d6fa7396.md", "file_type": "document", "degree": 1}, {"id": "smig_v2_phase1_NonLinearityModel", "label": "NonLinearityModel", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "NonLinearityModel", "community": 0, "community_name": "Detector Readout and Noise", "source_file": "graphify-out/converted/smig_v2_phase1_spec_d6fa7396.md", "file_type": "document", "degree": 2}, {"id": "smig_v2_phase1_MultiAccumSimulator", "label": "MultiAccumSimulator", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "MultiAccumSimulator", "community": 0, "community_name": "Detector Readout and Noise", "source_file": "graphify-out/converted/smig_v2_phase1_spec_d6fa7396.md", "file_type": "document", "degree": 1}, {"id": "smig_v2_phase1_OneOverFNoise", "label": "OneOverFNoise (1/f Noise)", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "OneOverFNoise (1/f Noise)", "community": 0, "community_name": "Detector Readout and Noise", "source_file": "graphify-out/converted/smig_v2_phase1_spec_d6fa7396.md", "file_type": "document", "degree": 1}, {"id": "smig_v2_phase1_RTSNoise", "label": "RTSNoise (Random Telegraph Signal)", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "RTSNoise (Random Telegraph Signal)", "community": 0, "community_name": "Detector Readout and Noise", "source_file": "graphify-out/converted/smig_v2_phase1_spec_d6fa7396.md", "file_type": "document", "degree": 1}, {"id": "smig_v2_phase1_ClusteredCosmicRayInjector", "label": "ClusteredCosmicRayInjector", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "ClusteredCosmicRayInjector", "community": 0, "community_name": "Detector Readout and Noise", "source_file": "graphify-out/converted/smig_v2_phase1_spec_d6fa7396.md", "file_type": "document", "degree": 1}, {"id": "smig_v2_phase1_ProvenanceTracker", "label": "ProvenanceTracker", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 20.0, "font": {"size": 12, "color": "#ffffff"}, "title": "ProvenanceTracker", "community": 2, "community_name": "Config Provenance Reproducibility", "source_file": "graphify-out/converted/smig_v2_phase1_spec_d6fa7396.md", "file_type": "document", "degree": 4}, {"id": "smig_v2_phase1_DetectorConfig", "label": "DetectorConfig (Pydantic v2)", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 17.5, "font": {"size": 12, "color": "#ffffff"}, "title": "DetectorConfig (Pydantic v2)", "community": 2, "community_name": "Config Provenance Reproducibility", "source_file": "graphify-out/converted/smig_v2_phase1_spec_d6fa7396.md", "file_type": "document", "degree": 3}, {"id": "smig_v2_phase1_SignalChainOrder", "label": "Fixed Signal Chain Order Rationale", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Fixed Signal Chain Order Rationale", "community": 3, "community_name": "IPC and Charge Physics", "source_file": "graphify-out/converted/smig_v2_phase1_spec_d6fa7396.md", "file_type": "document", "degree": 2}, {"id": "smig_v2_phase1_IPCKernelLoader", "label": "HDF5 Field-Dependent IPC Kernel Loader", "color": {"background": "#76B7B2", "border": "#76B7B2", "highlight": {"background": "#ffffff", "border": "#76B7B2"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "HDF5 Field-Dependent IPC Kernel Loader", "community": 3, "community_name": "IPC and Charge Physics", "source_file": "graphify-out/converted/smig_v2_phase1_spec_d6fa7396.md", "file_type": "document", "degree": 1}, {"id": "smig_v2_phase1_NLCurveLoader", "label": "Nonlinearity Calibration Loader", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "Nonlinearity Calibration Loader", "community": 0, "community_name": "Detector Readout and Noise", "source_file": "graphify-out/converted/smig_v2_phase1_spec_d6fa7396.md", "file_type": "document", "degree": 1}, {"id": "smig_v2_phase1_ProvenanceRecord", "label": "ProvenanceRecord (Pydantic)", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "ProvenanceRecord (Pydantic)", "community": 2, "community_name": "Config Provenance Reproducibility", "source_file": "graphify-out/converted/smig_v2_phase1_spec_d6fa7396.md", "file_type": "document", "degree": 1}, {"id": "smig_v2_phases2to6_STPSFProvider", "label": "STPSFProvider (Optical PSF)", "color": {"background": "#59A14F", "border": "#59A14F", "highlight": {"background": "#ffffff", "border": "#59A14F"}}, "size": 17.5, "font": {"size": 12, "color": "#ffffff"}, "title": "STPSFProvider (Optical PSF)", "community": 4, "community_name": "Optical Rendering and Scene", "source_file": "graphify-out/converted/smig_v2_phases2to6_spec_5787f657.md", "file_type": "document", "degree": 3}, {"id": "smig_v2_phases2to6_FiniteSourceRenderer", "label": "FiniteSourceRenderer", "color": {"background": "#59A14F", "border": "#59A14F", "highlight": {"background": "#ffffff", "border": "#59A14F"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "FiniteSourceRenderer", "community": 4, "community_name": "Optical Rendering and Scene", "source_file": "graphify-out/converted/smig_v2_phases2to6_spec_5787f657.md", "file_type": "document", "degree": 2}, {"id": "smig_v2_phases2to6_CrowdedFieldRenderer", "label": "CrowdedFieldRenderer", "color": {"background": "#59A14F", "border": "#59A14F", "highlight": {"background": "#ffffff", "border": "#59A14F"}}, "size": 17.5, "font": {"size": 12, "color": "#ffffff"}, "title": "CrowdedFieldRenderer", "community": 4, "community_name": "Optical Rendering and Scene", "source_file": "graphify-out/converted/smig_v2_phases2to6_spec_5787f657.md", "file_type": "document", "degree": 3}, {"id": "smig_v2_phases2to6_MicroluxEngine", "label": "MicroluxEngine (Physics Engine)", "color": {"background": "#EDC948", "border": "#EDC948", "highlight": {"background": "#ffffff", "border": "#EDC948"}}, "size": 20.0, "font": {"size": 12, "color": "#ffffff"}, "title": "MicroluxEngine (Physics Engine)", "community": 5, "community_name": "Microlensing Physics Engine", "source_file": "graphify-out/converted/smig_v2_phases2to6_spec_5787f657.md", "file_type": "document", "degree": 4}, {"id": "smig_v2_phases2to6_BAGLEOrbitalDynamics", "label": "BAGLE Orbital Dynamics", "color": {"background": "#EDC948", "border": "#EDC948", "highlight": {"background": "#ffffff", "border": "#EDC948"}}, "size": 17.5, "font": {"size": 12, "color": "#ffffff"}, "title": "BAGLE Orbital Dynamics", "community": 5, "community_name": "Microlensing Physics Engine", "source_file": "graphify-out/converted/smig_v2_phases2to6_spec_5787f657.md", "file_type": "document", "degree": 3}, {"id": "smig_v2_phases2to6_SpatiotemporalTrigger", "label": "SpatiotemporalTrigger Stage A Classifier", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 22.5, "font": {"size": 12, "color": "#ffffff"}, "title": "SpatiotemporalTrigger Stage A Classifier", "community": 1, "community_name": "Classifier and Training", "source_file": "graphify-out/converted/smig_v2_phases2to6_spec_5787f657.md", "file_type": "document", "degree": 5}, {"id": "smig_v2_phases2to6_TriggerCalibrator", "label": "TriggerCalibrator (Temperature Scaling)", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "TriggerCalibrator (Temperature Scaling)", "community": 1, "community_name": "Classifier and Training", "source_file": "graphify-out/converted/smig_v2_phases2to6_spec_5787f657.md", "file_type": "document", "degree": 2}, {"id": "smig_v2_phases2to6_StageB_HMC", "label": "Stage B Parameter Estimation (HMC)", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Stage B Parameter Estimation (HMC)", "community": 1, "community_name": "Classifier and Training", "source_file": "graphify-out/converted/smig_v2_phases2to6_spec_5787f657.md", "file_type": "document", "degree": 2}, {"id": "smig_v2_phases2to6_NeuralCDE", "label": "Neural CDE Temporal Encoder", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Neural CDE Temporal Encoder", "community": 1, "community_name": "Classifier and Training", "source_file": "graphify-out/converted/smig_v2_phases2to6_spec_5787f657.md", "file_type": "document", "degree": 2}, {"id": "smig_v2_phases2to6_EfficientNetEncoder", "label": "EfficientNet-B0 Spatial Encoder", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "EfficientNet-B0 Spatial Encoder", "community": 1, "community_name": "Classifier and Training", "source_file": "graphify-out/converted/smig_v2_phases2to6_spec_5787f657.md", "file_type": "document", "degree": 1}, {"id": "smig_v2_phases2to6_PriorSeparationPolicy", "label": "Three-Tier Prior Separation Policy", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Three-Tier Prior Separation Policy", "community": 1, "community_name": "Classifier and Training", "source_file": "graphify-out/converted/smig_v2_phases2to6_spec_5787f657.md", "file_type": "document", "degree": 2}, {"id": "smig_v2_phases2to6_DataLeakagePrevention", "label": "Data Leakage Prevention Policy", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "Data Leakage Prevention Policy", "community": 1, "community_name": "Classifier and Training", "source_file": "graphify-out/converted/smig_v2_phases2to6_spec_5787f657.md", "file_type": "document", "degree": 1}, {"id": "smig_v2_phases2to6_ReproducibilityContract", "label": "Reproducibility Contract", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Reproducibility Contract", "community": 2, "community_name": "Config Provenance Reproducibility", "source_file": "graphify-out/converted/smig_v2_phases2to6_spec_5787f657.md", "file_type": "document", "degree": 2}, {"id": "smig_v2_phases2to6_PhysicsAwareAugmentation", "label": "Physics-Aware Augmentation", "color": {"background": "#59A14F", "border": "#59A14F", "highlight": {"background": "#ffffff", "border": "#59A14F"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "Physics-Aware Augmentation", "community": 4, "community_name": "Optical Rendering and Scene", "source_file": "graphify-out/converted/smig_v2_phases2to6_spec_5787f657.md", "file_type": "document", "degree": 1}, {"id": "smig_v2_phases2to6_CycleGAN_NoiseTransfer", "label": "CycleGAN Noise-Domain Transfer", "color": {"background": "#4E79A7", "border": "#4E79A7", "highlight": {"background": "#ffffff", "border": "#4E79A7"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "CycleGAN Noise-Domain Transfer", "community": 0, "community_name": "Detector Readout and Noise", "source_file": "graphify-out/converted/smig_v2_phases2to6_spec_5787f657.md", "file_type": "document", "degree": 1}, {"id": "smig_v2_phases2to6_SnakemakeDVC", "label": "Snakemake + DVC Workflow Orchestration", "color": {"background": "#E15759", "border": "#E15759", "highlight": {"background": "#ffffff", "border": "#E15759"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "Snakemake + DVC Workflow Orchestration", "community": 2, "community_name": "Config Provenance Reproducibility", "source_file": "graphify-out/converted/smig_v2_phases2to6_spec_5787f657.md", "file_type": "document", "degree": 1}, {"id": "smig_v2_phases2to6_XallarapModel", "label": "Xallarap (1L2S Orbital Motion)", "color": {"background": "#EDC948", "border": "#EDC948", "highlight": {"background": "#ffffff", "border": "#EDC948"}}, "size": 15.0, "font": {"size": 12, "color": "#ffffff"}, "title": "Xallarap (1L2S Orbital Motion)", "community": 5, "community_name": "Microlensing Physics Engine", "source_file": "graphify-out/converted/smig_v2_phases2to6_spec_5787f657.md", "file_type": "document", "degree": 2}, {"id": "smig_v2_phases2to6_VBMicrolensing", "label": "VBMicrolensing (Validation Reference)", "color": {"background": "#EDC948", "border": "#EDC948", "highlight": {"background": "#ffffff", "border": "#EDC948"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "VBMicrolensing (Validation Reference)", "community": 5, "community_name": "Microlensing Physics Engine", "source_file": "graphify-out/converted/smig_v2_phases2to6_spec_5787f657.md", "file_type": "document", "degree": 1}, {"id": "smig_v2_phases2to6_AblationPlan", "label": "Ablation Plan (A3 vs A5)", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "Ablation Plan (A3 vs A5)", "community": 1, "community_name": "Classifier and Training", "source_file": "graphify-out/converted/smig_v2_phases2to6_spec_5787f657.md", "file_type": "document", "degree": 1}, {"id": "smig_v2_phases2to6_MultiWindowEvents", "label": "Multi-Window Event Handling", "color": {"background": "#F28E2B", "border": "#F28E2B", "highlight": {"background": "#ffffff", "border": "#F28E2B"}}, "size": 12.5, "font": {"size": 0, "color": "#ffffff"}, "title": "Multi-Window Event Handling", "community": 1, "community_name": "Classifier and Training", "source_file": "graphify-out/converted/smig_v2_phases2to6_spec_5787f657.md", "file_type": "document", "degree": 1}];
+const RAW_EDGES = [{"from": "smig_v2_phase1_H4RG10Detector", "to": "smig_v2_phase1_ChargeDiffusionModel", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phase1_H4RG10Detector", "to": "smig_v2_phase1_FieldDependentIPC", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phase1_H4RG10Detector", "to": "smig_v2_phase1_DynamicPersistence", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phase1_H4RG10Detector", "to": "smig_v2_phase1_NonLinearityModel", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phase1_H4RG10Detector", "to": "smig_v2_phase1_MultiAccumSimulator", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phase1_H4RG10Detector", "to": "smig_v2_phase1_OneOverFNoise", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phase1_H4RG10Detector", "to": "smig_v2_phase1_RTSNoise", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phase1_H4RG10Detector", "to": "smig_v2_phase1_ClusteredCosmicRayInjector", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phase1_H4RG10Detector", "to": "smig_v2_phase1_ProvenanceTracker", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phase1_H4RG10Detector", "to": "smig_v2_phase1_DetectorConfig", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phase1_H4RG10Detector", "to": "smig_v2_phases2to6_CrowdedFieldRenderer", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phase1_H4RG10Detector", "to": "smig_v2_phases2to6_CycleGAN_NoiseTransfer", "label": "conceptually_related_to", "title": "conceptually_related_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "smig_v2_phase1_FieldDependentIPC", "to": "smig_v2_phase1_SignalChainOrder", "label": "rationale_for", "title": "rationale_for [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phase1_FieldDependentIPC", "to": "smig_v2_phase1_IPCKernelLoader", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phase1_ChargeDiffusionModel", "to": "smig_v2_phase1_SignalChainOrder", "label": "rationale_for", "title": "rationale_for [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phase1_NonLinearityModel", "to": "smig_v2_phase1_NLCurveLoader", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phase1_ProvenanceTracker", "to": "smig_v2_phase1_ProvenanceRecord", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phase1_ProvenanceTracker", "to": "smig_v2_phase1_DetectorConfig", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phase1_ProvenanceTracker", "to": "smig_v2_phases2to6_ReproducibilityContract", "label": "conceptually_related_to", "title": "conceptually_related_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "smig_v2_phase1_DetectorConfig", "to": "smig_v2_phases2to6_STPSFProvider", "label": "references", "title": "references [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "smig_v2_phases2to6_STPSFProvider", "to": "smig_v2_phases2to6_CrowdedFieldRenderer", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phases2to6_STPSFProvider", "to": "smig_v2_phases2to6_FiniteSourceRenderer", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phases2to6_FiniteSourceRenderer", "to": "smig_v2_phases2to6_MicroluxEngine", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phases2to6_CrowdedFieldRenderer", "to": "smig_v2_phases2to6_PhysicsAwareAugmentation", "label": "calls", "title": "calls [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "smig_v2_phases2to6_MicroluxEngine", "to": "smig_v2_phases2to6_VBMicrolensing", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phases2to6_MicroluxEngine", "to": "smig_v2_phases2to6_BAGLEOrbitalDynamics", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phases2to6_MicroluxEngine", "to": "smig_v2_phases2to6_XallarapModel", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phases2to6_BAGLEOrbitalDynamics", "to": "smig_v2_phases2to6_StageB_HMC", "label": "references", "title": "references [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "smig_v2_phases2to6_BAGLEOrbitalDynamics", "to": "smig_v2_phases2to6_XallarapModel", "label": "implements", "title": "implements [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phases2to6_SpatiotemporalTrigger", "to": "smig_v2_phases2to6_NeuralCDE", "label": "implements", "title": "implements [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phases2to6_SpatiotemporalTrigger", "to": "smig_v2_phases2to6_EfficientNetEncoder", "label": "implements", "title": "implements [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phases2to6_SpatiotemporalTrigger", "to": "smig_v2_phases2to6_TriggerCalibrator", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phases2to6_SpatiotemporalTrigger", "to": "smig_v2_phases2to6_StageB_HMC", "label": "calls", "title": "calls [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phases2to6_SpatiotemporalTrigger", "to": "smig_v2_phases2to6_AblationPlan", "label": "rationale_for", "title": "rationale_for [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phases2to6_TriggerCalibrator", "to": "smig_v2_phases2to6_PriorSeparationPolicy", "label": "rationale_for", "title": "rationale_for [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phases2to6_NeuralCDE", "to": "smig_v2_phases2to6_MultiWindowEvents", "label": "rationale_for", "title": "rationale_for [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}, {"from": "smig_v2_phases2to6_PriorSeparationPolicy", "to": "smig_v2_phases2to6_DataLeakagePrevention", "label": "conceptually_related_to", "title": "conceptually_related_to [INFERRED]", "dashes": true, "width": 1, "color": {"opacity": 0.35}, "confidence": "INFERRED"}, {"from": "smig_v2_phases2to6_ReproducibilityContract", "to": "smig_v2_phases2to6_SnakemakeDVC", "label": "references", "title": "references [EXTRACTED]", "dashes": false, "width": 2, "color": {"opacity": 0.7}, "confidence": "EXTRACTED"}];
+const LEGEND = [{"cid": 0, "color": "#4E79A7", "label": "Detector Readout and Noise", "count": 9}, {"cid": 1, "color": "#F28E2B", "label": "Classifier and Training", "count": 9}, {"cid": 2, "color": "#E15759", "label": "Config Provenance Reproducibility", "count": 5}, {"cid": 3, "color": "#76B7B2", "label": "IPC and Charge Physics", "count": 4}, {"cid": 4, "color": "#59A14F", "label": "Optical Rendering and Scene", "count": 4}, {"cid": 5, "color": "#EDC948", "label": "Microlensing Physics Engine", "count": 4}];
+
+// Build vis datasets
+const nodesDS = new vis.DataSet(RAW_NODES.map(n => ({
+  id: n.id, label: n.label, color: n.color, size: n.size,
+  font: n.font, title: n.title,
+  _community: n.community, _community_name: n.community_name,
+  _source_file: n.source_file, _file_type: n.file_type, _degree: n.degree,
+})));
+
+const edgesDS = new vis.DataSet(RAW_EDGES.map((e, i) => ({
+  id: i, from: e.from, to: e.to,
+  label: '',
+  title: e.title,
+  dashes: e.dashes,
+  width: e.width,
+  color: e.color,
+  arrows: { to: { enabled: true, scaleFactor: 0.5 } },
+})));
+
+const container = document.getElementById('graph');
+const network = new vis.Network(container, { nodes: nodesDS, edges: edgesDS }, {
+  physics: {
+    enabled: true,
+    solver: 'forceAtlas2Based',
+    forceAtlas2Based: {
+      gravitationalConstant: -60,
+      centralGravity: 0.005,
+      springLength: 120,
+      springConstant: 0.08,
+      damping: 0.4,
+      avoidOverlap: 0.8,
+    },
+    stabilization: { iterations: 200, fit: true },
+  },
+  interaction: {
+    hover: true,
+    tooltipDelay: 100,
+    hideEdgesOnDrag: true,
+    navigationButtons: false,
+    keyboard: false,
+  },
+  nodes: { shape: 'dot', borderWidth: 1.5 },
+  edges: { smooth: { type: 'continuous', roundness: 0.2 }, selectionWidth: 3 },
+});
+
+network.once('stabilizationIterationsDone', () => {
+  network.setOptions({ physics: { enabled: false } });
+});
+
+function showInfo(nodeId) {
+  const n = nodesDS.get(nodeId);
+  if (!n) return;
+  const neighborIds = network.getConnectedNodes(nodeId);
+  const neighborItems = neighborIds.map(nid => {
+    const nb = nodesDS.get(nid);
+    const color = nb ? nb.color.background : '#555';
+    return `<span class="neighbor-link" style="border-left-color:${color}" onclick="focusNode('${nid}')">${nb ? nb.label : nid}</span>`;
+  }).join('');
+  document.getElementById('info-content').innerHTML = `
+    <div class="field"><b>${n.label}</b></div>
+    <div class="field">Type: ${n._file_type || 'unknown'}</div>
+    <div class="field">Community: ${n._community_name}</div>
+    <div class="field">Source: ${n._source_file || '-'}</div>
+    <div class="field">Degree: ${n._degree}</div>
+    ${neighborIds.length ? `<div class="field" style="margin-top:8px;color:#aaa;font-size:11px">Neighbors (${neighborIds.length})</div><div id="neighbors-list">${neighborItems}</div>` : ''}
+  `;
+}
+
+function focusNode(nodeId) {
+  network.focus(nodeId, { scale: 1.4, animation: true });
+  network.selectNodes([nodeId]);
+  showInfo(nodeId);
+}
+
+network.on('click', params => {
+  if (params.nodes.length > 0) showInfo(params.nodes[0]);
+  else document.getElementById('info-content').innerHTML = '<span class="empty">Click a node to inspect it</span>';
+});
+
+const searchInput = document.getElementById('search');
+const searchResults = document.getElementById('search-results');
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.toLowerCase().trim();
+  searchResults.innerHTML = '';
+  if (!q) { searchResults.style.display = 'none'; return; }
+  const matches = RAW_NODES.filter(n => n.label.toLowerCase().includes(q)).slice(0, 20);
+  if (!matches.length) { searchResults.style.display = 'none'; return; }
+  searchResults.style.display = 'block';
+  matches.forEach(n => {
+    const el = document.createElement('div');
+    el.className = 'search-item';
+    el.textContent = n.label;
+    el.style.borderLeft = `3px solid ${n.color.background}`;
+    el.style.paddingLeft = '8px';
+    el.onclick = () => {
+      network.focus(n.id, { scale: 1.5, animation: true });
+      network.selectNodes([n.id]);
+      showInfo(n.id);
+      searchResults.style.display = 'none';
+      searchInput.value = '';
+    };
+    searchResults.appendChild(el);
+  });
+});
+document.addEventListener('click', e => {
+  if (!searchResults.contains(e.target) && e.target !== searchInput)
+    searchResults.style.display = 'none';
+});
+
+const hiddenCommunities = new Set();
+const legendEl = document.getElementById('legend');
+LEGEND.forEach(c => {
+  const item = document.createElement('div');
+  item.className = 'legend-item';
+  item.innerHTML = `<div class="legend-dot" style="background:${c.color}"></div>
+    <span class="legend-label">${c.label}</span>
+    <span class="legend-count">${c.count}</span>`;
+  item.onclick = () => {
+    if (hiddenCommunities.has(c.cid)) {
+      hiddenCommunities.delete(c.cid);
+      item.classList.remove('dimmed');
+    } else {
+      hiddenCommunities.add(c.cid);
+      item.classList.add('dimmed');
+    }
+    const updates = RAW_NODES
+      .filter(n => n.community === c.cid)
+      .map(n => ({ id: n.id, hidden: hiddenCommunities.has(c.cid) }));
+    nodesDS.update(updates);
+  };
+  legendEl.appendChild(item);
+});
+</script>
+<script>
+// Render hyperedges as shaded regions
+const hyperedges = [{"id": "detector_signal_chain", "label": "H4RG10 Fixed Signal Chain", "nodes": ["smig_v2_phase1_H4RG10Detector", "smig_v2_phase1_ChargeDiffusionModel", "smig_v2_phase1_FieldDependentIPC", "smig_v2_phase1_DynamicPersistence", "smig_v2_phase1_NonLinearityModel", "smig_v2_phase1_MultiAccumSimulator", "smig_v2_phase1_ClusteredCosmicRayInjector"], "relation": "implement", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "graphify-out/converted/smig_v2_phase1_spec_d6fa7396.md"}, {"id": "stage_a_classifier_components", "label": "Stage A Classifier Architecture", "nodes": ["smig_v2_phases2to6_SpatiotemporalTrigger", "smig_v2_phases2to6_NeuralCDE", "smig_v2_phases2to6_EfficientNetEncoder", "smig_v2_phases2to6_TriggerCalibrator"], "relation": "implement", "confidence": "EXTRACTED", "confidence_score": 1.0, "source_file": "graphify-out/converted/smig_v2_phases2to6_spec_5787f657.md"}, {"id": "reproducibility_triad", "label": "Reproducibility Triad", "nodes": ["smig_v2_phases2to6_ReproducibilityContract", "smig_v2_phase1_ProvenanceTracker", "smig_v2_phase1_DetectorConfig", "smig_v2_phases2to6_SnakemakeDVC"], "relation": "participate_in", "confidence": "EXTRACTED", "confidence_score": 0.95, "source_file": "graphify-out/converted/smig_v2_phases2to6_spec_5787f657.md"}];
+function drawHyperedges() {
+    const canvas = network.canvas.frame.canvas;
+    const ctx = canvas.getContext('2d');
+    hyperedges.forEach(h => {
+        const positions = h.nodes
+            .map(nid => network.getPositions([nid])[nid])
+            .filter(p => p !== undefined);
+        if (positions.length < 2) return;
+        // Draw convex hull as filled polygon
+        ctx.save();
+        ctx.globalAlpha = 0.12;
+        ctx.fillStyle = '#6366f1';
+        ctx.strokeStyle = '#6366f1';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        const scale = network.getScale();
+        const offset = network.getViewPosition();
+        const toCanvas = (p) => ({
+            x: (p.x - offset.x) * scale + canvas.width / 2,
+            y: (p.y - offset.y) * scale + canvas.height / 2
+        });
+        const pts = positions.map(toCanvas);
+        // Expand hull slightly
+        const cx = pts.reduce((s, p) => s + p.x, 0) / pts.length;
+        const cy = pts.reduce((s, p) => s + p.y, 0) / pts.length;
+        const expanded = pts.map(p => ({
+            x: cx + (p.x - cx) * 1.15,
+            y: cy + (p.y - cy) * 1.15
+        }));
+        ctx.moveTo(expanded[0].x, expanded[0].y);
+        expanded.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 0.4;
+        ctx.stroke();
+        // Label
+        ctx.globalAlpha = 0.8;
+        ctx.fillStyle = '#4f46e5';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(h.label, cx, cy - 5);
+        ctx.restore();
+    });
+}
+network.on('afterDrawing', drawHyperedges);
+</script>
+</body>
+</html>
