@@ -3,7 +3,12 @@
     "allow": [
       "Bash(python -c ':*)",
       "Bash(mkdir -p graphify-out)",
-      "Bash(rm -f .graphify_detect.json .graphify_extract.json .graphify_ast.json .graphify_semantic.json .graphify_analysis.json .graphify_labels.json .graphify_python .graphify_cached.json .graphify_uncached.txt .graphify_semantic_new.json)"
+      "Bash(rm -f .graphify_detect.json .graphify_extract.json .graphify_ast.json .graphify_semantic.json .graphify_analysis.json .graphify_labels.json .graphify_python .graphify_cached.json .graphify_uncached.txt .graphify_semantic_new.json)",
+      "Bash(mkdir -p /c/Users/eriks/OneDrive/Documents/Github/Exoplanets-Research/SMIG/smig/config /c/Users/eriks/OneDrive/Documents/Github/Exoplanets-Research/SMIG/smig/provenance)",
+      "Bash(touch /c/Users/eriks/OneDrive/Documents/Github/Exoplanets-Research/SMIG/smig/__init__.py /c/Users/eriks/OneDrive/Documents/Github/Exoplanets-Research/SMIG/smig/config/__init__.py /c/Users/eriks/OneDrive/Documents/Github/Exoplanets-Research/SMIG/smig/provenance/__init__.py)",
+      "Bash(python:*)",
+      "Bash(mkdir -p \"C:\\\\Users\\\\eriks\\\\.claude\\\\plans\")",
+      "Read(//c/Users/eriks/.claude/**)"
     ]
   }
 }
