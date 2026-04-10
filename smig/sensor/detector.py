@@ -166,18 +166,12 @@ class H4RG10Detector:
             config.nonlinearity,
             full_well_electrons=config.electrical.full_well_electrons,
         )
-        self._readout = MultiAccumSimulator(
-            config.readout,
-            dark_current_e_per_s=config.electrical.dark_current_e_per_s,
-            read_noise_cds_electrons=config.electrical.read_noise_cds_electrons,
-            nonlinearity=self._nonlinearity,
-        )
 
-        # Spawn independent, deterministic child RNGs for each noise module.
-        # SeedSequence.spawn guarantees zero correlation between child streams.
-        # Reproducibility contract: the parent RNG state captured per-epoch is
-        # sufficient to reproduce all child states because children are derived
-        # deterministically from the parent's SeedSequence at construction time.
+        # Spawn independent, deterministic child RNGs for all stochastic modules.
+        # Must happen before any child RNG is consumed.
+        # Indices: [0] 1/f noise, [1] RTS noise, [2] cosmic rays, [3] readout.
+        # SeedSequence.spawn is positionally stable: spawn(4)[0:3] == spawn(3)[0:3],
+        # so existing noise-module reproducibility is preserved when adding index 3.
         _seed_seq = rng.bit_generator.seed_seq
         if _seed_seq is None:
             # Fallback for bit generators not backed by a SeedSequence (e.g.
@@ -186,7 +180,15 @@ class H4RG10Detector:
             _seed_seq = np.random.SeedSequence(
                 int(rng.integers(0, 2**63, dtype=np.int64))
             )
-        _child_seeds = _seed_seq.spawn(3)
+        _child_seeds = _seed_seq.spawn(4)
+
+        self._readout = MultiAccumSimulator(
+            config.readout,
+            dark_current_e_per_s=config.electrical.dark_current_e_per_s,
+            read_noise_cds_electrons=config.electrical.read_noise_cds_electrons,
+            nonlinearity=self._nonlinearity,
+            rng=np.random.default_rng(_child_seeds[3]),
+        )
         self._onef_noise = OneOverFNoise(config, np.random.default_rng(_child_seeds[0]))
         self._rts_noise = RTSNoise(config, np.random.default_rng(_child_seeds[1]))
         self._cr_injector = ClusteredCosmicRayInjector(
@@ -294,28 +296,27 @@ class H4RG10Detector:
         image = self._charge_diffusion.apply(image)
         image = self._ipc.apply(image)
         image = self._persistence.apply(image, delta_time_s=delta_time_s)
-        # NonLinearityModel is applied inside MultiAccumSimulator (per-read
-        # when 3D ramp is implemented; once on 2D image in the stub).
-        image = self._readout.simulate_ramp(image)
-        # TEMPORARY GUARD: stub simulate_ramp returns 2D; production will return
-        # 3D (n_reads, ny, nx). Replace with 3D ramp-collapse (e.g. slope fitting)
-        # when MULTIACCUM physics is implemented. Remove this check at that point.
-        if image.ndim != 2:
-            raise RuntimeError(
-                f"readout.simulate_ramp returned ndim={image.ndim}; "
-                "expected 2-D from stub. Implement 3D ramp-collapse before removing guard."
-            )
+        # Build 3D MULTIACCUM ramp (n_reads, ny, nx) with NL applied per-read.
+        # sat_reads: pre-noise physical saturation flag (accurate; not contaminated
+        # by read noise that could push clipped values below Q_sat).
+        ramp_cube, sat_reads = self._readout.simulate_ramp(image)
 
-        # Noise injection
+        # Saturation mask derived from pre-noise accumulated charge.
+        saturation_mask = sat_reads.any(axis=0)
+        saturated_pixel_count = int(saturation_mask.sum())
+
+        # Collapse 3D ramp to 2D rate image (e-/s) via OLS slope fit.
+        # Pass sat_reads for accurate per-pixel saturation exclusion.
+        image = self._readout.fit_slope(ramp_cube, sat_reads=sat_reads)
+        del ramp_cube, sat_reads
+        gc.collect()
+
+        # Noise injection (2D rate image; stubs pass through unchanged).
+        # FIXME CR-1: When CR injection is upgraded to per-read, replace this
+        # call with inject_into_ramp inside simulate_ramp.
         image = self._onef_noise.apply(image)
         image = self._rts_noise.apply(image)
-        # FIXME CR-1: SYNCHRONIZED CHANGE REQUIRED. When simulate_ramp returns 3D,
-        # replace this call with per-read CR injection. See cosmic_rays.py:inject_into_ramp stub.
         image, cr_mask, cr_hit_count = self._cr_injector.apply(image)
-
-        # Saturation mask: threshold precomputed in __init__ from frozen config.
-        saturation_mask = image >= self._saturation_threshold
-        saturated_pixel_count = int(saturation_mask.sum())
 
         provenance_data: dict[str, Any] = {
             "git_commit": self._git_commit,
@@ -326,7 +327,7 @@ class H4RG10Detector:
             "random_state": sanitize_rng_state(rng_state),
             "ipc_applied": False,
             "persistence_applied": False,
-            "nonlinearity_applied": False,
+            "nonlinearity_applied": True,   # NL applied per-read inside simulate_ramp
             "charge_diffusion_applied": True,
             "saturated_pixel_count": saturated_pixel_count,
             "cosmic_ray_hit_count": cr_hit_count,
