@@ -9,12 +9,16 @@ Run from the project root:
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
+
 import numpy as np
 import pytest
+from pydantic import ValidationError
 
 from smig.config.schemas import DetectorConfig, GeometryConfig
 from smig.config.utils import get_config_sha256
-from smig.provenance.schema import ProvenanceRecord
+from smig.provenance.schema import ProvenanceRecord, sanitize_rng_state
+from smig.provenance.tracker import ProvenanceTracker
 from smig.sensor.detector import DetectorOutput, EventOutput, H4RG10Detector
 from smig.sensor.noise.cosmic_rays import ClusteredCosmicRayInjector
 
@@ -127,6 +131,20 @@ _EXPECTED_PROVENANCE_KEYS = frozenset({
     "charge_diffusion_applied",
     "saturated_pixel_count",
     "cosmic_ray_hit_count",
+})
+
+# Phase B: new fields added to ProvenanceRecord as optional (default=None/0).
+# These are not yet populated by the detector stub, so they are validated against
+# ProvenanceRecord.model_fields rather than against provenance_data.keys().
+_EXPECTED_PHASE_B_PROVENANCE_FIELDS = frozenset({
+    "ipc_kernel_hash",
+    "persistence_history_depth",
+    "n_partial_saturation_pixels",
+    "cr_types",
+    "n_rts_active_pixels",
+    "slope_fit_method",
+    "n_reads_used_median",
+    "peak_memory_mb",
 })
 
 
@@ -513,3 +531,112 @@ def test_cr_hit_count_is_events_not_pixels():
     # The injector returns 1 event regardless of cluster size
     _, _, hit_count = injector.apply(image)
     assert hit_count == 1, f"Expected hit_count=1 for one event, got {hit_count}"
+
+
+# ---------------------------------------------------------------------------
+# Phase D — Schema boundary tests (Phase B fields and config_sha256 validation)
+# ---------------------------------------------------------------------------
+
+def test_provenance_record_has_phase_b_fields():
+    """All Phase B fields must be declared in ProvenanceRecord.model_fields."""
+    assert _EXPECTED_PHASE_B_PROVENANCE_FIELDS <= set(ProvenanceRecord.model_fields)
+
+
+def test_provenance_schema_rejects_non_hex_sha256():
+    """ProvenanceRecord raises ValidationError when config_sha256 contains
+    non-hexadecimal characters (pattern ^[0-9a-f]{64}$ not satisfied)."""
+    _VALID_RNG_STATE = {
+        "bit_generator": "PCG64",
+        "state": {"state": 0, "inc": 0},
+        "has_uint32": 0,
+        "uinteger": 0,
+    }
+    with pytest.raises(ValidationError):
+        ProvenanceRecord(
+            event_id="test",
+            epoch_index=0,
+            timestamp_utc=datetime.now(timezone.utc),
+            git_commit=None,
+            container_digest=None,
+            python_version="3.11",
+            numpy_version="1.26",
+            config_sha256="Z" * 64,  # uppercase Z is not a hex digit
+            random_state=_VALID_RNG_STATE,
+            ipc_applied=False,
+            persistence_applied=False,
+            nonlinearity_applied=False,
+            charge_diffusion_applied=True,
+            saturated_pixel_count=0,
+            cosmic_ray_hit_count=0,
+        )
+
+
+# ---------------------------------------------------------------------------
+# Phase D — Tracker strict drift tests
+# ---------------------------------------------------------------------------
+
+def _make_valid_record(
+    event_id: str = "test_event",
+    epoch_index: int = 0,
+    *,
+    git_commit: str | None = None,
+    container_digest: str | None = None,
+    config_sha256: str = "a" * 64,
+) -> ProvenanceRecord:
+    """Helper: build a minimal valid ProvenanceRecord for drift tests."""
+    return ProvenanceRecord(
+        event_id=event_id,
+        epoch_index=epoch_index,
+        timestamp_utc=datetime.now(timezone.utc),
+        git_commit=git_commit,
+        container_digest=container_digest,
+        python_version="3.11",
+        numpy_version="1.26",
+        config_sha256=config_sha256,
+        random_state={
+            "bit_generator": "PCG64",
+            "state": {"state": 0, "inc": 0},
+            "has_uint32": 0,
+            "uinteger": 0,
+        },
+        ipc_applied=False,
+        persistence_applied=False,
+        nonlinearity_applied=False,
+        charge_diffusion_applied=True,
+        saturated_pixel_count=0,
+        cosmic_ray_hit_count=0,
+    )
+
+
+def test_tracker_rejects_silent_metadata_drift():
+    """ProvenanceTracker raises ValueError when record git_commit is None
+    but the tracker has a non-None value (and vice versa)."""
+    # Case 1: tracker has a commit, record has None
+    tracker = ProvenanceTracker(event_id="test_event")
+    tracker.git_commit = "abc123def456abc123def456abc123def456abc1"
+    record_none_commit = _make_valid_record(git_commit=None)
+    with pytest.raises(ValueError, match="git_commit"):
+        tracker.append_record(record_none_commit)
+
+    # Case 2: tracker has None (env var unset), record has a non-None commit
+    tracker2 = ProvenanceTracker(event_id="test_event")
+    assert tracker2.git_commit is None  # env var not set in test environment
+    record_with_commit = _make_valid_record(git_commit="abc123def456abc123def456abc123def456abc1")
+    with pytest.raises(ValueError, match="git_commit"):
+        tracker2.append_record(record_with_commit)
+
+
+# ---------------------------------------------------------------------------
+# Phase D — RNG sanitizer type-safety test
+# ---------------------------------------------------------------------------
+
+def test_sanitize_rng_state_rejects_non_dict():
+    """sanitize_rng_state raises TypeError for non-dict inputs."""
+    with pytest.raises(TypeError, match="dict"):
+        sanitize_rng_state([1, 2, 3])  # type: ignore[arg-type]
+
+    with pytest.raises(TypeError, match="dict"):
+        sanitize_rng_state("not a dict")  # type: ignore[arg-type]
+
+    with pytest.raises(TypeError, match="dict"):
+        sanitize_rng_state(42)  # type: ignore[arg-type]

@@ -99,7 +99,11 @@ def test_load_detector_config_list_yaml():
 # a default DetectorConfig().  If this hash changes, a field default or Pydantic
 # serialization behavior has changed.  Do NOT auto-update this value.  Report the
 # dependency/version delta and update deliberately after code review.
-_CANARY_HASH = "0bf688dd1f69bc8d08d4814463463b7bce88829ebf0f26d3440235a83dc2def1"
+#
+# Updated in phase-A (2026-04-10): Added NoiseConfig sub-model with six default
+# fields to DetectorConfig; changed ipc_kernel_path from Path|None to str|None.
+# Old hash: 0bf688dd1f69bc8d08d4814463463b7bce88829ebf0f26d3440235a83dc2def1
+_CANARY_HASH = "a2ce8d9319461c4de9e802cd0e3b4db1862bd34f5af3d6ea8fc869654bfe76eb"
 
 
 def test_config_sha256_stability_canary():
