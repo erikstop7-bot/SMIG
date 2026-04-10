@@ -9,7 +9,7 @@
       "source_file": "smig\\sensor\\validation\\__init__.py",
       "source_location": "L1",
       "id": "init",
-      "community": 9
+      "community": 20
     },
     {
       "label": "schemas.py",
@@ -17,7 +17,7 @@
       "source_file": "smig\\config\\schemas.py",
       "source_location": "L1",
       "id": "schemas",
-      "community": 3
+      "community": 5
     },
     {
       "label": "GeometryConfig",
@@ -25,7 +25,7 @@
       "source_file": "smig\\config\\schemas.py",
       "source_location": "L27",
       "id": "schemas_geometryconfig",
-      "community": 1
+      "community": 6
     },
     {
       "label": "BaseModel",
@@ -33,7 +33,7 @@
       "source_file": "",
       "source_location": "",
       "id": "basemodel",
-      "community": 3
+      "community": 5
     },
     {
       "label": "ElectricalConfig",
@@ -41,7 +41,7 @@
       "source_file": "smig\\config\\schemas.py",
       "source_location": "L69",
       "id": "schemas_electricalconfig",
-      "community": 3
+      "community": 5
     },
     {
       "label": "ReadoutConfig",
@@ -49,7 +49,7 @@
       "source_file": "smig\\config\\schemas.py",
       "source_location": "L118",
       "id": "schemas_readoutconfig",
-      "community": 8
+      "community": 2
     },
     {
       "label": "_check_exposure_time_consistency()",
@@ -57,7 +57,7 @@
       "source_file": "smig\\config\\schemas.py",
       "source_location": "L156",
       "id": "schemas_check_exposure_time_consistency",
-      "community": 3
+      "community": 5
     },
     {
       "label": "IPCConfig",
@@ -73,7 +73,7 @@
       "source_file": "smig\\config\\schemas.py",
       "source_location": "L213",
       "id": "schemas_must_be_odd",
-      "community": 3
+      "community": 5
     },
     {
       "label": "PersistenceConfig",
@@ -89,7 +89,7 @@
       "source_file": "smig\\config\\schemas.py",
       "source_location": "L271",
       "id": "schemas_check_amplitude_sum",
-      "community": 3
+      "community": 5
     },
     {
       "label": "NonlinearityConfig",
@@ -97,7 +97,7 @@
       "source_file": "smig\\config\\schemas.py",
       "source_location": "L285",
       "id": "schemas_nonlinearityconfig",
-      "community": 6
+      "community": 2
     },
     {
       "label": "EnvironmentConfig",
@@ -105,7 +105,7 @@
       "source_file": "smig\\config\\schemas.py",
       "source_location": "L332",
       "id": "schemas_environmentconfig",
-      "community": 3
+      "community": 5
     },
     {
       "label": "DetectorConfig",
@@ -121,7 +121,7 @@
       "source_file": "smig\\config\\schemas.py",
       "source_location": "L1",
       "id": "schemas_rationale_1",
-      "community": 3
+      "community": 5
     },
     {
       "label": "Focal-plane geometry of a single H4RG-10 SCA.",
@@ -129,7 +129,7 @@
       "source_file": "smig\\config\\schemas.py",
       "source_location": "L28",
       "id": "schemas_rationale_28",
-      "community": 1
+      "community": 6
     },
     {
       "label": "Electrical characteristics governing signal range and read noise.",
@@ -137,7 +137,7 @@
       "source_file": "smig\\config\\schemas.py",
       "source_location": "L70",
       "id": "schemas_rationale_70",
-      "community": 3
+      "community": 5
     },
     {
       "label": "Non-destructive readout timing for Multi-Accumulation (MULTIACCUM) mode.      Th",
@@ -145,7 +145,7 @@
       "source_file": "smig\\config\\schemas.py",
       "source_location": "L119",
       "id": "schemas_rationale_119",
-      "community": 8
+      "community": 2
     },
     {
       "label": "Inter-pixel capacitance (IPC) kernel parameters.      Only scalar defaults are s",
@@ -169,7 +169,7 @@
       "source_file": "smig\\config\\schemas.py",
       "source_location": "L286",
       "id": "schemas_rationale_286",
-      "community": 6
+      "community": 2
     },
     {
       "label": "Telescope and sky environment parameters.",
@@ -177,7 +177,7 @@
       "source_file": "smig\\config\\schemas.py",
       "source_location": "L333",
       "id": "schemas_rationale_333",
-      "community": 3
+      "community": 5
     },
     {
       "label": "Immutable, fully-validated configuration for one Roman WFI H4RG-10 SCA.      Ins",
@@ -193,7 +193,7 @@
       "source_file": "smig\\config\\utils.py",
       "source_location": "L1",
       "id": "utils",
-      "community": 3
+      "community": 0
     },
     {
       "label": "load_detector_config()",
@@ -201,7 +201,7 @@
       "source_file": "smig\\config\\utils.py",
       "source_location": "L22",
       "id": "utils_load_detector_config",
-      "community": 3
+      "community": 0
     },
     {
       "label": "get_config_sha256()",
@@ -209,7 +209,7 @@
       "source_file": "smig\\config\\utils.py",
       "source_location": "L48",
       "id": "utils_get_config_sha256",
-      "community": 3
+      "community": 0
     },
     {
       "label": "smig/config/utils.py ==================== Config loading and canonical hashing u",
@@ -217,7 +217,7 @@
       "source_file": "smig\\config\\utils.py",
       "source_location": "L1",
       "id": "utils_rationale_1",
-      "community": 3
+      "community": 0
     },
     {
       "label": "Load and validate a DetectorConfig from a YAML file.      Parameters     -------",
@@ -225,7 +225,7 @@
       "source_file": "smig\\config\\utils.py",
       "source_location": "L23",
       "id": "utils_rationale_23",
-      "community": 3
+      "community": 0
     },
     {
       "label": "Compute the SHA-256 fingerprint of a DetectorConfig.      Uses ``model_dump_json",
@@ -233,7 +233,7 @@
       "source_file": "smig\\config\\utils.py",
       "source_location": "L49",
       "id": "utils_rationale_49",
-      "community": 3
+      "community": 0
     },
     {
       "label": "schema.py",
@@ -241,23 +241,31 @@
       "source_file": "smig\\provenance\\schema.py",
       "source_location": "L1",
       "id": "schema",
-      "community": 4
+      "community": 9
+    },
+    {
+      "label": "sanitize_rng_state()",
+      "file_type": "code",
+      "source_file": "smig\\provenance\\schema.py",
+      "source_location": "L21",
+      "id": "schema_sanitize_rng_state",
+      "community": 9
     },
     {
       "label": "ProvenanceRecord",
       "file_type": "code",
       "source_file": "smig\\provenance\\schema.py",
-      "source_location": "L21",
+      "source_location": "L59",
       "id": "schema_provenancerecord",
-      "community": 1
+      "community": 3
     },
     {
       "label": "_sanitize_numpy_types()",
       "file_type": "code",
       "source_file": "smig\\provenance\\schema.py",
-      "source_location": "L146",
+      "source_location": "L184",
       "id": "schema_sanitize_numpy_types",
-      "community": 4
+      "community": 9
     },
     {
       "label": "smig/provenance/schema.py ========================= Pydantic v2 model representi",
@@ -265,23 +273,31 @@
       "source_file": "smig\\provenance\\schema.py",
       "source_location": "L1",
       "id": "schema_rationale_1",
-      "community": 4
+      "community": 9
+    },
+    {
+      "label": "Recursively convert numpy types in an RNG state dict to native Python.      Conv",
+      "file_type": "rationale",
+      "source_file": "smig\\provenance\\schema.py",
+      "source_location": "L22",
+      "id": "schema_rationale_22",
+      "community": 9
     },
     {
       "label": "Immutable audit record for one simulated epoch of one microlensing event.      A",
       "file_type": "rationale",
       "source_file": "smig\\provenance\\schema.py",
-      "source_location": "L22",
-      "id": "schema_rationale_22",
-      "community": 1
+      "source_location": "L60",
+      "id": "schema_rationale_60",
+      "community": 3
     },
     {
-      "label": "Recursively convert numpy types to native Python for JSON safety.          Conve",
+      "label": "Delegate to the module-level sanitize_rng_state function.",
       "file_type": "rationale",
       "source_file": "smig\\provenance\\schema.py",
-      "source_location": "L147",
-      "id": "schema_rationale_147",
-      "community": 10
+      "source_location": "L185",
+      "id": "schema_rationale_185",
+      "community": 21
     },
     {
       "label": "tracker.py",
@@ -289,7 +305,7 @@
       "source_file": "smig\\provenance\\tracker.py",
       "source_location": "L1",
       "id": "tracker",
-      "community": 4
+      "community": 9
     },
     {
       "label": "ProvenanceTracker",
@@ -297,7 +313,7 @@
       "source_file": "smig\\provenance\\tracker.py",
       "source_location": "L35",
       "id": "tracker_provenancetracker",
-      "community": 4
+      "community": 3
     },
     {
       "label": ".__init__()",
@@ -305,7 +321,7 @@
       "source_file": "smig\\provenance\\tracker.py",
       "source_location": "L62",
       "id": "tracker_provenancetracker_init",
-      "community": 4
+      "community": 3
     },
     {
       "label": ".append_record()",
@@ -313,7 +329,7 @@
       "source_file": "smig\\provenance\\tracker.py",
       "source_location": "L73",
       "id": "tracker_provenancetracker_append_record",
-      "community": 4
+      "community": 3
     },
     {
       "label": ".write_sidecar()",
@@ -321,7 +337,7 @@
       "source_file": "smig\\provenance\\tracker.py",
       "source_location": "L127",
       "id": "tracker_provenancetracker_write_sidecar",
-      "community": 4
+      "community": 3
     },
     {
       "label": ".__len__()",
@@ -329,7 +345,7 @@
       "source_file": "smig\\provenance\\tracker.py",
       "source_location": "L210",
       "id": "tracker_provenancetracker_len",
-      "community": 4
+      "community": 3
     },
     {
       "label": ".__repr__()",
@@ -337,7 +353,7 @@
       "source_file": "smig\\provenance\\tracker.py",
       "source_location": "L214",
       "id": "tracker_provenancetracker_repr",
-      "community": 4
+      "community": 3
     },
     {
       "label": "smig/provenance/tracker.py ========================== Accumulates ProvenanceReco",
@@ -345,7 +361,7 @@
       "source_file": "smig\\provenance\\tracker.py",
       "source_location": "L1",
       "id": "tracker_rationale_1",
-      "community": 4
+      "community": 9
     },
     {
       "label": "Accumulates and persists provenance records for one microlensing event.      Par",
@@ -353,7 +369,7 @@
       "source_file": "smig\\provenance\\tracker.py",
       "source_location": "L36",
       "id": "tracker_rationale_36",
-      "community": 4
+      "community": 3
     },
     {
       "label": "Append one epoch's provenance record to the in-memory accumulator.          Para",
@@ -361,7 +377,7 @@
       "source_file": "smig\\provenance\\tracker.py",
       "source_location": "L74",
       "id": "tracker_rationale_74",
-      "community": 4
+      "community": 3
     },
     {
       "label": "Atomically serialise all accumulated records to a JSON sidecar file.          Th",
@@ -369,7 +385,7 @@
       "source_file": "smig\\provenance\\tracker.py",
       "source_location": "L128",
       "id": "tracker_rationale_128",
-      "community": 4
+      "community": 3
     },
     {
       "label": "Return the number of records accumulated so far.",
@@ -377,7 +393,7 @@
       "source_file": "smig\\provenance\\tracker.py",
       "source_location": "L211",
       "id": "tracker_rationale_211",
-      "community": 4
+      "community": 3
     },
     {
       "label": "charge_diffusion.py",
@@ -393,7 +409,7 @@
       "source_file": "smig\\sensor\\charge_diffusion.py",
       "source_location": "L16",
       "id": "charge_diffusion_chargediffusionmodel",
-      "community": 0
+      "community": 1
     },
     {
       "label": ".__init__()",
@@ -401,7 +417,7 @@
       "source_file": "smig\\sensor\\charge_diffusion.py",
       "source_location": "L32",
       "id": "charge_diffusion_chargediffusionmodel_init",
-      "community": 0
+      "community": 1
     },
     {
       "label": ".apply()",
@@ -425,7 +441,7 @@
       "source_file": "smig\\sensor\\charge_diffusion.py",
       "source_location": "L17",
       "id": "charge_diffusion_rationale_17",
-      "community": 0
+      "community": 1
     },
     {
       "label": "Apply charge diffusion and BFE to a charge image.          Parameters         --",
@@ -463,7 +479,7 @@
       "label": "EventOutput",
       "file_type": "code",
       "source_file": "smig\\sensor\\detector.py",
-      "source_location": "L79",
+      "source_location": "L80",
       "id": "detector_eventoutput",
       "community": 1
     },
@@ -471,33 +487,33 @@
       "label": "H4RG10Detector",
       "file_type": "code",
       "source_file": "smig\\sensor\\detector.py",
-      "source_location": "L115",
+      "source_location": "L116",
       "id": "detector_h4rg10detector",
-      "community": 1
+      "community": 8
     },
     {
       "label": ".__init__()",
       "file_type": "code",
       "source_file": "smig\\sensor\\detector.py",
-      "source_location": "L137",
+      "source_location": "L138",
       "id": "detector_h4rg10detector_init",
-      "community": 1
+      "community": 8
     },
     {
       "label": ".process_epoch()",
       "file_type": "code",
       "source_file": "smig\\sensor\\detector.py",
-      "source_location": "L158",
+      "source_location": "L194",
       "id": "detector_h4rg10detector_process_epoch",
-      "community": 0
+      "community": 1
     },
     {
       "label": ".process_event()",
       "file_type": "code",
       "source_file": "smig\\sensor\\detector.py",
-      "source_location": "L248",
+      "source_location": "L320",
       "id": "detector_h4rg10detector_process_event",
-      "community": 0
+      "community": 1
     },
     {
       "label": "smig/sensor/detector.py ======================== Star-topology orchestrator for",
@@ -505,7 +521,7 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L1",
       "id": "detector_rationale_1",
-      "community": 0
+      "community": 1
     },
     {
       "label": "Per-epoch detector simulation result.      Note: ``frozen=True`` freezes attribu",
@@ -513,39 +529,39 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L47",
       "id": "detector_rationale_47",
-      "community": 0
+      "community": 1
     },
     {
       "label": "Multi-epoch event simulation result.      Note: ``frozen=True`` freezes attribut",
       "file_type": "rationale",
       "source_file": "smig\\sensor\\detector.py",
-      "source_location": "L80",
-      "id": "detector_rationale_80",
-      "community": 5
+      "source_location": "L81",
+      "id": "detector_rationale_81",
+      "community": 1
     },
     {
       "label": "Star-topology orchestrator for the Roman WFI H4RG-10 detector.      Owns all lea",
       "file_type": "rationale",
       "source_file": "smig\\sensor\\detector.py",
-      "source_location": "L116",
-      "id": "detector_rationale_116",
-      "community": 0
+      "source_location": "L117",
+      "id": "detector_rationale_117",
+      "community": 1
     },
     {
       "label": "Process a single epoch through the detector signal chain.          The current i",
       "file_type": "rationale",
       "source_file": "smig\\sensor\\detector.py",
-      "source_location": "L164",
-      "id": "detector_rationale_164",
-      "community": 0
+      "source_location": "L201",
+      "id": "detector_rationale_201",
+      "community": 1
     },
     {
       "label": "Process a multi-epoch event through the detector signal chain.          Iterates",
       "file_type": "rationale",
       "source_file": "smig\\sensor\\detector.py",
-      "source_location": "L254",
-      "id": "detector_rationale_254",
-      "community": 0
+      "source_location": "L326",
+      "id": "detector_rationale_326",
+      "community": 1
     },
     {
       "label": "ipc.py",
@@ -561,7 +577,7 @@
       "source_file": "smig\\sensor\\ipc.py",
       "source_location": "L16",
       "id": "ipc_fielddependentipc",
-      "community": 5
+      "community": 1
     },
     {
       "label": ".__init__()",
@@ -569,7 +585,7 @@
       "source_file": "smig\\sensor\\ipc.py",
       "source_location": "L29",
       "id": "ipc_fielddependentipc_init",
-      "community": 5
+      "community": 1
     },
     {
       "label": ".apply()",
@@ -593,7 +609,7 @@
       "source_file": "smig\\sensor\\ipc.py",
       "source_location": "L17",
       "id": "ipc_rationale_17",
-      "community": 5
+      "community": 1
     },
     {
       "label": "Apply IPC convolution to a charge image.          Parameters         ----------",
@@ -625,7 +641,7 @@
       "source_file": "smig\\sensor\\noise\\correlated.py",
       "source_location": "L17",
       "id": "correlated_oneoverfnoise",
-      "community": 0
+      "community": 1
     },
     {
       "label": ".__init__()",
@@ -633,7 +649,7 @@
       "source_file": "smig\\sensor\\noise\\correlated.py",
       "source_location": "L34",
       "id": "correlated_oneoverfnoise_init",
-      "community": 0
+      "community": 1
     },
     {
       "label": ".apply()",
@@ -649,7 +665,7 @@
       "source_file": "smig\\sensor\\noise\\correlated.py",
       "source_location": "L57",
       "id": "correlated_rtsnoise",
-      "community": 0
+      "community": 1
     },
     {
       "label": ".__init__()",
@@ -657,13 +673,13 @@
       "source_file": "smig\\sensor\\noise\\correlated.py",
       "source_location": "L73",
       "id": "correlated_rtsnoise_init",
-      "community": 0
+      "community": 1
     },
     {
       "label": ".apply()",
       "file_type": "code",
       "source_file": "smig\\sensor\\noise\\correlated.py",
-      "source_location": "L77",
+      "source_location": "L80",
       "id": "correlated_rtsnoise_apply",
       "community": 0
     },
@@ -681,7 +697,7 @@
       "source_file": "smig\\sensor\\noise\\correlated.py",
       "source_location": "L18",
       "id": "correlated_rationale_18",
-      "community": 0
+      "community": 1
     },
     {
       "label": "Inject 1/f correlated noise into an image.          Parameters         ---------",
@@ -697,14 +713,14 @@
       "source_file": "smig\\sensor\\noise\\correlated.py",
       "source_location": "L58",
       "id": "correlated_rationale_58",
-      "community": 0
+      "community": 1
     },
     {
       "label": "Inject RTS noise into an image.          Parameters         ----------         i",
       "file_type": "rationale",
       "source_file": "smig\\sensor\\noise\\correlated.py",
-      "source_location": "L78",
-      "id": "correlated_rationale_78",
+      "source_location": "L81",
+      "id": "correlated_rationale_81",
       "community": 0
     },
     {
@@ -719,8 +735,8 @@
       "label": "# TODO: Implement physical model \u2014 sample a two-state Markov chain",
       "file_type": "rationale",
       "source_file": "smig\\sensor\\noise\\correlated.py",
-      "source_location": "L90",
-      "id": "correlated_rationale_90",
+      "source_location": "L93",
+      "id": "correlated_rationale_93",
       "community": 0
     },
     {
@@ -737,7 +753,7 @@
       "source_file": "smig\\sensor\\noise\\cosmic_rays.py",
       "source_location": "L16",
       "id": "cosmic_rays_clusteredcosmicrayinjector",
-      "community": 0
+      "community": 1
     },
     {
       "label": ".__init__()",
@@ -745,7 +761,7 @@
       "source_file": "smig\\sensor\\noise\\cosmic_rays.py",
       "source_location": "L32",
       "id": "cosmic_rays_clusteredcosmicrayinjector_init",
-      "community": 0
+      "community": 1
     },
     {
       "label": ".apply()",
@@ -769,7 +785,7 @@
       "source_file": "smig\\sensor\\noise\\cosmic_rays.py",
       "source_location": "L17",
       "id": "cosmic_rays_rationale_17",
-      "community": 0
+      "community": 1
     },
     {
       "label": "Inject cosmic-ray hits into an image.          Parameters         ----------",
@@ -783,8 +799,8 @@
       "label": "# TODO: Implement physical model \u2014 sample hit positions, energies, and",
       "file_type": "rationale",
       "source_file": "smig\\sensor\\noise\\cosmic_rays.py",
-      "source_location": "L50",
-      "id": "cosmic_rays_rationale_50",
+      "source_location": "L52",
+      "id": "cosmic_rays_rationale_52",
       "community": 0
     },
     {
@@ -793,7 +809,7 @@
       "source_file": "smig\\sensor\\nonlinearity.py",
       "source_location": "L1",
       "id": "nonlinearity",
-      "community": 6
+      "community": 2
     },
     {
       "label": "NonLinearityModel",
@@ -801,23 +817,23 @@
       "source_file": "smig\\sensor\\nonlinearity.py",
       "source_location": "L16",
       "id": "nonlinearity_nonlinearitymodel",
-      "community": 6
+      "community": 2
     },
     {
       "label": ".__init__()",
       "file_type": "code",
       "source_file": "smig\\sensor\\nonlinearity.py",
-      "source_location": "L31",
+      "source_location": "L35",
       "id": "nonlinearity_nonlinearitymodel_init",
-      "community": 6
+      "community": 2
     },
     {
       "label": ".apply()",
       "file_type": "code",
       "source_file": "smig\\sensor\\nonlinearity.py",
-      "source_location": "L34",
+      "source_location": "L39",
       "id": "nonlinearity_nonlinearitymodel_apply",
-      "community": 6
+      "community": 2
     },
     {
       "label": "smig/sensor/nonlinearity.py ============================ Polynomial detector non",
@@ -825,7 +841,7 @@
       "source_file": "smig\\sensor\\nonlinearity.py",
       "source_location": "L1",
       "id": "nonlinearity_rationale_1",
-      "community": 6
+      "community": 2
     },
     {
       "label": "Polynomial detector nonlinearity model.      Converts accumulated charge (in ele",
@@ -833,23 +849,23 @@
       "source_file": "smig\\sensor\\nonlinearity.py",
       "source_location": "L17",
       "id": "nonlinearity_rationale_17",
-      "community": 6
+      "community": 2
     },
     {
       "label": "Apply the nonlinearity polynomial to a charge image.          Parameters",
       "file_type": "rationale",
       "source_file": "smig\\sensor\\nonlinearity.py",
-      "source_location": "L35",
-      "id": "nonlinearity_rationale_35",
-      "community": 6
+      "source_location": "L40",
+      "id": "nonlinearity_rationale_40",
+      "community": 2
     },
     {
       "label": "# TODO: Implement physical model \u2014 evaluate polynomial",
       "file_type": "rationale",
       "source_file": "smig\\sensor\\nonlinearity.py",
-      "source_location": "L47",
-      "id": "nonlinearity_rationale_47",
-      "community": 6
+      "source_location": "L52",
+      "id": "nonlinearity_rationale_52",
+      "community": 2
     },
     {
       "label": "persistence.py",
@@ -879,7 +895,7 @@
       "label": ".apply()",
       "file_type": "code",
       "source_file": "smig\\sensor\\persistence.py",
-      "source_location": "L36",
+      "source_location": "L39",
       "id": "persistence_dynamicpersistence_apply",
       "community": 7
     },
@@ -903,16 +919,24 @@
       "label": "Apply persistence injection to a charge image.          Parameters         -----",
       "file_type": "rationale",
       "source_file": "smig\\sensor\\persistence.py",
-      "source_location": "L37",
-      "id": "persistence_rationale_37",
+      "source_location": "L40",
+      "id": "persistence_rationale_40",
       "community": 7
     },
     {
       "label": "# TODO: Implement physical model \u2014 two-component exponential decay from",
       "file_type": "rationale",
       "source_file": "smig\\sensor\\persistence.py",
-      "source_location": "L52",
-      "id": "persistence_rationale_52",
+      "source_location": "L56",
+      "id": "persistence_rationale_56",
+      "community": 7
+    },
+    {
+      "label": "# TODO: Apply exponential decay using delta_time_s and update",
+      "file_type": "rationale",
+      "source_file": "smig\\sensor\\persistence.py",
+      "source_location": "L62",
+      "id": "persistence_rationale_62",
       "community": 7
     },
     {
@@ -921,31 +945,31 @@
       "source_file": "smig\\sensor\\readout.py",
       "source_location": "L1",
       "id": "readout",
-      "community": 8
+      "community": 2
     },
     {
       "label": "MultiAccumSimulator",
       "file_type": "code",
       "source_file": "smig\\sensor\\readout.py",
-      "source_location": "L16",
+      "source_location": "L27",
       "id": "readout_multiaccumsimulator",
-      "community": 8
+      "community": 2
     },
     {
       "label": ".__init__()",
       "file_type": "code",
       "source_file": "smig\\sensor\\readout.py",
-      "source_location": "L30",
+      "source_location": "L52",
       "id": "readout_multiaccumsimulator_init",
-      "community": 8
+      "community": 2
     },
     {
       "label": ".simulate_ramp()",
       "file_type": "code",
       "source_file": "smig\\sensor\\readout.py",
-      "source_location": "L33",
+      "source_location": "L64",
       "id": "readout_multiaccumsimulator_simulate_ramp",
-      "community": 8
+      "community": 2
     },
     {
       "label": "smig/sensor/readout.py ======================= MULTIACCUM (up-the-ramp) readout",
@@ -953,31 +977,31 @@
       "source_file": "smig\\sensor\\readout.py",
       "source_location": "L1",
       "id": "readout_rationale_1",
-      "community": 8
+      "community": 2
     },
     {
       "label": "MULTIACCUM (up-the-ramp) readout simulator.      Builds a non-destructive read r",
       "file_type": "rationale",
       "source_file": "smig\\sensor\\readout.py",
-      "source_location": "L17",
-      "id": "readout_rationale_17",
-      "community": 8
+      "source_location": "L28",
+      "id": "readout_rationale_28",
+      "community": 2
     },
     {
       "label": "Simulate MULTIACCUM ramp readout of a charge image.          Parameters",
       "file_type": "rationale",
       "source_file": "smig\\sensor\\readout.py",
-      "source_location": "L34",
-      "id": "readout_rationale_34",
-      "community": 8
+      "source_location": "L65",
+      "id": "readout_rationale_65",
+      "community": 2
     },
     {
       "label": "# TODO: Implement physical model \u2014 build up-the-ramp sample cube with",
       "file_type": "rationale",
       "source_file": "smig\\sensor\\readout.py",
-      "source_location": "L47",
-      "id": "readout_rationale_47",
-      "community": 8
+      "source_location": "L78",
+      "id": "readout_rationale_78",
+      "community": 2
     },
     {
       "label": "test_integration.py",
@@ -985,7 +1009,7 @@
       "source_file": "smig\\sensor\\validation\\test_integration.py",
       "source_location": "L1",
       "id": "test_integration",
-      "community": 1
+      "community": 3
     },
     {
       "label": "test_load_detector_config_from_yaml()",
@@ -993,7 +1017,7 @@
       "source_file": "smig\\sensor\\validation\\test_integration.py",
       "source_location": "L33",
       "id": "test_integration_test_load_detector_config_from_yaml",
-      "community": 1
+      "community": 3
     },
     {
       "label": "test_full_chain_integration()",
@@ -1001,7 +1025,7 @@
       "source_file": "smig\\sensor\\validation\\test_integration.py",
       "source_location": "L48",
       "id": "test_integration_test_full_chain_integration",
-      "community": 1
+      "community": 3
     },
     {
       "label": "smig/sensor/validation/test_integration.py =====================================",
@@ -1009,7 +1033,7 @@
       "source_file": "smig\\sensor\\validation\\test_integration.py",
       "source_location": "L1",
       "id": "test_integration_rationale_1",
-      "community": 1
+      "community": 3
     },
     {
       "label": "load_detector_config correctly parses smig/config/roman_wfi.yaml.",
@@ -1017,7 +1041,7 @@
       "source_file": "smig\\sensor\\validation\\test_integration.py",
       "source_location": "L34",
       "id": "test_integration_rationale_34",
-      "community": 1
+      "community": 3
     },
     {
       "label": "process_event \u2192 ProvenanceTracker \u2192 sidecar round-trips as valid JSON.",
@@ -1025,7 +1049,7 @@
       "source_file": "smig\\sensor\\validation\\test_integration.py",
       "source_location": "L49",
       "id": "test_integration_rationale_49",
-      "community": 1
+      "community": 3
     },
     {
       "label": "test_unit.py",
@@ -1033,7 +1057,7 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L1",
       "id": "test_unit",
-      "community": 2
+      "community": 4
     },
     {
       "label": "small_cfg()",
@@ -1041,7 +1065,7 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L26",
       "id": "test_unit_small_cfg",
-      "community": 2
+      "community": 6
     },
     {
       "label": "small_detector()",
@@ -1049,7 +1073,7 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L32",
       "id": "test_unit_small_detector",
-      "community": 2
+      "community": 4
     },
     {
       "label": "single_epoch_output()",
@@ -1057,7 +1081,7 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L37",
       "id": "test_unit_single_epoch_output",
-      "community": 2
+      "community": 4
     },
     {
       "label": "event_output()",
@@ -1065,7 +1089,7 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L43",
       "id": "test_unit_event_output",
-      "community": 2
+      "community": 4
     },
     {
       "label": "test_config_sha256_determinism()",
@@ -1073,7 +1097,7 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L53",
       "id": "test_unit_test_config_sha256_determinism",
-      "community": 2
+      "community": 18
     },
     {
       "label": "test_config_sha256_is_hex_string()",
@@ -1081,7 +1105,7 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L66",
       "id": "test_unit_test_config_sha256_is_hex_string",
-      "community": 2
+      "community": 12
     },
     {
       "label": "test_detector_construction()",
@@ -1089,7 +1113,7 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L77",
       "id": "test_unit_test_detector_construction",
-      "community": 2
+      "community": 6
     },
     {
       "label": "test_process_epoch_returns_detector_output()",
@@ -1097,7 +1121,7 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L89",
       "id": "test_unit_test_process_epoch_returns_detector_output",
-      "community": 2
+      "community": 4
     },
     {
       "label": "test_process_epoch_rate_image_shape_and_dtype()",
@@ -1105,7 +1129,7 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L93",
       "id": "test_unit_test_process_epoch_rate_image_shape_and_dtype",
-      "community": 2
+      "community": 4
     },
     {
       "label": "test_process_epoch_masks_shape_and_dtype()",
@@ -1113,7 +1137,7 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L98",
       "id": "test_unit_test_process_epoch_masks_shape_and_dtype",
-      "community": 2
+      "community": 4
     },
     {
       "label": "test_process_epoch_stub_returns_copy_not_alias()",
@@ -1121,95 +1145,183 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L105",
       "id": "test_unit_test_process_epoch_stub_returns_copy_not_alias",
-      "community": 2
+      "community": 19
     },
     {
       "label": "test_process_epoch_provenance_data_has_correct_keys()",
       "file_type": "code",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L132",
+      "source_location": "L133",
       "id": "test_unit_test_process_epoch_provenance_data_has_correct_keys",
-      "community": 2
+      "community": 4
     },
     {
       "label": "test_process_epoch_provenance_data_stub_flags()",
       "file_type": "code",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L138",
+      "source_location": "L139",
       "id": "test_unit_test_process_epoch_provenance_data_stub_flags",
-      "community": 2
+      "community": 8
     },
     {
       "label": "test_process_epoch_provenance_config_sha256()",
       "file_type": "code",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L150",
+      "source_location": "L157",
       "id": "test_unit_test_process_epoch_provenance_config_sha256",
-      "community": 2
+      "community": 4
     },
     {
       "label": "test_process_epoch_provenance_random_state_structure()",
       "file_type": "code",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L160",
+      "source_location": "L167",
       "id": "test_unit_test_process_epoch_provenance_random_state_structure",
-      "community": 2
+      "community": 4
     },
     {
       "label": "test_process_epoch_rejects_wrong_shape()",
       "file_type": "code",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L172",
+      "source_location": "L179",
       "id": "test_unit_test_process_epoch_rejects_wrong_shape",
-      "community": 2
+      "community": 4
     },
     {
       "label": "test_process_event_returns_event_output()",
       "file_type": "code",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L182",
+      "source_location": "L189",
       "id": "test_unit_test_process_event_returns_event_output",
-      "community": 2
+      "community": 4
     },
     {
       "label": "test_process_event_cube_shapes()",
       "file_type": "code",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L186",
+      "source_location": "L193",
       "id": "test_unit_test_process_event_cube_shapes",
-      "community": 2
+      "community": 4
     },
     {
       "label": "test_process_event_provenance_record_count()",
       "file_type": "code",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L193",
+      "source_location": "L200",
       "id": "test_unit_test_process_event_provenance_record_count",
-      "community": 2
+      "community": 4
     },
     {
       "label": "test_process_event_provenance_records_are_valid()",
       "file_type": "code",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L197",
+      "source_location": "L204",
       "id": "test_unit_test_process_event_provenance_records_are_valid",
-      "community": 2
+      "community": 14
     },
     {
       "label": "test_process_event_provenance_timestamps_are_aware()",
       "file_type": "code",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L205",
+      "source_location": "L212",
       "id": "test_unit_test_process_event_provenance_timestamps_are_aware",
-      "community": 2
+      "community": 4
     },
     {
       "label": "test_process_event_provenance_config_sha256_consistent()",
       "file_type": "code",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L211",
+      "source_location": "L218",
       "id": "test_unit_test_process_event_provenance_config_sha256_consistent",
-      "community": 2
+      "community": 16
+    },
+    {
+      "label": "test_process_epoch_rejects_nan_input()",
+      "file_type": "code",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L232",
+      "id": "test_unit_test_process_epoch_rejects_nan_input",
+      "community": 13
+    },
+    {
+      "label": "test_process_epoch_rejects_negative_input()",
+      "file_type": "code",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L240",
+      "id": "test_unit_test_process_epoch_rejects_negative_input",
+      "community": 10
+    },
+    {
+      "label": "test_process_epoch_rejects_1d_input()",
+      "file_type": "code",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L247",
+      "id": "test_unit_test_process_epoch_rejects_1d_input",
+      "community": 6
+    },
+    {
+      "label": "test_process_epoch_rate_image_is_float64()",
+      "file_type": "code",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L254",
+      "id": "test_unit_test_process_epoch_rate_image_is_float64",
+      "community": 15
+    },
+    {
+      "label": "test_process_epoch_cr_mask_shape_matches_rate_image()",
+      "file_type": "code",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L261",
+      "id": "test_unit_test_process_epoch_cr_mask_shape_matches_rate_image",
+      "community": 8
+    },
+    {
+      "label": "test_process_event_rejects_2d_cube()",
+      "file_type": "code",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L268",
+      "id": "test_unit_test_process_event_rejects_2d_cube",
+      "community": 8
+    },
+    {
+      "label": "test_saturation_mask_correct_threshold()",
+      "file_type": "code",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L280",
+      "id": "test_unit_test_saturation_mask_correct_threshold",
+      "community": 4
+    },
+    {
+      "label": "test_saturation_mask_below_threshold_not_masked()",
+      "file_type": "code",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L294",
+      "id": "test_unit_test_saturation_mask_below_threshold_not_masked",
+      "community": 8
+    },
+    {
+      "label": "test_process_epoch_provenance_random_state_json_serializable()",
+      "file_type": "code",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L308",
+      "id": "test_unit_test_process_epoch_provenance_random_state_json_serializable",
+      "community": 17
+    },
+    {
+      "label": "test_rng_state_serialization_is_snapshot()",
+      "file_type": "code",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L319",
+      "id": "test_unit_test_rng_state_serialization_is_snapshot",
+      "community": 6
+    },
+    {
+      "label": "test_process_event_independence_from_input_mutation()",
+      "file_type": "code",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L351",
+      "id": "test_unit_test_process_event_independence_from_input_mutation",
+      "community": 11
     },
     {
       "label": "smig/sensor/validation/test_unit.py ===================================== Unit t",
@@ -1217,7 +1329,7 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L1",
       "id": "test_unit_rationale_1",
-      "community": 1
+      "community": 6
     },
     {
       "label": "16\u00d716 DetectorConfig for fast unit tests.",
@@ -1225,7 +1337,7 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L27",
       "id": "test_unit_rationale_27",
-      "community": 1
+      "community": 6
     },
     {
       "label": "Identical configs produce the same 64-char hash; different configs differ.",
@@ -1233,7 +1345,7 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L54",
       "id": "test_unit_rationale_54",
-      "community": 1
+      "community": 18
     },
     {
       "label": "Hash is a valid lowercase hex string of length 64.",
@@ -1241,7 +1353,7 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L67",
       "id": "test_unit_rationale_67",
-      "community": 1
+      "community": 12
     },
     {
       "label": "H4RG10Detector constructs without error and stores the config.",
@@ -1249,7 +1361,7 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L78",
       "id": "test_unit_rationale_78",
-      "community": 1
+      "community": 6
     },
     {
       "label": "Stub returns a copy of the input, not the same object.",
@@ -1257,39 +1369,127 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L106",
       "id": "test_unit_rationale_106",
-      "community": 1
+      "community": 19
     },
     {
-      "label": "Stub sets all applied-effect flags to False and counts to 0.",
+      "label": "Checks provenance applied-effect flags and counts.      charge_diffusion_applied",
       "file_type": "rationale",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L141",
-      "id": "test_unit_rationale_141",
-      "community": 1
+      "source_location": "L142",
+      "id": "test_unit_rationale_142",
+      "community": 8
     },
     {
       "label": "All records are ProvenanceRecords with correct event_id and epoch_index.",
       "file_type": "rationale",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L198",
-      "id": "test_unit_rationale_198",
-      "community": 1
+      "source_location": "L205",
+      "id": "test_unit_rationale_205",
+      "community": 14
     },
     {
       "label": "All provenance timestamps are timezone-aware (UTC).",
       "file_type": "rationale",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L206",
-      "id": "test_unit_rationale_206",
-      "community": 1
+      "source_location": "L213",
+      "id": "test_unit_rationale_213",
+      "community": 4
     },
     {
       "label": "All records share the same config_sha256.",
       "file_type": "rationale",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L215",
-      "id": "test_unit_rationale_215",
-      "community": 1
+      "source_location": "L222",
+      "id": "test_unit_rationale_222",
+      "community": 16
+    },
+    {
+      "label": "ValueError on NaN anywhere in ideal_image_e.",
+      "file_type": "rationale",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L233",
+      "id": "test_unit_rationale_233",
+      "community": 13
+    },
+    {
+      "label": "ValueError when ideal_image_e contains negative electron counts.",
+      "file_type": "rationale",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L241",
+      "id": "test_unit_rationale_241",
+      "community": 10
+    },
+    {
+      "label": "ValueError when ideal_image_e is 1-D (ndim != 2).",
+      "file_type": "rationale",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L248",
+      "id": "test_unit_rationale_248",
+      "community": 6
+    },
+    {
+      "label": "Output rate_image is always float64 even when input dtype is integer.",
+      "file_type": "rationale",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L255",
+      "id": "test_unit_rationale_255",
+      "community": 15
+    },
+    {
+      "label": "cr_mask must have the same shape as rate_image.",
+      "file_type": "rationale",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L264",
+      "id": "test_unit_rationale_264",
+      "community": 8
+    },
+    {
+      "label": "ValueError when ideal_cube_e is 2-D instead of 3-D.",
+      "file_type": "rationale",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L269",
+      "id": "test_unit_rationale_269",
+      "community": 8
+    },
+    {
+      "label": "Pixels at exactly the saturation threshold must be flagged.      Uses _saturatio",
+      "file_type": "rationale",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L281",
+      "id": "test_unit_rationale_281",
+      "community": 4
+    },
+    {
+      "label": "Pixels strictly below the saturation threshold must not be flagged.",
+      "file_type": "rationale",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L295",
+      "id": "test_unit_rationale_295",
+      "community": 8
+    },
+    {
+      "label": "random_state in provenance_data must be natively JSON-serializable.",
+      "file_type": "rationale",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L311",
+      "id": "test_unit_rationale_311",
+      "community": 17
+    },
+    {
+      "label": "Provenance random_state is a static snapshot, not a live generator reference.",
+      "file_type": "rationale",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L320",
+      "id": "test_unit_rationale_320",
+      "community": 6
+    },
+    {
+      "label": "Mutating ideal_cube_e after process_event does not corrupt the output.      proc",
+      "file_type": "rationale",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L354",
+      "id": "test_unit_rationale_354",
+      "community": 11
     }
   ],
   "links": [
@@ -1587,10 +1787,10 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L15",
       "weight": 0.8,
-      "_src": "test_unit_rationale_141",
+      "_src": "test_unit_rationale_142",
       "_tgt": "schemas_geometryconfig",
       "source": "schemas_geometryconfig",
-      "target": "test_unit_rationale_141",
+      "target": "test_unit_rationale_142",
       "confidence_score": 0.5
     },
     {
@@ -1599,10 +1799,10 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L15",
       "weight": 0.8,
-      "_src": "test_unit_rationale_198",
+      "_src": "test_unit_rationale_205",
       "_tgt": "schemas_geometryconfig",
       "source": "schemas_geometryconfig",
-      "target": "test_unit_rationale_198",
+      "target": "test_unit_rationale_205",
       "confidence_score": 0.5
     },
     {
@@ -1611,10 +1811,10 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L15",
       "weight": 0.8,
-      "_src": "test_unit_rationale_206",
+      "_src": "test_unit_rationale_213",
       "_tgt": "schemas_geometryconfig",
       "source": "schemas_geometryconfig",
-      "target": "test_unit_rationale_206",
+      "target": "test_unit_rationale_213",
       "confidence_score": 0.5
     },
     {
@@ -1623,10 +1823,142 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L15",
       "weight": 0.8,
-      "_src": "test_unit_rationale_215",
+      "_src": "test_unit_rationale_222",
       "_tgt": "schemas_geometryconfig",
       "source": "schemas_geometryconfig",
-      "target": "test_unit_rationale_215",
+      "target": "test_unit_rationale_222",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L15",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_233",
+      "_tgt": "schemas_geometryconfig",
+      "source": "schemas_geometryconfig",
+      "target": "test_unit_rationale_233",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L15",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_241",
+      "_tgt": "schemas_geometryconfig",
+      "source": "schemas_geometryconfig",
+      "target": "test_unit_rationale_241",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L15",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_248",
+      "_tgt": "schemas_geometryconfig",
+      "source": "schemas_geometryconfig",
+      "target": "test_unit_rationale_248",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L15",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_255",
+      "_tgt": "schemas_geometryconfig",
+      "source": "schemas_geometryconfig",
+      "target": "test_unit_rationale_255",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L15",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_264",
+      "_tgt": "schemas_geometryconfig",
+      "source": "schemas_geometryconfig",
+      "target": "test_unit_rationale_264",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L15",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_269",
+      "_tgt": "schemas_geometryconfig",
+      "source": "schemas_geometryconfig",
+      "target": "test_unit_rationale_269",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L15",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_281",
+      "_tgt": "schemas_geometryconfig",
+      "source": "schemas_geometryconfig",
+      "target": "test_unit_rationale_281",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L15",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_295",
+      "_tgt": "schemas_geometryconfig",
+      "source": "schemas_geometryconfig",
+      "target": "test_unit_rationale_295",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L15",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_311",
+      "_tgt": "schemas_geometryconfig",
+      "source": "schemas_geometryconfig",
+      "target": "test_unit_rationale_311",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L15",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_320",
+      "_tgt": "schemas_geometryconfig",
+      "source": "schemas_geometryconfig",
+      "target": "test_unit_rationale_320",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L15",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_354",
+      "_tgt": "schemas_geometryconfig",
+      "source": "schemas_geometryconfig",
+      "target": "test_unit_rationale_354",
       "confidence_score": 0.5
     },
     {
@@ -1717,7 +2049,7 @@
       "relation": "inherits",
       "confidence": "EXTRACTED",
       "source_file": "smig\\provenance\\schema.py",
-      "source_location": "L21",
+      "source_location": "L59",
       "weight": 1.0,
       "_src": "schema_provenancerecord",
       "_tgt": "basemodel",
@@ -1753,7 +2085,7 @@
       "relation": "uses",
       "confidence": "INFERRED",
       "source_file": "smig\\sensor\\readout.py",
-      "source_location": "L13",
+      "source_location": "L23",
       "weight": 0.8,
       "_src": "readout_multiaccumsimulator",
       "_tgt": "schemas_readoutconfig",
@@ -1765,7 +2097,7 @@
       "relation": "uses",
       "confidence": "INFERRED",
       "source_file": "smig\\sensor\\readout.py",
-      "source_location": "L13",
+      "source_location": "L23",
       "weight": 0.8,
       "_src": "readout_rationale_1",
       "_tgt": "schemas_readoutconfig",
@@ -1777,36 +2109,36 @@
       "relation": "uses",
       "confidence": "INFERRED",
       "source_file": "smig\\sensor\\readout.py",
-      "source_location": "L13",
+      "source_location": "L23",
       "weight": 0.8,
-      "_src": "readout_rationale_17",
+      "_src": "readout_rationale_28",
       "_tgt": "schemas_readoutconfig",
       "source": "schemas_readoutconfig",
-      "target": "readout_rationale_17",
+      "target": "readout_rationale_28",
       "confidence_score": 0.5
     },
     {
       "relation": "uses",
       "confidence": "INFERRED",
       "source_file": "smig\\sensor\\readout.py",
-      "source_location": "L13",
+      "source_location": "L23",
       "weight": 0.8,
-      "_src": "readout_rationale_34",
+      "_src": "readout_rationale_65",
       "_tgt": "schemas_readoutconfig",
       "source": "schemas_readoutconfig",
-      "target": "readout_rationale_34",
+      "target": "readout_rationale_65",
       "confidence_score": 0.5
     },
     {
       "relation": "uses",
       "confidence": "INFERRED",
       "source_file": "smig\\sensor\\readout.py",
-      "source_location": "L13",
+      "source_location": "L23",
       "weight": 0.8,
-      "_src": "readout_rationale_47",
+      "_src": "readout_rationale_78",
       "_tgt": "schemas_readoutconfig",
       "source": "schemas_readoutconfig",
-      "target": "readout_rationale_47",
+      "target": "readout_rationale_78",
       "confidence_score": 0.5
     },
     {
@@ -1935,10 +2267,10 @@
       "source_file": "smig\\sensor\\persistence.py",
       "source_location": "L13",
       "weight": 0.8,
-      "_src": "persistence_rationale_37",
+      "_src": "persistence_rationale_40",
       "_tgt": "schemas_persistenceconfig",
       "source": "schemas_persistenceconfig",
-      "target": "persistence_rationale_37",
+      "target": "persistence_rationale_40",
       "confidence_score": 0.5
     },
     {
@@ -1947,10 +2279,22 @@
       "source_file": "smig\\sensor\\persistence.py",
       "source_location": "L13",
       "weight": 0.8,
-      "_src": "persistence_rationale_52",
+      "_src": "persistence_rationale_56",
       "_tgt": "schemas_persistenceconfig",
       "source": "schemas_persistenceconfig",
-      "target": "persistence_rationale_52",
+      "target": "persistence_rationale_56",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\persistence.py",
+      "source_location": "L13",
+      "weight": 0.8,
+      "_src": "persistence_rationale_62",
+      "_tgt": "schemas_persistenceconfig",
+      "source": "schemas_persistenceconfig",
+      "target": "persistence_rationale_62",
       "confidence_score": 0.5
     },
     {
@@ -2007,10 +2351,10 @@
       "source_file": "smig\\sensor\\nonlinearity.py",
       "source_location": "L13",
       "weight": 0.8,
-      "_src": "nonlinearity_rationale_35",
+      "_src": "nonlinearity_rationale_40",
       "_tgt": "schemas_nonlinearityconfig",
       "source": "schemas_nonlinearityconfig",
-      "target": "nonlinearity_rationale_35",
+      "target": "nonlinearity_rationale_40",
       "confidence_score": 0.5
     },
     {
@@ -2019,10 +2363,10 @@
       "source_file": "smig\\sensor\\nonlinearity.py",
       "source_location": "L13",
       "weight": 0.8,
-      "_src": "nonlinearity_rationale_47",
+      "_src": "nonlinearity_rationale_52",
       "_tgt": "schemas_nonlinearityconfig",
       "source": "schemas_nonlinearityconfig",
-      "target": "nonlinearity_rationale_47",
+      "target": "nonlinearity_rationale_52",
       "confidence_score": 0.5
     },
     {
@@ -2211,10 +2555,10 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L26",
       "weight": 0.8,
-      "_src": "detector_rationale_80",
+      "_src": "detector_rationale_81",
       "_tgt": "schemas_detectorconfig",
       "source": "schemas_detectorconfig",
-      "target": "detector_rationale_80",
+      "target": "detector_rationale_81",
       "confidence_score": 0.5
     },
     {
@@ -2223,10 +2567,10 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L26",
       "weight": 0.8,
-      "_src": "detector_rationale_116",
+      "_src": "detector_rationale_117",
       "_tgt": "schemas_detectorconfig",
       "source": "schemas_detectorconfig",
-      "target": "detector_rationale_116",
+      "target": "detector_rationale_117",
       "confidence_score": 0.5
     },
     {
@@ -2235,10 +2579,10 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L26",
       "weight": 0.8,
-      "_src": "detector_rationale_164",
+      "_src": "detector_rationale_201",
       "_tgt": "schemas_detectorconfig",
       "source": "schemas_detectorconfig",
-      "target": "detector_rationale_164",
+      "target": "detector_rationale_201",
       "confidence_score": 0.5
     },
     {
@@ -2247,10 +2591,10 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L26",
       "weight": 0.8,
-      "_src": "detector_rationale_254",
+      "_src": "detector_rationale_326",
       "_tgt": "schemas_detectorconfig",
       "source": "schemas_detectorconfig",
-      "target": "detector_rationale_254",
+      "target": "detector_rationale_326",
       "confidence_score": 0.5
     },
     {
@@ -2331,10 +2675,10 @@
       "source_file": "smig\\sensor\\noise\\correlated.py",
       "source_location": "L14",
       "weight": 0.8,
-      "_src": "correlated_rationale_78",
+      "_src": "correlated_rationale_81",
       "_tgt": "schemas_detectorconfig",
       "source": "schemas_detectorconfig",
-      "target": "correlated_rationale_78",
+      "target": "correlated_rationale_81",
       "confidence_score": 0.5
     },
     {
@@ -2355,10 +2699,10 @@
       "source_file": "smig\\sensor\\noise\\correlated.py",
       "source_location": "L14",
       "weight": 0.8,
-      "_src": "correlated_rationale_90",
+      "_src": "correlated_rationale_93",
       "_tgt": "schemas_detectorconfig",
       "source": "schemas_detectorconfig",
-      "target": "correlated_rationale_90",
+      "target": "correlated_rationale_93",
       "confidence_score": 0.5
     },
     {
@@ -2415,10 +2759,10 @@
       "source_file": "smig\\sensor\\noise\\cosmic_rays.py",
       "source_location": "L13",
       "weight": 0.8,
-      "_src": "cosmic_rays_rationale_50",
+      "_src": "cosmic_rays_rationale_52",
       "_tgt": "schemas_detectorconfig",
       "source": "schemas_detectorconfig",
-      "target": "cosmic_rays_rationale_50",
+      "target": "cosmic_rays_rationale_52",
       "confidence_score": 0.5
     },
     {
@@ -2535,10 +2879,10 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L15",
       "weight": 0.8,
-      "_src": "test_unit_rationale_141",
+      "_src": "test_unit_rationale_142",
       "_tgt": "schemas_detectorconfig",
       "source": "schemas_detectorconfig",
-      "target": "test_unit_rationale_141",
+      "target": "test_unit_rationale_142",
       "confidence_score": 0.5
     },
     {
@@ -2547,10 +2891,10 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L15",
       "weight": 0.8,
-      "_src": "test_unit_rationale_198",
+      "_src": "test_unit_rationale_205",
       "_tgt": "schemas_detectorconfig",
       "source": "schemas_detectorconfig",
-      "target": "test_unit_rationale_198",
+      "target": "test_unit_rationale_205",
       "confidence_score": 0.5
     },
     {
@@ -2559,10 +2903,10 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L15",
       "weight": 0.8,
-      "_src": "test_unit_rationale_206",
+      "_src": "test_unit_rationale_213",
       "_tgt": "schemas_detectorconfig",
       "source": "schemas_detectorconfig",
-      "target": "test_unit_rationale_206",
+      "target": "test_unit_rationale_213",
       "confidence_score": 0.5
     },
     {
@@ -2571,10 +2915,142 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L15",
       "weight": 0.8,
-      "_src": "test_unit_rationale_215",
+      "_src": "test_unit_rationale_222",
       "_tgt": "schemas_detectorconfig",
       "source": "schemas_detectorconfig",
-      "target": "test_unit_rationale_215",
+      "target": "test_unit_rationale_222",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L15",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_233",
+      "_tgt": "schemas_detectorconfig",
+      "source": "schemas_detectorconfig",
+      "target": "test_unit_rationale_233",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L15",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_241",
+      "_tgt": "schemas_detectorconfig",
+      "source": "schemas_detectorconfig",
+      "target": "test_unit_rationale_241",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L15",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_248",
+      "_tgt": "schemas_detectorconfig",
+      "source": "schemas_detectorconfig",
+      "target": "test_unit_rationale_248",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L15",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_255",
+      "_tgt": "schemas_detectorconfig",
+      "source": "schemas_detectorconfig",
+      "target": "test_unit_rationale_255",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L15",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_264",
+      "_tgt": "schemas_detectorconfig",
+      "source": "schemas_detectorconfig",
+      "target": "test_unit_rationale_264",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L15",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_269",
+      "_tgt": "schemas_detectorconfig",
+      "source": "schemas_detectorconfig",
+      "target": "test_unit_rationale_269",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L15",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_281",
+      "_tgt": "schemas_detectorconfig",
+      "source": "schemas_detectorconfig",
+      "target": "test_unit_rationale_281",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L15",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_295",
+      "_tgt": "schemas_detectorconfig",
+      "source": "schemas_detectorconfig",
+      "target": "test_unit_rationale_295",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L15",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_311",
+      "_tgt": "schemas_detectorconfig",
+      "source": "schemas_detectorconfig",
+      "target": "test_unit_rationale_311",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L15",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_320",
+      "_tgt": "schemas_detectorconfig",
+      "source": "schemas_detectorconfig",
+      "target": "test_unit_rationale_320",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L15",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_354",
+      "_tgt": "schemas_detectorconfig",
+      "source": "schemas_detectorconfig",
+      "target": "test_unit_rationale_354",
       "confidence_score": 0.5
     },
     {
@@ -2644,6 +3120,18 @@
       "source_location": "L21",
       "weight": 1.0,
       "_src": "schema",
+      "_tgt": "schema_sanitize_rng_state",
+      "source": "schema",
+      "target": "schema_sanitize_rng_state",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "smig\\provenance\\schema.py",
+      "source_location": "L59",
+      "weight": 1.0,
+      "_src": "schema",
       "_tgt": "schema_provenancerecord",
       "source": "schema",
       "target": "schema_provenancerecord",
@@ -2653,7 +3141,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "smig\\provenance\\schema.py",
-      "source_location": "L146",
+      "source_location": "L184",
       "weight": 1.0,
       "_src": "schema",
       "_tgt": "schema_sanitize_numpy_types",
@@ -2686,15 +3174,39 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "calls",
+      "confidence": "INFERRED",
+      "source_file": "smig\\provenance\\schema.py",
+      "source_location": "L186",
+      "weight": 0.8,
+      "_src": "schema_sanitize_numpy_types",
+      "_tgt": "schema_sanitize_rng_state",
+      "source": "schema_sanitize_rng_state",
+      "target": "schema_sanitize_numpy_types",
+      "confidence_score": 0.5
+    },
+    {
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "smig\\provenance\\schema.py",
       "source_location": "L22",
       "weight": 1.0,
       "_src": "schema_rationale_22",
+      "_tgt": "schema_sanitize_rng_state",
+      "source": "schema_sanitize_rng_state",
+      "target": "schema_rationale_22",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "smig\\provenance\\schema.py",
+      "source_location": "L60",
+      "weight": 1.0,
+      "_src": "schema_rationale_60",
       "_tgt": "schema_provenancerecord",
       "source": "schema_provenancerecord",
-      "target": "schema_rationale_22",
+      "target": "schema_rationale_60",
       "confidence_score": 1.0
     },
     {
@@ -2835,10 +3347,10 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L28",
       "weight": 0.8,
-      "_src": "detector_rationale_80",
+      "_src": "detector_rationale_81",
       "_tgt": "schema_provenancerecord",
       "source": "schema_provenancerecord",
-      "target": "detector_rationale_80",
+      "target": "detector_rationale_81",
       "confidence_score": 0.5
     },
     {
@@ -2847,10 +3359,10 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L28",
       "weight": 0.8,
-      "_src": "detector_rationale_116",
+      "_src": "detector_rationale_117",
       "_tgt": "schema_provenancerecord",
       "source": "schema_provenancerecord",
-      "target": "detector_rationale_116",
+      "target": "detector_rationale_117",
       "confidence_score": 0.5
     },
     {
@@ -2859,10 +3371,10 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L28",
       "weight": 0.8,
-      "_src": "detector_rationale_164",
+      "_src": "detector_rationale_201",
       "_tgt": "schema_provenancerecord",
       "source": "schema_provenancerecord",
-      "target": "detector_rationale_164",
+      "target": "detector_rationale_201",
       "confidence_score": 0.5
     },
     {
@@ -2871,10 +3383,10 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L28",
       "weight": 0.8,
-      "_src": "detector_rationale_254",
+      "_src": "detector_rationale_326",
       "_tgt": "schema_provenancerecord",
       "source": "schema_provenancerecord",
-      "target": "detector_rationale_254",
+      "target": "detector_rationale_326",
       "confidence_score": 0.5
     },
     {
@@ -2991,10 +3503,10 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L17",
       "weight": 0.8,
-      "_src": "test_unit_rationale_141",
+      "_src": "test_unit_rationale_142",
       "_tgt": "schema_provenancerecord",
       "source": "schema_provenancerecord",
-      "target": "test_unit_rationale_141",
+      "target": "test_unit_rationale_142",
       "confidence_score": 0.5
     },
     {
@@ -3003,10 +3515,10 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L17",
       "weight": 0.8,
-      "_src": "test_unit_rationale_198",
+      "_src": "test_unit_rationale_205",
       "_tgt": "schema_provenancerecord",
       "source": "schema_provenancerecord",
-      "target": "test_unit_rationale_198",
+      "target": "test_unit_rationale_205",
       "confidence_score": 0.5
     },
     {
@@ -3015,10 +3527,10 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L17",
       "weight": 0.8,
-      "_src": "test_unit_rationale_206",
+      "_src": "test_unit_rationale_213",
       "_tgt": "schema_provenancerecord",
       "source": "schema_provenancerecord",
-      "target": "test_unit_rationale_206",
+      "target": "test_unit_rationale_213",
       "confidence_score": 0.5
     },
     {
@@ -3027,10 +3539,142 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L17",
       "weight": 0.8,
-      "_src": "test_unit_rationale_215",
+      "_src": "test_unit_rationale_222",
       "_tgt": "schema_provenancerecord",
       "source": "schema_provenancerecord",
-      "target": "test_unit_rationale_215",
+      "target": "test_unit_rationale_222",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L17",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_233",
+      "_tgt": "schema_provenancerecord",
+      "source": "schema_provenancerecord",
+      "target": "test_unit_rationale_233",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L17",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_241",
+      "_tgt": "schema_provenancerecord",
+      "source": "schema_provenancerecord",
+      "target": "test_unit_rationale_241",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L17",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_248",
+      "_tgt": "schema_provenancerecord",
+      "source": "schema_provenancerecord",
+      "target": "test_unit_rationale_248",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L17",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_255",
+      "_tgt": "schema_provenancerecord",
+      "source": "schema_provenancerecord",
+      "target": "test_unit_rationale_255",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L17",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_264",
+      "_tgt": "schema_provenancerecord",
+      "source": "schema_provenancerecord",
+      "target": "test_unit_rationale_264",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L17",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_269",
+      "_tgt": "schema_provenancerecord",
+      "source": "schema_provenancerecord",
+      "target": "test_unit_rationale_269",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L17",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_281",
+      "_tgt": "schema_provenancerecord",
+      "source": "schema_provenancerecord",
+      "target": "test_unit_rationale_281",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L17",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_295",
+      "_tgt": "schema_provenancerecord",
+      "source": "schema_provenancerecord",
+      "target": "test_unit_rationale_295",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L17",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_311",
+      "_tgt": "schema_provenancerecord",
+      "source": "schema_provenancerecord",
+      "target": "test_unit_rationale_311",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L17",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_320",
+      "_tgt": "schema_provenancerecord",
+      "source": "schema_provenancerecord",
+      "target": "test_unit_rationale_320",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L17",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_354",
+      "_tgt": "schema_provenancerecord",
+      "source": "schema_provenancerecord",
+      "target": "test_unit_rationale_354",
       "confidence_score": 0.5
     },
     {
@@ -3339,10 +3983,10 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L29",
       "weight": 0.8,
-      "_src": "detector_rationale_80",
+      "_src": "detector_rationale_81",
       "_tgt": "charge_diffusion_chargediffusionmodel",
       "source": "charge_diffusion_chargediffusionmodel",
-      "target": "detector_rationale_80",
+      "target": "detector_rationale_81",
       "confidence_score": 0.5
     },
     {
@@ -3351,10 +3995,10 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L29",
       "weight": 0.8,
-      "_src": "detector_rationale_116",
+      "_src": "detector_rationale_117",
       "_tgt": "charge_diffusion_chargediffusionmodel",
       "source": "charge_diffusion_chargediffusionmodel",
-      "target": "detector_rationale_116",
+      "target": "detector_rationale_117",
       "confidence_score": 0.5
     },
     {
@@ -3363,10 +4007,10 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L29",
       "weight": 0.8,
-      "_src": "detector_rationale_164",
+      "_src": "detector_rationale_201",
       "_tgt": "charge_diffusion_chargediffusionmodel",
       "source": "charge_diffusion_chargediffusionmodel",
-      "target": "detector_rationale_164",
+      "target": "detector_rationale_201",
       "confidence_score": 0.5
     },
     {
@@ -3375,10 +4019,10 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L29",
       "weight": 0.8,
-      "_src": "detector_rationale_254",
+      "_src": "detector_rationale_326",
       "_tgt": "charge_diffusion_chargediffusionmodel",
       "source": "charge_diffusion_chargediffusionmodel",
-      "target": "detector_rationale_254",
+      "target": "detector_rationale_326",
       "confidence_score": 0.5
     },
     {
@@ -3409,7 +4053,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\detector.py",
-      "source_location": "L79",
+      "source_location": "L80",
       "weight": 1.0,
       "_src": "detector",
       "_tgt": "detector_eventoutput",
@@ -3421,7 +4065,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\detector.py",
-      "source_location": "L115",
+      "source_location": "L116",
       "weight": 1.0,
       "_src": "detector",
       "_tgt": "detector_h4rg10detector",
@@ -3445,7 +4089,7 @@
       "relation": "calls",
       "confidence": "INFERRED",
       "source_file": "smig\\sensor\\detector.py",
-      "source_location": "L241",
+      "source_location": "L313",
       "weight": 0.8,
       "_src": "detector_h4rg10detector_process_epoch",
       "_tgt": "detector_detectoroutput",
@@ -3627,10 +4271,10 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L18",
       "weight": 0.8,
-      "_src": "test_unit_rationale_141",
+      "_src": "test_unit_rationale_142",
       "_tgt": "detector_detectoroutput",
       "source": "detector_detectoroutput",
-      "target": "test_unit_rationale_141",
+      "target": "test_unit_rationale_142",
       "confidence_score": 0.5
     },
     {
@@ -3639,10 +4283,10 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L18",
       "weight": 0.8,
-      "_src": "test_unit_rationale_198",
+      "_src": "test_unit_rationale_205",
       "_tgt": "detector_detectoroutput",
       "source": "detector_detectoroutput",
-      "target": "test_unit_rationale_198",
+      "target": "test_unit_rationale_205",
       "confidence_score": 0.5
     },
     {
@@ -3651,10 +4295,10 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L18",
       "weight": 0.8,
-      "_src": "test_unit_rationale_206",
+      "_src": "test_unit_rationale_213",
       "_tgt": "detector_detectoroutput",
       "source": "detector_detectoroutput",
-      "target": "test_unit_rationale_206",
+      "target": "test_unit_rationale_213",
       "confidence_score": 0.5
     },
     {
@@ -3663,17 +4307,149 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L18",
       "weight": 0.8,
-      "_src": "test_unit_rationale_215",
+      "_src": "test_unit_rationale_222",
       "_tgt": "detector_detectoroutput",
       "source": "detector_detectoroutput",
-      "target": "test_unit_rationale_215",
+      "target": "test_unit_rationale_222",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_233",
+      "_tgt": "detector_detectoroutput",
+      "source": "detector_detectoroutput",
+      "target": "test_unit_rationale_233",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_241",
+      "_tgt": "detector_detectoroutput",
+      "source": "detector_detectoroutput",
+      "target": "test_unit_rationale_241",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_248",
+      "_tgt": "detector_detectoroutput",
+      "source": "detector_detectoroutput",
+      "target": "test_unit_rationale_248",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_255",
+      "_tgt": "detector_detectoroutput",
+      "source": "detector_detectoroutput",
+      "target": "test_unit_rationale_255",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_264",
+      "_tgt": "detector_detectoroutput",
+      "source": "detector_detectoroutput",
+      "target": "test_unit_rationale_264",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_269",
+      "_tgt": "detector_detectoroutput",
+      "source": "detector_detectoroutput",
+      "target": "test_unit_rationale_269",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_281",
+      "_tgt": "detector_detectoroutput",
+      "source": "detector_detectoroutput",
+      "target": "test_unit_rationale_281",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_295",
+      "_tgt": "detector_detectoroutput",
+      "source": "detector_detectoroutput",
+      "target": "test_unit_rationale_295",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_311",
+      "_tgt": "detector_detectoroutput",
+      "source": "detector_detectoroutput",
+      "target": "test_unit_rationale_311",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_320",
+      "_tgt": "detector_detectoroutput",
+      "source": "detector_detectoroutput",
+      "target": "test_unit_rationale_320",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_354",
+      "_tgt": "detector_detectoroutput",
+      "source": "detector_detectoroutput",
+      "target": "test_unit_rationale_354",
       "confidence_score": 0.5
     },
     {
       "relation": "calls",
       "confidence": "INFERRED",
       "source_file": "smig\\sensor\\detector.py",
-      "source_location": "L317",
+      "source_location": "L401",
       "weight": 0.8,
       "_src": "detector_h4rg10detector_process_event",
       "_tgt": "detector_eventoutput",
@@ -3685,12 +4461,12 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\detector.py",
-      "source_location": "L80",
+      "source_location": "L81",
       "weight": 1.0,
-      "_src": "detector_rationale_80",
+      "_src": "detector_rationale_81",
       "_tgt": "detector_eventoutput",
       "source": "detector_eventoutput",
-      "target": "detector_rationale_80",
+      "target": "detector_rationale_81",
       "confidence_score": 1.0
     },
     {
@@ -3855,10 +4631,10 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L18",
       "weight": 0.8,
-      "_src": "test_unit_rationale_141",
+      "_src": "test_unit_rationale_142",
       "_tgt": "detector_eventoutput",
       "source": "detector_eventoutput",
-      "target": "test_unit_rationale_141",
+      "target": "test_unit_rationale_142",
       "confidence_score": 0.5
     },
     {
@@ -3867,10 +4643,10 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L18",
       "weight": 0.8,
-      "_src": "test_unit_rationale_198",
+      "_src": "test_unit_rationale_205",
       "_tgt": "detector_eventoutput",
       "source": "detector_eventoutput",
-      "target": "test_unit_rationale_198",
+      "target": "test_unit_rationale_205",
       "confidence_score": 0.5
     },
     {
@@ -3879,10 +4655,10 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L18",
       "weight": 0.8,
-      "_src": "test_unit_rationale_206",
+      "_src": "test_unit_rationale_213",
       "_tgt": "detector_eventoutput",
       "source": "detector_eventoutput",
-      "target": "test_unit_rationale_206",
+      "target": "test_unit_rationale_213",
       "confidence_score": 0.5
     },
     {
@@ -3891,17 +4667,149 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L18",
       "weight": 0.8,
-      "_src": "test_unit_rationale_215",
+      "_src": "test_unit_rationale_222",
       "_tgt": "detector_eventoutput",
       "source": "detector_eventoutput",
-      "target": "test_unit_rationale_215",
+      "target": "test_unit_rationale_222",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_233",
+      "_tgt": "detector_eventoutput",
+      "source": "detector_eventoutput",
+      "target": "test_unit_rationale_233",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_241",
+      "_tgt": "detector_eventoutput",
+      "source": "detector_eventoutput",
+      "target": "test_unit_rationale_241",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_248",
+      "_tgt": "detector_eventoutput",
+      "source": "detector_eventoutput",
+      "target": "test_unit_rationale_248",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_255",
+      "_tgt": "detector_eventoutput",
+      "source": "detector_eventoutput",
+      "target": "test_unit_rationale_255",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_264",
+      "_tgt": "detector_eventoutput",
+      "source": "detector_eventoutput",
+      "target": "test_unit_rationale_264",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_269",
+      "_tgt": "detector_eventoutput",
+      "source": "detector_eventoutput",
+      "target": "test_unit_rationale_269",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_281",
+      "_tgt": "detector_eventoutput",
+      "source": "detector_eventoutput",
+      "target": "test_unit_rationale_281",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_295",
+      "_tgt": "detector_eventoutput",
+      "source": "detector_eventoutput",
+      "target": "test_unit_rationale_295",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_311",
+      "_tgt": "detector_eventoutput",
+      "source": "detector_eventoutput",
+      "target": "test_unit_rationale_311",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_320",
+      "_tgt": "detector_eventoutput",
+      "source": "detector_eventoutput",
+      "target": "test_unit_rationale_320",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_354",
+      "_tgt": "detector_eventoutput",
+      "source": "detector_eventoutput",
+      "target": "test_unit_rationale_354",
       "confidence_score": 0.5
     },
     {
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\detector.py",
-      "source_location": "L137",
+      "source_location": "L138",
       "weight": 1.0,
       "_src": "detector_h4rg10detector",
       "_tgt": "detector_h4rg10detector_init",
@@ -3913,7 +4821,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\detector.py",
-      "source_location": "L158",
+      "source_location": "L194",
       "weight": 1.0,
       "_src": "detector_h4rg10detector",
       "_tgt": "detector_h4rg10detector_process_epoch",
@@ -3925,7 +4833,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\detector.py",
-      "source_location": "L248",
+      "source_location": "L320",
       "weight": 1.0,
       "_src": "detector_h4rg10detector",
       "_tgt": "detector_h4rg10detector_process_event",
@@ -3937,12 +4845,12 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\detector.py",
-      "source_location": "L116",
+      "source_location": "L117",
       "weight": 1.0,
-      "_src": "detector_rationale_116",
+      "_src": "detector_rationale_117",
       "_tgt": "detector_h4rg10detector",
       "source": "detector_h4rg10detector",
-      "target": "detector_rationale_116",
+      "target": "detector_rationale_117",
       "confidence_score": 1.0
     },
     {
@@ -4143,10 +5051,10 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L18",
       "weight": 0.8,
-      "_src": "test_unit_rationale_141",
+      "_src": "test_unit_rationale_142",
       "_tgt": "detector_h4rg10detector",
       "source": "detector_h4rg10detector",
-      "target": "test_unit_rationale_141",
+      "target": "test_unit_rationale_142",
       "confidence_score": 0.5
     },
     {
@@ -4155,10 +5063,10 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L18",
       "weight": 0.8,
-      "_src": "test_unit_rationale_198",
+      "_src": "test_unit_rationale_205",
       "_tgt": "detector_h4rg10detector",
       "source": "detector_h4rg10detector",
-      "target": "test_unit_rationale_198",
+      "target": "test_unit_rationale_205",
       "confidence_score": 0.5
     },
     {
@@ -4167,10 +5075,10 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L18",
       "weight": 0.8,
-      "_src": "test_unit_rationale_206",
+      "_src": "test_unit_rationale_213",
       "_tgt": "detector_h4rg10detector",
       "source": "detector_h4rg10detector",
-      "target": "test_unit_rationale_206",
+      "target": "test_unit_rationale_213",
       "confidence_score": 0.5
     },
     {
@@ -4179,17 +5087,149 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L18",
       "weight": 0.8,
-      "_src": "test_unit_rationale_215",
+      "_src": "test_unit_rationale_222",
       "_tgt": "detector_h4rg10detector",
       "source": "detector_h4rg10detector",
-      "target": "test_unit_rationale_215",
+      "target": "test_unit_rationale_222",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_233",
+      "_tgt": "detector_h4rg10detector",
+      "source": "detector_h4rg10detector",
+      "target": "test_unit_rationale_233",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_241",
+      "_tgt": "detector_h4rg10detector",
+      "source": "detector_h4rg10detector",
+      "target": "test_unit_rationale_241",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_248",
+      "_tgt": "detector_h4rg10detector",
+      "source": "detector_h4rg10detector",
+      "target": "test_unit_rationale_248",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_255",
+      "_tgt": "detector_h4rg10detector",
+      "source": "detector_h4rg10detector",
+      "target": "test_unit_rationale_255",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_264",
+      "_tgt": "detector_h4rg10detector",
+      "source": "detector_h4rg10detector",
+      "target": "test_unit_rationale_264",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_269",
+      "_tgt": "detector_h4rg10detector",
+      "source": "detector_h4rg10detector",
+      "target": "test_unit_rationale_269",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_281",
+      "_tgt": "detector_h4rg10detector",
+      "source": "detector_h4rg10detector",
+      "target": "test_unit_rationale_281",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_295",
+      "_tgt": "detector_h4rg10detector",
+      "source": "detector_h4rg10detector",
+      "target": "test_unit_rationale_295",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_311",
+      "_tgt": "detector_h4rg10detector",
+      "source": "detector_h4rg10detector",
+      "target": "test_unit_rationale_311",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_320",
+      "_tgt": "detector_h4rg10detector",
+      "source": "detector_h4rg10detector",
+      "target": "test_unit_rationale_320",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L18",
+      "weight": 0.8,
+      "_src": "test_unit_rationale_354",
+      "_tgt": "detector_h4rg10detector",
+      "source": "detector_h4rg10detector",
+      "target": "test_unit_rationale_354",
       "confidence_score": 0.5
     },
     {
       "relation": "calls",
       "confidence": "INFERRED",
       "source_file": "smig\\sensor\\detector.py",
-      "source_location": "L294",
+      "source_location": "L377",
       "weight": 0.8,
       "_src": "detector_h4rg10detector_process_event",
       "_tgt": "detector_h4rg10detector_process_epoch",
@@ -4201,24 +5241,24 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\detector.py",
-      "source_location": "L164",
+      "source_location": "L201",
       "weight": 1.0,
-      "_src": "detector_rationale_164",
+      "_src": "detector_rationale_201",
       "_tgt": "detector_h4rg10detector_process_epoch",
       "source": "detector_h4rg10detector_process_epoch",
-      "target": "detector_rationale_164",
+      "target": "detector_rationale_201",
       "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\detector.py",
-      "source_location": "L254",
+      "source_location": "L326",
       "weight": 1.0,
-      "_src": "detector_rationale_254",
+      "_src": "detector_rationale_326",
       "_tgt": "detector_h4rg10detector_process_event",
       "source": "detector_h4rg10detector_process_event",
-      "target": "detector_rationale_254",
+      "target": "detector_rationale_326",
       "confidence_score": 1.0
     },
     {
@@ -4395,9 +5435,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L30",
       "weight": 0.8,
-      "_src": "detector_rationale_80",
+      "_src": "detector_rationale_81",
       "_tgt": "ipc_fielddependentipc",
-      "source": "detector_rationale_80",
+      "source": "detector_rationale_81",
       "target": "ipc_fielddependentipc",
       "confidence_score": 0.5
     },
@@ -4407,9 +5447,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L31",
       "weight": 0.8,
-      "_src": "detector_rationale_80",
+      "_src": "detector_rationale_81",
       "_tgt": "correlated_oneoverfnoise",
-      "source": "detector_rationale_80",
+      "source": "detector_rationale_81",
       "target": "correlated_oneoverfnoise",
       "confidence_score": 0.5
     },
@@ -4419,9 +5459,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L31",
       "weight": 0.8,
-      "_src": "detector_rationale_80",
+      "_src": "detector_rationale_81",
       "_tgt": "correlated_rtsnoise",
-      "source": "detector_rationale_80",
+      "source": "detector_rationale_81",
       "target": "correlated_rtsnoise",
       "confidence_score": 0.5
     },
@@ -4431,9 +5471,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L32",
       "weight": 0.8,
-      "_src": "detector_rationale_80",
+      "_src": "detector_rationale_81",
       "_tgt": "cosmic_rays_clusteredcosmicrayinjector",
-      "source": "detector_rationale_80",
+      "source": "detector_rationale_81",
       "target": "cosmic_rays_clusteredcosmicrayinjector",
       "confidence_score": 0.5
     },
@@ -4443,9 +5483,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L33",
       "weight": 0.8,
-      "_src": "detector_rationale_80",
+      "_src": "detector_rationale_81",
       "_tgt": "nonlinearity_nonlinearitymodel",
-      "source": "detector_rationale_80",
+      "source": "detector_rationale_81",
       "target": "nonlinearity_nonlinearitymodel",
       "confidence_score": 0.5
     },
@@ -4455,9 +5495,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L34",
       "weight": 0.8,
-      "_src": "detector_rationale_80",
+      "_src": "detector_rationale_81",
       "_tgt": "persistence_dynamicpersistence",
-      "source": "detector_rationale_80",
+      "source": "detector_rationale_81",
       "target": "persistence_dynamicpersistence",
       "confidence_score": 0.5
     },
@@ -4467,9 +5507,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L35",
       "weight": 0.8,
-      "_src": "detector_rationale_80",
+      "_src": "detector_rationale_81",
       "_tgt": "readout_multiaccumsimulator",
-      "source": "detector_rationale_80",
+      "source": "detector_rationale_81",
       "target": "readout_multiaccumsimulator",
       "confidence_score": 0.5
     },
@@ -4479,9 +5519,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L30",
       "weight": 0.8,
-      "_src": "detector_rationale_116",
+      "_src": "detector_rationale_117",
       "_tgt": "ipc_fielddependentipc",
-      "source": "detector_rationale_116",
+      "source": "detector_rationale_117",
       "target": "ipc_fielddependentipc",
       "confidence_score": 0.5
     },
@@ -4491,9 +5531,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L31",
       "weight": 0.8,
-      "_src": "detector_rationale_116",
+      "_src": "detector_rationale_117",
       "_tgt": "correlated_oneoverfnoise",
-      "source": "detector_rationale_116",
+      "source": "detector_rationale_117",
       "target": "correlated_oneoverfnoise",
       "confidence_score": 0.5
     },
@@ -4503,9 +5543,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L31",
       "weight": 0.8,
-      "_src": "detector_rationale_116",
+      "_src": "detector_rationale_117",
       "_tgt": "correlated_rtsnoise",
-      "source": "detector_rationale_116",
+      "source": "detector_rationale_117",
       "target": "correlated_rtsnoise",
       "confidence_score": 0.5
     },
@@ -4515,9 +5555,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L32",
       "weight": 0.8,
-      "_src": "detector_rationale_116",
+      "_src": "detector_rationale_117",
       "_tgt": "cosmic_rays_clusteredcosmicrayinjector",
-      "source": "detector_rationale_116",
+      "source": "detector_rationale_117",
       "target": "cosmic_rays_clusteredcosmicrayinjector",
       "confidence_score": 0.5
     },
@@ -4527,9 +5567,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L33",
       "weight": 0.8,
-      "_src": "detector_rationale_116",
+      "_src": "detector_rationale_117",
       "_tgt": "nonlinearity_nonlinearitymodel",
-      "source": "detector_rationale_116",
+      "source": "detector_rationale_117",
       "target": "nonlinearity_nonlinearitymodel",
       "confidence_score": 0.5
     },
@@ -4539,9 +5579,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L34",
       "weight": 0.8,
-      "_src": "detector_rationale_116",
+      "_src": "detector_rationale_117",
       "_tgt": "persistence_dynamicpersistence",
-      "source": "detector_rationale_116",
+      "source": "detector_rationale_117",
       "target": "persistence_dynamicpersistence",
       "confidence_score": 0.5
     },
@@ -4551,9 +5591,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L35",
       "weight": 0.8,
-      "_src": "detector_rationale_116",
+      "_src": "detector_rationale_117",
       "_tgt": "readout_multiaccumsimulator",
-      "source": "detector_rationale_116",
+      "source": "detector_rationale_117",
       "target": "readout_multiaccumsimulator",
       "confidence_score": 0.5
     },
@@ -4563,9 +5603,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L30",
       "weight": 0.8,
-      "_src": "detector_rationale_164",
+      "_src": "detector_rationale_201",
       "_tgt": "ipc_fielddependentipc",
-      "source": "detector_rationale_164",
+      "source": "detector_rationale_201",
       "target": "ipc_fielddependentipc",
       "confidence_score": 0.5
     },
@@ -4575,9 +5615,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L31",
       "weight": 0.8,
-      "_src": "detector_rationale_164",
+      "_src": "detector_rationale_201",
       "_tgt": "correlated_oneoverfnoise",
-      "source": "detector_rationale_164",
+      "source": "detector_rationale_201",
       "target": "correlated_oneoverfnoise",
       "confidence_score": 0.5
     },
@@ -4587,9 +5627,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L31",
       "weight": 0.8,
-      "_src": "detector_rationale_164",
+      "_src": "detector_rationale_201",
       "_tgt": "correlated_rtsnoise",
-      "source": "detector_rationale_164",
+      "source": "detector_rationale_201",
       "target": "correlated_rtsnoise",
       "confidence_score": 0.5
     },
@@ -4599,9 +5639,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L32",
       "weight": 0.8,
-      "_src": "detector_rationale_164",
+      "_src": "detector_rationale_201",
       "_tgt": "cosmic_rays_clusteredcosmicrayinjector",
-      "source": "detector_rationale_164",
+      "source": "detector_rationale_201",
       "target": "cosmic_rays_clusteredcosmicrayinjector",
       "confidence_score": 0.5
     },
@@ -4611,9 +5651,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L33",
       "weight": 0.8,
-      "_src": "detector_rationale_164",
+      "_src": "detector_rationale_201",
       "_tgt": "nonlinearity_nonlinearitymodel",
-      "source": "detector_rationale_164",
+      "source": "detector_rationale_201",
       "target": "nonlinearity_nonlinearitymodel",
       "confidence_score": 0.5
     },
@@ -4623,9 +5663,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L34",
       "weight": 0.8,
-      "_src": "detector_rationale_164",
+      "_src": "detector_rationale_201",
       "_tgt": "persistence_dynamicpersistence",
-      "source": "detector_rationale_164",
+      "source": "detector_rationale_201",
       "target": "persistence_dynamicpersistence",
       "confidence_score": 0.5
     },
@@ -4635,9 +5675,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L35",
       "weight": 0.8,
-      "_src": "detector_rationale_164",
+      "_src": "detector_rationale_201",
       "_tgt": "readout_multiaccumsimulator",
-      "source": "detector_rationale_164",
+      "source": "detector_rationale_201",
       "target": "readout_multiaccumsimulator",
       "confidence_score": 0.5
     },
@@ -4647,9 +5687,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L30",
       "weight": 0.8,
-      "_src": "detector_rationale_254",
+      "_src": "detector_rationale_326",
       "_tgt": "ipc_fielddependentipc",
-      "source": "detector_rationale_254",
+      "source": "detector_rationale_326",
       "target": "ipc_fielddependentipc",
       "confidence_score": 0.5
     },
@@ -4659,9 +5699,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L31",
       "weight": 0.8,
-      "_src": "detector_rationale_254",
+      "_src": "detector_rationale_326",
       "_tgt": "correlated_oneoverfnoise",
-      "source": "detector_rationale_254",
+      "source": "detector_rationale_326",
       "target": "correlated_oneoverfnoise",
       "confidence_score": 0.5
     },
@@ -4671,9 +5711,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L31",
       "weight": 0.8,
-      "_src": "detector_rationale_254",
+      "_src": "detector_rationale_326",
       "_tgt": "correlated_rtsnoise",
-      "source": "detector_rationale_254",
+      "source": "detector_rationale_326",
       "target": "correlated_rtsnoise",
       "confidence_score": 0.5
     },
@@ -4683,9 +5723,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L32",
       "weight": 0.8,
-      "_src": "detector_rationale_254",
+      "_src": "detector_rationale_326",
       "_tgt": "cosmic_rays_clusteredcosmicrayinjector",
-      "source": "detector_rationale_254",
+      "source": "detector_rationale_326",
       "target": "cosmic_rays_clusteredcosmicrayinjector",
       "confidence_score": 0.5
     },
@@ -4695,9 +5735,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L33",
       "weight": 0.8,
-      "_src": "detector_rationale_254",
+      "_src": "detector_rationale_326",
       "_tgt": "nonlinearity_nonlinearitymodel",
-      "source": "detector_rationale_254",
+      "source": "detector_rationale_326",
       "target": "nonlinearity_nonlinearitymodel",
       "confidence_score": 0.5
     },
@@ -4707,9 +5747,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L34",
       "weight": 0.8,
-      "_src": "detector_rationale_254",
+      "_src": "detector_rationale_326",
       "_tgt": "persistence_dynamicpersistence",
-      "source": "detector_rationale_254",
+      "source": "detector_rationale_326",
       "target": "persistence_dynamicpersistence",
       "confidence_score": 0.5
     },
@@ -4719,9 +5759,9 @@
       "source_file": "smig\\sensor\\detector.py",
       "source_location": "L35",
       "weight": 0.8,
-      "_src": "detector_rationale_254",
+      "_src": "detector_rationale_326",
       "_tgt": "readout_multiaccumsimulator",
-      "source": "detector_rationale_254",
+      "source": "detector_rationale_326",
       "target": "readout_multiaccumsimulator",
       "confidence_score": 0.5
     },
@@ -4861,12 +5901,12 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\noise\\correlated.py",
-      "source_location": "L90",
+      "source_location": "L93",
       "weight": 1.0,
-      "_src": "correlated_rationale_90",
+      "_src": "correlated_rationale_93",
       "_tgt": "correlated",
       "source": "correlated",
-      "target": "correlated_rationale_90",
+      "target": "correlated_rationale_93",
       "confidence_score": 1.0
     },
     {
@@ -4933,7 +5973,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\noise\\correlated.py",
-      "source_location": "L77",
+      "source_location": "L80",
       "weight": 1.0,
       "_src": "correlated_rtsnoise",
       "_tgt": "correlated_rtsnoise_apply",
@@ -4957,12 +5997,12 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\noise\\correlated.py",
-      "source_location": "L78",
+      "source_location": "L81",
       "weight": 1.0,
-      "_src": "correlated_rationale_78",
+      "_src": "correlated_rationale_81",
       "_tgt": "correlated_rtsnoise_apply",
       "source": "correlated_rtsnoise_apply",
-      "target": "correlated_rationale_78",
+      "target": "correlated_rationale_81",
       "confidence_score": 1.0
     },
     {
@@ -4993,12 +6033,12 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\noise\\cosmic_rays.py",
-      "source_location": "L50",
+      "source_location": "L52",
       "weight": 1.0,
-      "_src": "cosmic_rays_rationale_50",
+      "_src": "cosmic_rays_rationale_52",
       "_tgt": "cosmic_rays",
       "source": "cosmic_rays",
-      "target": "cosmic_rays_rationale_50",
+      "target": "cosmic_rays_rationale_52",
       "confidence_score": 1.0
     },
     {
@@ -5077,19 +6117,19 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\nonlinearity.py",
-      "source_location": "L47",
+      "source_location": "L52",
       "weight": 1.0,
-      "_src": "nonlinearity_rationale_47",
+      "_src": "nonlinearity_rationale_52",
       "_tgt": "nonlinearity",
       "source": "nonlinearity",
-      "target": "nonlinearity_rationale_47",
+      "target": "nonlinearity_rationale_52",
       "confidence_score": 1.0
     },
     {
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\nonlinearity.py",
-      "source_location": "L31",
+      "source_location": "L35",
       "weight": 1.0,
       "_src": "nonlinearity_nonlinearitymodel",
       "_tgt": "nonlinearity_nonlinearitymodel_init",
@@ -5101,7 +6141,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\nonlinearity.py",
-      "source_location": "L34",
+      "source_location": "L39",
       "weight": 1.0,
       "_src": "nonlinearity_nonlinearitymodel",
       "_tgt": "nonlinearity_nonlinearitymodel_apply",
@@ -5122,15 +6162,75 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\readout.py",
+      "source_location": "L24",
+      "weight": 0.8,
+      "_src": "readout_multiaccumsimulator",
+      "_tgt": "nonlinearity_nonlinearitymodel",
+      "source": "nonlinearity_nonlinearitymodel",
+      "target": "readout_multiaccumsimulator",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\readout.py",
+      "source_location": "L24",
+      "weight": 0.8,
+      "_src": "readout_rationale_1",
+      "_tgt": "nonlinearity_nonlinearitymodel",
+      "source": "nonlinearity_nonlinearitymodel",
+      "target": "readout_rationale_1",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\readout.py",
+      "source_location": "L24",
+      "weight": 0.8,
+      "_src": "readout_rationale_28",
+      "_tgt": "nonlinearity_nonlinearitymodel",
+      "source": "nonlinearity_nonlinearitymodel",
+      "target": "readout_rationale_28",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\readout.py",
+      "source_location": "L24",
+      "weight": 0.8,
+      "_src": "readout_rationale_65",
+      "_tgt": "nonlinearity_nonlinearitymodel",
+      "source": "nonlinearity_nonlinearitymodel",
+      "target": "readout_rationale_65",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\readout.py",
+      "source_location": "L24",
+      "weight": 0.8,
+      "_src": "readout_rationale_78",
+      "_tgt": "nonlinearity_nonlinearitymodel",
+      "source": "nonlinearity_nonlinearitymodel",
+      "target": "readout_rationale_78",
+      "confidence_score": 0.5
+    },
+    {
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\nonlinearity.py",
-      "source_location": "L35",
+      "source_location": "L40",
       "weight": 1.0,
-      "_src": "nonlinearity_rationale_35",
+      "_src": "nonlinearity_rationale_40",
       "_tgt": "nonlinearity_nonlinearitymodel_apply",
       "source": "nonlinearity_nonlinearitymodel_apply",
-      "target": "nonlinearity_rationale_35",
+      "target": "nonlinearity_rationale_40",
       "confidence_score": 1.0
     },
     {
@@ -5161,12 +6261,24 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\persistence.py",
-      "source_location": "L52",
+      "source_location": "L56",
       "weight": 1.0,
-      "_src": "persistence_rationale_52",
+      "_src": "persistence_rationale_56",
       "_tgt": "persistence",
       "source": "persistence",
-      "target": "persistence_rationale_52",
+      "target": "persistence_rationale_56",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "smig\\sensor\\persistence.py",
+      "source_location": "L62",
+      "weight": 1.0,
+      "_src": "persistence_rationale_62",
+      "_tgt": "persistence",
+      "source": "persistence",
+      "target": "persistence_rationale_62",
       "confidence_score": 1.0
     },
     {
@@ -5185,7 +6297,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\persistence.py",
-      "source_location": "L36",
+      "source_location": "L39",
       "weight": 1.0,
       "_src": "persistence_dynamicpersistence",
       "_tgt": "persistence_dynamicpersistence_apply",
@@ -5209,19 +6321,19 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\persistence.py",
-      "source_location": "L37",
+      "source_location": "L40",
       "weight": 1.0,
-      "_src": "persistence_rationale_37",
+      "_src": "persistence_rationale_40",
       "_tgt": "persistence_dynamicpersistence_apply",
       "source": "persistence_dynamicpersistence_apply",
-      "target": "persistence_rationale_37",
+      "target": "persistence_rationale_40",
       "confidence_score": 1.0
     },
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\readout.py",
-      "source_location": "L16",
+      "source_location": "L27",
       "weight": 1.0,
       "_src": "readout",
       "_tgt": "readout_multiaccumsimulator",
@@ -5245,19 +6357,19 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\readout.py",
-      "source_location": "L47",
+      "source_location": "L78",
       "weight": 1.0,
-      "_src": "readout_rationale_47",
+      "_src": "readout_rationale_78",
       "_tgt": "readout",
       "source": "readout",
-      "target": "readout_rationale_47",
+      "target": "readout_rationale_78",
       "confidence_score": 1.0
     },
     {
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\readout.py",
-      "source_location": "L30",
+      "source_location": "L52",
       "weight": 1.0,
       "_src": "readout_multiaccumsimulator",
       "_tgt": "readout_multiaccumsimulator_init",
@@ -5269,7 +6381,7 @@
       "relation": "method",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\readout.py",
-      "source_location": "L33",
+      "source_location": "L64",
       "weight": 1.0,
       "_src": "readout_multiaccumsimulator",
       "_tgt": "readout_multiaccumsimulator_simulate_ramp",
@@ -5281,24 +6393,24 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\readout.py",
-      "source_location": "L17",
+      "source_location": "L28",
       "weight": 1.0,
-      "_src": "readout_rationale_17",
+      "_src": "readout_rationale_28",
       "_tgt": "readout_multiaccumsimulator",
       "source": "readout_multiaccumsimulator",
-      "target": "readout_rationale_17",
+      "target": "readout_rationale_28",
       "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\readout.py",
-      "source_location": "L34",
+      "source_location": "L65",
       "weight": 1.0,
-      "_src": "readout_rationale_34",
+      "_src": "readout_rationale_65",
       "_tgt": "readout_multiaccumsimulator_simulate_ramp",
       "source": "readout_multiaccumsimulator_simulate_ramp",
-      "target": "readout_rationale_34",
+      "target": "readout_rationale_65",
       "confidence_score": 1.0
     },
     {
@@ -5497,7 +6609,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L132",
+      "source_location": "L133",
       "weight": 1.0,
       "_src": "test_unit",
       "_tgt": "test_unit_test_process_epoch_provenance_data_has_correct_keys",
@@ -5509,7 +6621,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L138",
+      "source_location": "L139",
       "weight": 1.0,
       "_src": "test_unit",
       "_tgt": "test_unit_test_process_epoch_provenance_data_stub_flags",
@@ -5521,7 +6633,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L150",
+      "source_location": "L157",
       "weight": 1.0,
       "_src": "test_unit",
       "_tgt": "test_unit_test_process_epoch_provenance_config_sha256",
@@ -5533,7 +6645,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L160",
+      "source_location": "L167",
       "weight": 1.0,
       "_src": "test_unit",
       "_tgt": "test_unit_test_process_epoch_provenance_random_state_structure",
@@ -5545,7 +6657,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L172",
+      "source_location": "L179",
       "weight": 1.0,
       "_src": "test_unit",
       "_tgt": "test_unit_test_process_epoch_rejects_wrong_shape",
@@ -5557,7 +6669,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L182",
+      "source_location": "L189",
       "weight": 1.0,
       "_src": "test_unit",
       "_tgt": "test_unit_test_process_event_returns_event_output",
@@ -5569,7 +6681,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L186",
+      "source_location": "L193",
       "weight": 1.0,
       "_src": "test_unit",
       "_tgt": "test_unit_test_process_event_cube_shapes",
@@ -5581,7 +6693,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L193",
+      "source_location": "L200",
       "weight": 1.0,
       "_src": "test_unit",
       "_tgt": "test_unit_test_process_event_provenance_record_count",
@@ -5593,7 +6705,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L197",
+      "source_location": "L204",
       "weight": 1.0,
       "_src": "test_unit",
       "_tgt": "test_unit_test_process_event_provenance_records_are_valid",
@@ -5605,7 +6717,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L205",
+      "source_location": "L212",
       "weight": 1.0,
       "_src": "test_unit",
       "_tgt": "test_unit_test_process_event_provenance_timestamps_are_aware",
@@ -5617,12 +6729,144 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L211",
+      "source_location": "L218",
       "weight": 1.0,
       "_src": "test_unit",
       "_tgt": "test_unit_test_process_event_provenance_config_sha256_consistent",
       "source": "test_unit",
       "target": "test_unit_test_process_event_provenance_config_sha256_consistent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L232",
+      "weight": 1.0,
+      "_src": "test_unit",
+      "_tgt": "test_unit_test_process_epoch_rejects_nan_input",
+      "source": "test_unit",
+      "target": "test_unit_test_process_epoch_rejects_nan_input",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L240",
+      "weight": 1.0,
+      "_src": "test_unit",
+      "_tgt": "test_unit_test_process_epoch_rejects_negative_input",
+      "source": "test_unit",
+      "target": "test_unit_test_process_epoch_rejects_negative_input",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L247",
+      "weight": 1.0,
+      "_src": "test_unit",
+      "_tgt": "test_unit_test_process_epoch_rejects_1d_input",
+      "source": "test_unit",
+      "target": "test_unit_test_process_epoch_rejects_1d_input",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L254",
+      "weight": 1.0,
+      "_src": "test_unit",
+      "_tgt": "test_unit_test_process_epoch_rate_image_is_float64",
+      "source": "test_unit",
+      "target": "test_unit_test_process_epoch_rate_image_is_float64",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L261",
+      "weight": 1.0,
+      "_src": "test_unit",
+      "_tgt": "test_unit_test_process_epoch_cr_mask_shape_matches_rate_image",
+      "source": "test_unit",
+      "target": "test_unit_test_process_epoch_cr_mask_shape_matches_rate_image",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L268",
+      "weight": 1.0,
+      "_src": "test_unit",
+      "_tgt": "test_unit_test_process_event_rejects_2d_cube",
+      "source": "test_unit",
+      "target": "test_unit_test_process_event_rejects_2d_cube",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L280",
+      "weight": 1.0,
+      "_src": "test_unit",
+      "_tgt": "test_unit_test_saturation_mask_correct_threshold",
+      "source": "test_unit",
+      "target": "test_unit_test_saturation_mask_correct_threshold",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L294",
+      "weight": 1.0,
+      "_src": "test_unit",
+      "_tgt": "test_unit_test_saturation_mask_below_threshold_not_masked",
+      "source": "test_unit",
+      "target": "test_unit_test_saturation_mask_below_threshold_not_masked",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L308",
+      "weight": 1.0,
+      "_src": "test_unit",
+      "_tgt": "test_unit_test_process_epoch_provenance_random_state_json_serializable",
+      "source": "test_unit",
+      "target": "test_unit_test_process_epoch_provenance_random_state_json_serializable",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L319",
+      "weight": 1.0,
+      "_src": "test_unit",
+      "_tgt": "test_unit_test_rng_state_serialization_is_snapshot",
+      "source": "test_unit",
+      "target": "test_unit_test_rng_state_serialization_is_snapshot",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L351",
+      "weight": 1.0,
+      "_src": "test_unit",
+      "_tgt": "test_unit_test_process_event_independence_from_input_mutation",
+      "source": "test_unit",
+      "target": "test_unit_test_process_event_independence_from_input_mutation",
       "confidence_score": 1.0
     },
     {
@@ -5701,48 +6945,180 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L141",
+      "source_location": "L142",
       "weight": 1.0,
-      "_src": "test_unit_rationale_141",
+      "_src": "test_unit_rationale_142",
       "_tgt": "test_unit_test_process_epoch_provenance_data_stub_flags",
       "source": "test_unit_test_process_epoch_provenance_data_stub_flags",
-      "target": "test_unit_rationale_141",
+      "target": "test_unit_rationale_142",
       "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L198",
+      "source_location": "L205",
       "weight": 1.0,
-      "_src": "test_unit_rationale_198",
+      "_src": "test_unit_rationale_205",
       "_tgt": "test_unit_test_process_event_provenance_records_are_valid",
       "source": "test_unit_test_process_event_provenance_records_are_valid",
-      "target": "test_unit_rationale_198",
+      "target": "test_unit_rationale_205",
       "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L206",
+      "source_location": "L213",
       "weight": 1.0,
-      "_src": "test_unit_rationale_206",
+      "_src": "test_unit_rationale_213",
       "_tgt": "test_unit_test_process_event_provenance_timestamps_are_aware",
       "source": "test_unit_test_process_event_provenance_timestamps_are_aware",
-      "target": "test_unit_rationale_206",
+      "target": "test_unit_rationale_213",
       "confidence_score": 1.0
     },
     {
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "smig\\sensor\\validation\\test_unit.py",
-      "source_location": "L215",
+      "source_location": "L222",
       "weight": 1.0,
-      "_src": "test_unit_rationale_215",
+      "_src": "test_unit_rationale_222",
       "_tgt": "test_unit_test_process_event_provenance_config_sha256_consistent",
       "source": "test_unit_test_process_event_provenance_config_sha256_consistent",
-      "target": "test_unit_rationale_215",
+      "target": "test_unit_rationale_222",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L233",
+      "weight": 1.0,
+      "_src": "test_unit_rationale_233",
+      "_tgt": "test_unit_test_process_epoch_rejects_nan_input",
+      "source": "test_unit_test_process_epoch_rejects_nan_input",
+      "target": "test_unit_rationale_233",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L241",
+      "weight": 1.0,
+      "_src": "test_unit_rationale_241",
+      "_tgt": "test_unit_test_process_epoch_rejects_negative_input",
+      "source": "test_unit_test_process_epoch_rejects_negative_input",
+      "target": "test_unit_rationale_241",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L248",
+      "weight": 1.0,
+      "_src": "test_unit_rationale_248",
+      "_tgt": "test_unit_test_process_epoch_rejects_1d_input",
+      "source": "test_unit_test_process_epoch_rejects_1d_input",
+      "target": "test_unit_rationale_248",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L255",
+      "weight": 1.0,
+      "_src": "test_unit_rationale_255",
+      "_tgt": "test_unit_test_process_epoch_rate_image_is_float64",
+      "source": "test_unit_test_process_epoch_rate_image_is_float64",
+      "target": "test_unit_rationale_255",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L264",
+      "weight": 1.0,
+      "_src": "test_unit_rationale_264",
+      "_tgt": "test_unit_test_process_epoch_cr_mask_shape_matches_rate_image",
+      "source": "test_unit_test_process_epoch_cr_mask_shape_matches_rate_image",
+      "target": "test_unit_rationale_264",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L269",
+      "weight": 1.0,
+      "_src": "test_unit_rationale_269",
+      "_tgt": "test_unit_test_process_event_rejects_2d_cube",
+      "source": "test_unit_test_process_event_rejects_2d_cube",
+      "target": "test_unit_rationale_269",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L281",
+      "weight": 1.0,
+      "_src": "test_unit_rationale_281",
+      "_tgt": "test_unit_test_saturation_mask_correct_threshold",
+      "source": "test_unit_test_saturation_mask_correct_threshold",
+      "target": "test_unit_rationale_281",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L295",
+      "weight": 1.0,
+      "_src": "test_unit_rationale_295",
+      "_tgt": "test_unit_test_saturation_mask_below_threshold_not_masked",
+      "source": "test_unit_test_saturation_mask_below_threshold_not_masked",
+      "target": "test_unit_rationale_295",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L311",
+      "weight": 1.0,
+      "_src": "test_unit_rationale_311",
+      "_tgt": "test_unit_test_process_epoch_provenance_random_state_json_serializable",
+      "source": "test_unit_test_process_epoch_provenance_random_state_json_serializable",
+      "target": "test_unit_rationale_311",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L320",
+      "weight": 1.0,
+      "_src": "test_unit_rationale_320",
+      "_tgt": "test_unit_test_rng_state_serialization_is_snapshot",
+      "source": "test_unit_test_rng_state_serialization_is_snapshot",
+      "target": "test_unit_rationale_320",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "smig\\sensor\\validation\\test_unit.py",
+      "source_location": "L354",
+      "weight": 1.0,
+      "_src": "test_unit_rationale_354",
+      "_tgt": "test_unit_test_process_event_independence_from_input_mutation",
+      "source": "test_unit_test_process_event_independence_from_input_mutation",
+      "target": "test_unit_rationale_354",
       "confidence_score": 1.0
     }
   ],
