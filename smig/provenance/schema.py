@@ -29,13 +29,26 @@ def sanitize_rng_state(state: dict[str, Any]) -> dict[str, Any]:
     ----------
     state:
         A dict as returned by ``numpy.random.Generator.bit_generator.state``.
+        Must be a ``dict``; passing any other type raises ``TypeError``.
 
     Returns
     -------
     dict[str, Any]
         The same structure with all numpy types replaced by native Python types,
         making the result safe to pass to ``json.dumps``.
+
+    Raises
+    ------
+    TypeError
+        If ``state`` is not a ``dict``.
     """
+    if not isinstance(state, dict):
+        raise TypeError(
+            f"sanitize_rng_state expects a dict, got {type(state).__name__!r}.  "
+            "Pass the dict returned by "
+            "numpy.random.Generator.bit_generator.state."
+        )
+
     try:
         import numpy as np
     except ImportError:
@@ -154,13 +167,13 @@ class ProvenanceRecord(BaseModel):
     # ------------------------------------------------------------------
 
     config_sha256: str = Field(
-        min_length=64,
-        max_length=64,
+        pattern=r"^[0-9a-f]{64}$",
         description=(
             "SHA-256 hex digest of the canonical JSON serialisation of the "
             "DetectorConfig used for this epoch.  Allows downstream users to "
             "verify that two epochs used identical detector settings even if "
-            "the YAML source file has changed."
+            "the YAML source file has changed.  "
+            "Must be exactly 64 lowercase hexadecimal characters."
         ),
     )
 
@@ -229,8 +242,84 @@ class ProvenanceRecord(BaseModel):
     cosmic_ray_hit_count: int = Field(
         ge=0,
         description=(
-            "Count of distinct CR *events* (primary impact sites), not affected "
+            "Number of distinct CR events injected, not the number of affected "
             "pixels.  A single event with a 5-pixel morphology contributes 1 to "
-            "this count.  Stub: always 0 until injection is implemented."
+            "this count, regardless of cluster size.  "
+            "Stub: always 0 until injection is implemented."
+        ),
+    )
+
+    # ------------------------------------------------------------------
+    # Phase 1 extended provenance fields
+    # ------------------------------------------------------------------
+
+    ipc_kernel_hash: str | None = Field(
+        default=None,
+        description=(
+            "SHA-256 hex digest of the IPC kernel array loaded from the HDF5 "
+            "calibration file, or None if the uniform fallback kernel was used.  "
+            "Allows verification that the same calibration file was used across epochs."
+        ),
+    )
+    persistence_history_depth: int = Field(
+        default=0,
+        ge=0,
+        description=(
+            "Number of prior epochs whose accumulated trap state was available "
+            "when computing the persistence signal for this epoch.  "
+            "0 = no persistence history (first epoch or persistence disabled)."
+        ),
+    )
+    n_partial_saturation_pixels: int = Field(
+        default=0,
+        ge=0,
+        description=(
+            "Number of pixels that crossed the saturation flag threshold "
+            "(nonlinearity.saturation_flag_threshold) but did not reach the "
+            "hard-clip ceiling (full_well_electrons) in this epoch.  "
+            "Distinct from saturated_pixel_count, which counts all flagged pixels."
+        ),
+    )
+    cr_types: list[str] | None = Field(
+        default=None,
+        description=(
+            "List of cosmic ray event morphology labels injected in this epoch "
+            "(e.g. ['point', 'track', 'cluster']), or None if CR injection was "
+            "disabled or not yet implemented."
+        ),
+    )
+    n_rts_active_pixels: int = Field(
+        default=0,
+        ge=0,
+        description=(
+            "Number of pixels in the active RTS pixel set that switched state "
+            "during this epoch's ramp.  "
+            "0 until RTS noise injection is implemented."
+        ),
+    )
+    slope_fit_method: str | None = Field(
+        default=None,
+        description=(
+            "Algorithm used to reduce the MULTIACCUM ramp to a slope image "
+            "(e.g. 'least_squares', 'optimal_weighting', 'cds').  "
+            "None until ramp-fitting is implemented."
+        ),
+    )
+    n_reads_used_median: float | None = Field(
+        default=None,
+        ge=0.0,
+        description=(
+            "Median number of non-destructive reads actually used in the slope "
+            "fit after cosmic-ray and saturation masking, across all pixels.  "
+            "None until ramp-fitting is implemented."
+        ),
+    )
+    peak_memory_mb: float | None = Field(
+        default=None,
+        ge=0.0,
+        description=(
+            "Peak resident memory consumed during this epoch's simulation in "
+            "megabytes, as measured by the memory profiler.  "
+            "None if memory profiling was not available."
         ),
     )
