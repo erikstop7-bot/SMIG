@@ -87,3 +87,19 @@ def test_full_chain_integration():
     for raw_record in sidecar["records"]:
         parsed = ProvenanceRecord.model_validate(raw_record)
         assert parsed.event_id == event_id
+
+
+# ---------------------------------------------------------------------------
+# Physics integration (placeholder — not yet implemented)
+# ---------------------------------------------------------------------------
+
+@pytest.mark.skip(reason="Physics not implemented")
+def test_physics_integration_128x128():
+    """Full physics integration smoke test at 128×128 with all models active.
+
+    When physics is implemented, this test should exercise the full chain
+    (charge diffusion → IPC → persistence → MULTIACCUM → noise) and verify
+    that output statistics (mean, std, saturation fraction) fall within
+    physically expected bounds for a 128×128 detector with a realistic scene.
+    """
+    pass

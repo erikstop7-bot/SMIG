@@ -229,7 +229,8 @@ class ProvenanceRecord(BaseModel):
     cosmic_ray_hit_count: int = Field(
         ge=0,
         description=(
-            "Number of individual cosmic-ray strike events injected into "
-            "this epoch's ramp."
+            "Count of distinct CR *events* (primary impact sites), not affected "
+            "pixels.  A single event with a 5-pixel morphology contributes 1 to "
+            "this count.  Stub: always 0 until injection is implemented."
         ),
     )

@@ -42,6 +42,14 @@ def load_detector_config(path: str | Path) -> DetectorConfig:
         If the parsed YAML does not satisfy the DetectorConfig schema.
     """
     raw = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
+    if raw is None:
+        raise ValueError(
+            "Configuration file is empty or contains only comments."
+        )
+    if not isinstance(raw, dict):
+        raise ValueError(
+            f"Expected a YAML mapping at the top level, got {type(raw).__name__!r}."
+        )
     return DetectorConfig.model_validate(raw)
 
 
@@ -62,5 +70,7 @@ def get_config_sha256(config: DetectorConfig) -> str:
     str
         64-character lowercase hexadecimal digest.
     """
+    # Pydantic serializes fields in field-definition order (not YAML key order),
+    # guaranteeing hash stability regardless of the original YAML key ordering.
     canonical = config.model_dump_json(round_trip=True).encode("utf-8")
     return hashlib.sha256(canonical).hexdigest()

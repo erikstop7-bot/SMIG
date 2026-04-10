@@ -10,7 +10,8 @@
       "Bash(mkdir -p \"C:\\\\Users\\\\eriks\\\\.claude\\\\plans\")",
       "Read(//c/Users/eriks/.claude/**)",
       "Bash(git -C \"C:/Users/eriks/OneDrive/Documents/GitHub/Exoplanets-Research/SMIG\" log --oneline -3)",
-      "Bash(PYTHONIOENCODING=utf-8 PYTHONUTF8=1 python -c \"from graphify.watch import _rebuild_code; from pathlib import Path; _rebuild_code\\(Path\\('.'\\)\\)\")"
+      "Bash(PYTHONIOENCODING=utf-8 PYTHONUTF8=1 python -c \"from graphify.watch import _rebuild_code; from pathlib import Path; _rebuild_code\\(Path\\('.'\\)\\)\")",
+      "Bash(git:*)"
     ]
   }
 }

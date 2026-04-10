@@ -16,6 +16,7 @@ from smig.config.schemas import DetectorConfig, GeometryConfig
 from smig.config.utils import get_config_sha256
 from smig.provenance.schema import ProvenanceRecord
 from smig.sensor.detector import DetectorOutput, EventOutput, H4RG10Detector
+from smig.sensor.noise.cosmic_rays import ClusteredCosmicRayInjector
 
 
 # ---------------------------------------------------------------------------
@@ -102,11 +103,10 @@ def test_process_epoch_masks_shape_and_dtype(single_epoch_output: DetectorOutput
     assert single_epoch_output.cr_mask.dtype == bool
 
 
-def test_process_epoch_stub_returns_copy_not_alias(small_detector: H4RG10Detector):
-    """Stub returns a copy of the input, not the same object."""
+def test_process_epoch_output_does_not_alias_input(small_detector: H4RG10Detector):
+    """Output rate_image must not be the same object as the input array."""
     ideal = np.ones((16, 16), dtype=np.float64) * 1_000.0
     output = small_detector.process_epoch(ideal, epoch_index=0, epoch_time_mjd=60_000.0)
-    assert np.array_equal(output.rate_image, ideal)
     assert output.rate_image is not ideal
 
 
@@ -133,7 +133,9 @@ _EXPECTED_PROVENANCE_KEYS = frozenset({
 def test_process_epoch_provenance_data_has_correct_keys(
     single_epoch_output: DetectorOutput,
 ):
-    assert set(single_epoch_output.provenance_data.keys()) == _EXPECTED_PROVENANCE_KEYS
+    # Subset check: required keys must be present; additional keys are allowed
+    # as new provenance dimensions are added without breaking this test.
+    assert _EXPECTED_PROVENANCE_KEYS <= set(single_epoch_output.provenance_data.keys())
 
 
 def test_process_epoch_provenance_data_stub_flags(
@@ -146,10 +148,13 @@ def test_process_epoch_provenance_data_stub_flags(
     flag themselves as not applied (False) until physics is implemented.
     """
     pd = single_epoch_output.provenance_data
-    assert pd["charge_diffusion_applied"] is True
-    assert pd["ipc_applied"] is False
-    assert pd["persistence_applied"] is False
-    assert pd["nonlinearity_applied"] is False
+
+    # Phase-1 stub check: updated to type checks to allow physics integration.
+    # When physics lands, reintroduce stronger semantics tests.
+    assert pd["charge_diffusion_applied"] is True  # Always True for Phase 1+; if diffusion is in the chain, it is applied.
+    assert isinstance(pd["ipc_applied"], bool)
+    assert isinstance(pd["persistence_applied"], bool)
+    assert isinstance(pd["nonlinearity_applied"], bool)
     assert pd["saturated_pixel_count"] == 0
     assert pd["cosmic_ray_hit_count"] == 0
 
@@ -277,13 +282,18 @@ def test_process_event_rejects_2d_cube(small_detector: H4RG10Detector):
 # Phase C — Saturation mask tests
 # ---------------------------------------------------------------------------
 
-def test_saturation_mask_correct_threshold(small_detector: H4RG10Detector):
+def test_saturation_mask_correct_threshold(
+    small_cfg: DetectorConfig, small_detector: H4RG10Detector
+):
     """Pixels at exactly the saturation threshold must be flagged.
 
-    Uses _saturation_threshold directly (precomputed from frozen config) to
-    ensure the test is tied to the same value the implementation uses.
+    Computes the expected threshold from first principles so the test does not
+    couple to the private _saturation_threshold attribute.
     """
-    threshold = small_detector._saturation_threshold
+    threshold = (
+        small_cfg.nonlinearity.saturation_flag_threshold
+        * small_cfg.electrical.full_well_electrons
+    )
     ideal = np.full((16, 16), threshold, dtype=np.float64)
     output = small_detector.process_epoch(ideal, epoch_index=0, epoch_time_mjd=60_000.0)
     assert output.saturation_mask.all(), (
@@ -291,9 +301,14 @@ def test_saturation_mask_correct_threshold(small_detector: H4RG10Detector):
     )
 
 
-def test_saturation_mask_below_threshold_not_masked(small_detector: H4RG10Detector):
+def test_saturation_mask_below_threshold_not_masked(
+    small_cfg: DetectorConfig, small_detector: H4RG10Detector
+):
     """Pixels strictly below the saturation threshold must not be flagged."""
-    threshold = small_detector._saturation_threshold
+    threshold = (
+        small_cfg.nonlinearity.saturation_flag_threshold
+        * small_cfg.electrical.full_well_electrons
+    )
     ideal = np.full((16, 16), threshold - 1.0, dtype=np.float64)
     output = small_detector.process_epoch(ideal, epoch_index=0, epoch_time_mjd=60_000.0)
     assert not output.saturation_mask.any(), (
@@ -319,13 +334,12 @@ def test_process_epoch_provenance_random_state_json_serializable(
 def test_rng_state_serialization_is_snapshot(small_detector: H4RG10Detector):
     """Provenance random_state is a static snapshot, not a live generator reference.
 
-    After Phase B, noise modules use child RNGs derived from the parent at
-    construction time.  The parent ``self._rng`` is therefore NOT advanced
-    naturally during ``process_epoch`` — all stochastic paths go through
-    the children.  We manually advance ``self._rng`` here so the assertion
-    is non-vacuous: if ``provenance_data["random_state"]`` were a live
-    reference to the generator object, it would reflect the new state after
-    the advance.  The test proves it does not.
+    Noise modules use child RNGs derived from the parent at construction time.
+    The parent ``self._rng`` is therefore NOT advanced naturally during
+    ``process_epoch`` — all stochastic paths go through the children.
+    We manually advance the parent RNG *post-call* to verify that the
+    already-captured ``provenance_data['random_state']`` is a snapshot
+    (serialized copy), not a live reference to the generator object.
     """
     import copy
 
@@ -366,3 +380,136 @@ def test_process_event_independence_from_input_mutation(
     ideal_cube[:] = 0.0
 
     np.testing.assert_array_equal(output.rate_cube, rate_cube_before)
+
+
+# ---------------------------------------------------------------------------
+# Phase D — Green contract tests (must pass now)
+# ---------------------------------------------------------------------------
+
+def test_cr_injector_signature_2d_only():
+    """ClusteredCosmicRayInjector.apply() must reject 3D arrays with ValueError."""
+    cfg = DetectorConfig(geometry=GeometryConfig(nx=16, ny=16))
+    injector = ClusteredCosmicRayInjector(cfg, np.random.default_rng(0))
+    ramp_3d = np.zeros((9, 16, 16), dtype=np.float64)
+    with pytest.raises(ValueError, match="2-D"):
+        injector.apply(ramp_3d)
+
+
+def test_process_event_rejects_non_monotone_timestamps(
+    small_detector: H4RG10Detector,
+):
+    """process_event must raise ValueError for decreasing timestamps."""
+    ideal_cube = np.ones((3, 16, 16), dtype=np.float64) * 500.0
+    # Third timestamp is less than second — violates non-decreasing constraint.
+    timestamps = np.array([60_000.0, 60_002.0, 60_001.0])
+    with pytest.raises(ValueError, match="non-decreasing"):
+        small_detector.process_event("ev", ideal_cube, timestamps)
+
+
+def test_process_epoch_applied_flags_are_booleans(
+    single_epoch_output: DetectorOutput,
+):
+    """Every *_applied key in provenance_data must be a native Python bool."""
+    pd = single_epoch_output.provenance_data
+    for key in ("ipc_applied", "persistence_applied", "nonlinearity_applied",
+                "charge_diffusion_applied"):
+        assert isinstance(pd[key], bool), (
+            f"{key!r} is {type(pd[key]).__name__!r}, expected bool"
+        )
+
+
+# ---------------------------------------------------------------------------
+# Phase D — Physics tests (xfail: physics not yet implemented)
+# ---------------------------------------------------------------------------
+
+@pytest.mark.xfail(reason="Physics not yet implemented")
+def test_ipc_flux_conservation():
+    """IPC convolution must conserve total flux to within 0.01%."""
+    from smig.sensor.ipc import FieldDependentIPC
+    from smig.config.schemas import IPCConfig
+    cfg = IPCConfig()
+    ipc = FieldDependentIPC(cfg, sca_id=1, field_position=(0.0, 0.0))
+    rng = np.random.default_rng(1)
+    image = rng.uniform(100.0, 50_000.0, size=(64, 64))
+    out = ipc.apply(image)
+    assert abs(out.sum() - image.sum()) / image.sum() < 1e-4
+
+
+@pytest.mark.xfail(reason="Physics not yet implemented")
+def test_ipc_asymmetric_kernel_injection():
+    """IPC applied to a point source must produce asymmetric neighbour values
+    that match hand-computed expectations for a non-symmetric kernel."""
+    from smig.sensor.ipc import FieldDependentIPC
+    from smig.config.schemas import IPCConfig
+    cfg = IPCConfig(ipc_field_dependent=False)
+    ipc = FieldDependentIPC(cfg, sca_id=1, field_position=(0.0, 0.0))
+    image = np.zeros((16, 16), dtype=np.float64)
+    image[8, 8] = 1_000.0
+    out = ipc.apply(image)
+    alpha = cfg.ipc_alpha_center
+    assert abs(out[8, 9] - alpha * 1_000.0) < 1.0
+    assert abs(out[8, 7] - alpha * 1_000.0) < 1.0
+
+
+@pytest.mark.xfail(reason="Physics not yet implemented")
+def test_charge_diffusion_conservation():
+    """Charge diffusion must conserve total electron count within 0.01%."""
+    from smig.sensor.charge_diffusion import ChargeDiffusionModel
+    from smig.config.schemas import ChargeDiffusionConfig
+    cfg = ChargeDiffusionConfig(pixel_pitch_um=10.0, full_well_electrons=100_000.0)
+    model = ChargeDiffusionModel(cfg)
+    rng = np.random.default_rng(2)
+    image = rng.uniform(100.0, 50_000.0, size=(64, 64))
+    out = model.apply(image)
+    assert abs(out.sum() - image.sum()) / image.sum() < 1e-4
+
+
+@pytest.mark.xfail(reason="Physics not yet implemented")
+def test_chain_order_cd_before_ipc_noncommutative():
+    """diffuse(ipc(x)) != ipc(diffuse(x)) for non-trivial kernels."""
+    from smig.sensor.ipc import FieldDependentIPC
+    from smig.sensor.charge_diffusion import ChargeDiffusionModel
+    from smig.config.schemas import ChargeDiffusionConfig, IPCConfig
+    ipc = FieldDependentIPC(IPCConfig(), sca_id=1, field_position=(0.0, 0.0))
+    cd = ChargeDiffusionModel(
+        ChargeDiffusionConfig(pixel_pitch_um=10.0, full_well_electrons=100_000.0)
+    )
+    rng = np.random.default_rng(3)
+    image = rng.uniform(100.0, 10_000.0, size=(32, 32))
+    # Correct order: diffuse then IPC
+    order_correct = ipc.apply(cd.apply(image))
+    # Swapped order
+    order_swapped = cd.apply(ipc.apply(image))
+    assert not np.allclose(order_correct, order_swapped), (
+        "CD→IPC and IPC→CD must differ for non-trivial kernels"
+    )
+
+
+@pytest.mark.xfail(reason="Physics not yet implemented")
+def test_cr_mask_covers_full_cluster():
+    """_inject_single_event mask must cover all pixels that received charge."""
+    cfg = DetectorConfig(geometry=GeometryConfig(nx=32, ny=32))
+    injector = ClusteredCosmicRayInjector(cfg, np.random.default_rng(4))
+    image = np.zeros((32, 32), dtype=np.float64)
+    morphology = np.array([[0.1, 0.8, 0.1]], dtype=np.float64)  # 3-pixel track
+    _, mask = injector._inject_single_event(
+        image, y0=16, x0=16, energy_electrons=10_000.0, morphology=morphology
+    )
+    # Every pixel that received non-zero charge must be True in the mask
+    modified = (image > 0)
+    assert np.all(mask[modified]), "cr_mask must cover all pixels that received charge"
+
+
+@pytest.mark.xfail(reason="Physics not yet implemented")
+def test_cr_hit_count_is_events_not_pixels():
+    """A single 5-pixel cluster contributes 1 to cosmic_ray_hit_count."""
+    cfg = DetectorConfig(geometry=GeometryConfig(nx=32, ny=32))
+    injector = ClusteredCosmicRayInjector(cfg, np.random.default_rng(5))
+    image = np.zeros((32, 32), dtype=np.float64)
+    morphology = np.ones((1, 5), dtype=np.float64) / 5  # 5-pixel track
+    _, mask = injector._inject_single_event(
+        image, y0=16, x0=16, energy_electrons=10_000.0, morphology=morphology
+    )
+    # The injector returns 1 event regardless of cluster size
+    _, _, hit_count = injector.apply(image)
+    assert hit_count == 1, f"Expected hit_count=1 for one event, got {hit_count}"

@@ -165,6 +165,36 @@ class ReadoutConfig(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Sub-model: Charge diffusion (interface boundary config)
+# ---------------------------------------------------------------------------
+
+class ChargeDiffusionConfig(BaseModel):
+    """Minimal configuration for the charge diffusion and brighter-fatter effect model.
+
+    Extracted from the full DetectorConfig to enforce the interface boundary
+    between the orchestrator (H4RG10Detector) and the leaf module
+    (ChargeDiffusionModel).  The orchestrator builds this from
+    ``config.geometry.pixel_pitch_um`` and
+    ``config.electrical.full_well_electrons`` — it is not a field of
+    ``DetectorConfig``.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    pixel_pitch_um: float = Field(
+        gt=0.0,
+        description="Centre-to-centre pixel pitch in micrometres (um).",
+    )
+    full_well_electrons: float = Field(
+        gt=0.0,
+        description=(
+            "Full-well capacity in electrons (e-).  "
+            "Used to normalise the BFE perturbation kernel."
+        ),
+    )
+
+
+# ---------------------------------------------------------------------------
 # Sub-model: Inter-pixel capacitance
 # ---------------------------------------------------------------------------
 
@@ -205,6 +235,26 @@ class IPCConfig(BaseModel):
             "of charge shared with each orthogonal neighbour).  "
             "Used as a uniform fallback when ipc_field_dependent is False or as "
             "a sanity-check reference value for the field-dependent map."
+        ),
+    )
+    sca_id: int = Field(
+        default=1,
+        ge=1,
+        le=18,
+        description=(
+            "Science camera array (SCA) identifier, 1-indexed (1–18 for Roman WFI).  "
+            "Used as the HDF5 dataset lookup key for the field-dependent IPC kernel "
+            "map inside FieldDependentIPC."
+        ),
+    )
+    ipc_kernel_path: Path | None = Field(
+        default=None,
+        description=(
+            "Path to the HDF5 calibration file containing the field-dependent IPC "
+            "kernel map.  If None and ipc_field_dependent is True, falls back to the "
+            "uniform alpha kernel defined by ipc_alpha_center.  If provided, the "
+            "kernel is loaded at FieldDependentIPC construction time using sca_id as "
+            "the HDF5 dataset key."
         ),
     )
 

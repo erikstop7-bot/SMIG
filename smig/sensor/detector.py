@@ -23,7 +23,7 @@ from typing import Any
 
 import numpy as np
 
-from smig.config.schemas import DetectorConfig
+from smig.config.schemas import ChargeDiffusionConfig, DetectorConfig
 from smig.config.utils import get_config_sha256
 from smig.provenance.schema import ProvenanceRecord, sanitize_rng_state
 from smig.sensor.charge_diffusion import ChargeDiffusionModel
@@ -59,7 +59,10 @@ class DetectorOutput:
         2D bool array (ny, nx); True where charge met or exceeded the saturation
         flag threshold.
     cr_mask:
-        2D bool array (ny, nx); True at pixels struck by cosmic rays.
+        2D bool array (ny, nx); True at ALL pixels in the cosmic-ray cluster
+        (primary impact site plus all pixels with deposited charge from the
+        same event, including morphologically extended tracks).  A single
+        event may set multiple pixels True.
     provenance_data:
         Dict containing exactly the 12 ``ProvenanceRecord`` constructor kwargs
         that are not supplied by ``process_event``:
@@ -144,8 +147,17 @@ class H4RG10Detector:
 
         # Leaf module instances (star topology: detector owns all, none import peers).
         # Exception: readout.py imports nonlinearity.py (one-way, documented in readout.py).
-        self._charge_diffusion = ChargeDiffusionModel(config)
-        self._ipc = FieldDependentIPC(config.ipc)
+        #
+        # ChargeDiffusionConfig is built here explicitly so that ChargeDiffusionModel
+        # receives only the fields it needs, enforcing the leaf interface boundary.
+        _cd_config = ChargeDiffusionConfig(
+            pixel_pitch_um=config.geometry.pixel_pitch_um,
+            full_well_electrons=config.electrical.full_well_electrons,
+        )
+        self._charge_diffusion = ChargeDiffusionModel(_cd_config)
+        # sca_id and field_position are passed explicitly; the HDF5 kernel loader
+        # (not yet implemented) will use sca_id as its dataset key.
+        self._ipc = FieldDependentIPC(config.ipc, sca_id=1, field_position=(0.0, 0.0))
         self._persistence = DynamicPersistence(config.persistence)
         # NonLinearityModel must be created before MultiAccumSimulator: it is
         # injected into the readout simulator so NL can be applied per-read
@@ -203,6 +215,11 @@ class H4RG10Detector:
         The current implementation is a structural stub: leaf module calls are
         wired in the correct order, but each is a no-op returning a copy.
         Physics will be enabled in subsequent phases.
+
+        Note on cosmic-ray injection: ``cr_injector.apply()`` is a 2D-only
+        placeholder.  When ``simulate_ramp`` is upgraded to return a 3D ramp
+        ``(n_reads, ny, nx)``, CR injection must be replaced with per-read
+        calls to ``inject_into_ramp``.  See FIXME CR-1 below.
 
         Parameters
         ----------
@@ -271,6 +288,9 @@ class H4RG10Detector:
         image = ideal_image_e.astype(np.float64, copy=True)
 
         # --- Fixed signal chain (stubs: each leaf returns input.copy()) ---
+        # Charge diffusion before IPC: diffusion acts on the physical charge
+        # distribution in the semiconductor layer; IPC acts on the electrical
+        # sensing of that charge. Swapping these is physically incorrect.
         image = self._charge_diffusion.apply(image)
         image = self._ipc.apply(image)
         image = self._persistence.apply(image, delta_time_s=delta_time_s)
@@ -289,6 +309,8 @@ class H4RG10Detector:
         # Noise injection
         image = self._onef_noise.apply(image)
         image = self._rts_noise.apply(image)
+        # FIXME CR-1: SYNCHRONIZED CHANGE REQUIRED. When simulate_ramp returns 3D,
+        # replace this call with per-read CR injection. See cosmic_rays.py:inject_into_ramp stub.
         image, cr_mask, cr_hit_count = self._cr_injector.apply(image)
 
         # Saturation mask: threshold precomputed in __init__ from frozen config.
@@ -363,6 +385,10 @@ class H4RG10Detector:
         if not np.all(np.isfinite(timestamps_mjd)):
             raise ValueError(
                 "timestamps_mjd contains non-finite values (NaN or Inf)."
+            )
+        if len(timestamps_mjd) > 1 and not np.all(np.diff(timestamps_mjd) >= 0):
+            raise ValueError(
+                "timestamps_mjd must be non-decreasing."
             )
 
         ny, nx = ideal_cube_e.shape[1], ideal_cube_e.shape[2]
