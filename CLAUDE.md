@@ -42,7 +42,7 @@ Rules:
 SMIG v2 simulates the **Roman Space Telescope WFI H4RG-10 HgCdTe detector** to generate physically realistic synthetic exposures for microlensing event classification.
 
 - Phase 1 replaces v1's `roman_imsim` wrappers and static 3×3 IPC kernel with a rigorous, modular detector chain
-- The fixed signal chain order is: charge diffusion → IPC → persistence → nonlinearity → MULTIACCUM readout → noise injection
+- The fixed signal chain order is: charge diffusion → IPC → persistence → MULTIACCUM readout (NL applied per-read inside readout) → noise injection
 - Downstream pipeline (Phases 2–6) trains a `SpatiotemporalTrigger` (NeuralCDE + EfficientNet-B0) on simulated ramps
 
 ---
@@ -80,6 +80,7 @@ r = ProvenanceRecord(
     python_version='3.11', numpy_version=np.__version__,
     config_sha256='a'*64, random_state=rng.bit_generator.state,
     ipc_applied=True, persistence_applied=True, nonlinearity_applied=True,
+    charge_diffusion_applied=True,
     saturated_pixel_count=0, cosmic_ray_hit_count=0,
 )
 json.dumps(r.model_dump(mode='json'))   # must not raise

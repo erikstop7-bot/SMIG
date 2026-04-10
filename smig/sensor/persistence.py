@@ -32,6 +32,9 @@ class DynamicPersistence:
 
     def __init__(self, config: PersistenceConfig) -> None:
         self._config = config
+        # Per-pixel trap-state map lazily allocated on first apply() call.
+        # Stores trapped charge (electrons) from previous epochs.
+        self._trap_state: np.ndarray | None = None
 
     def apply(self, image: np.ndarray, delta_time_s: float = 0.0) -> np.ndarray:
         """Apply persistence injection to a charge image.
@@ -41,8 +44,9 @@ class DynamicPersistence:
         image:
             2D array (ny, nx) of electron counts.
         delta_time_s:
-            Time elapsed since the previous epoch in seconds.  Used to compute
-            the exponential decay of trapped charge from prior saturation events.
+            Time elapsed since the previous epoch in seconds, derived from
+            the MJD timestamps by the orchestrator.  Used to compute the
+            exponential decay of trapped charge from prior saturation events.
 
         Returns
         -------
@@ -50,6 +54,11 @@ class DynamicPersistence:
             Image with persistence signal added (stub: copy of input).
 
         # TODO: Implement physical model — two-component exponential decay from
-        # a running per-pixel trap-state map updated after each epoch.
+        # self._trap_state updated after each epoch.
         """
+        # Lazy allocation: dimensions only known at first call.
+        if self._trap_state is None:
+            self._trap_state = np.zeros(image.shape, dtype=np.float64)
+        # TODO: Apply exponential decay using delta_time_s and update
+        # self._trap_state based on current image charge levels.
         return image.copy()

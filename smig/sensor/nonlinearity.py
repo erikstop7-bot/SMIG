@@ -26,10 +26,15 @@ class NonLinearityModel:
     ----------
     config:
         Nonlinearity sub-configuration extracted from DetectorConfig.
+    full_well_electrons:
+        Full-well capacity in electrons from ``ElectricalConfig``.  Passed
+        explicitly so this module receives only the scalar it needs rather
+        than the full ``DetectorConfig``.
     """
 
-    def __init__(self, config: NonlinearityConfig) -> None:
+    def __init__(self, config: NonlinearityConfig, full_well_electrons: float) -> None:
         self._config = config
+        self._full_well_electrons = full_well_electrons
 
     def apply(self, image: np.ndarray) -> np.ndarray:
         """Apply the nonlinearity polynomial to a charge image.

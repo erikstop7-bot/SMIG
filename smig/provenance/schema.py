@@ -18,6 +18,44 @@ from typing import Any
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, field_validator
 
 
+def sanitize_rng_state(state: dict[str, Any]) -> dict[str, Any]:
+    """Recursively convert numpy types in an RNG state dict to native Python.
+
+    Converts ``np.ndarray`` -> list and ``np.generic`` -> Python scalar,
+    traversing nested dicts and sequences.  Safe to call even when numpy is
+    not installed (returns the input unchanged in that case).
+
+    Parameters
+    ----------
+    state:
+        A dict as returned by ``numpy.random.Generator.bit_generator.state``.
+
+    Returns
+    -------
+    dict[str, Any]
+        The same structure with all numpy types replaced by native Python types,
+        making the result safe to pass to ``json.dumps``.
+    """
+    try:
+        import numpy as np
+    except ImportError:
+        return state
+
+    def _convert(obj: Any) -> Any:
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        if isinstance(obj, np.generic):
+            return obj.item()
+        if isinstance(obj, dict):
+            return {k: _convert(val) for k, val in obj.items()}
+        if isinstance(obj, (list, tuple)):
+            converted = (_convert(item) for item in obj)
+            return type(obj)(converted)
+        return obj
+
+    return _convert(state)
+
+
 class ProvenanceRecord(BaseModel):
     """Immutable audit record for one simulated epoch of one microlensing event.
 
@@ -144,36 +182,8 @@ class ProvenanceRecord(BaseModel):
     @field_validator("random_state", mode="before")
     @classmethod
     def _sanitize_numpy_types(cls, v: dict[str, Any]) -> dict[str, Any]:
-        """Recursively convert numpy types to native Python for JSON safety.
-
-        Converts:
-          - ``np.ndarray``  -> ``list`` (via ``.tolist()``)
-          - ``np.generic``  -> Python scalar (via ``.item()``)
-          - nested dicts and lists/tuples are traversed recursively.
-
-        numpy is imported locally so this module does not require numpy at
-        import time; callers that never pass numpy state can use this
-        module without numpy installed.
-        """
-        try:
-            import numpy as np
-        except ImportError:
-            # numpy not available; assume v already contains native types.
-            return v
-
-        def _convert(obj: Any) -> Any:
-            if isinstance(obj, np.ndarray):
-                return obj.tolist()
-            if isinstance(obj, np.generic):
-                return obj.item()
-            if isinstance(obj, dict):
-                return {k: _convert(val) for k, val in obj.items()}
-            if isinstance(obj, (list, tuple)):
-                converted = (_convert(item) for item in obj)
-                return type(obj)(converted)
-            return obj
-
-        return _convert(v)
+        """Delegate to the module-level sanitize_rng_state function."""
+        return sanitize_rng_state(v)
 
     # ------------------------------------------------------------------
     # Applied-effect flags
@@ -195,6 +205,12 @@ class ProvenanceRecord(BaseModel):
         description=(
             "True if the polynomial detector nonlinearity model was applied "
             "to convert accumulated charge to measured signal."
+        ),
+    )
+    charge_diffusion_applied: bool = Field(
+        description=(
+            "True if the charge diffusion and brighter-fatter effect model "
+            "was applied to this epoch's charge image."
         ),
     )
 

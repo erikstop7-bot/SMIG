@@ -124,6 +124,7 @@ _EXPECTED_PROVENANCE_KEYS = frozenset({
     "ipc_applied",
     "persistence_applied",
     "nonlinearity_applied",
+    "charge_diffusion_applied",
     "saturated_pixel_count",
     "cosmic_ray_hit_count",
 })
@@ -138,8 +139,14 @@ def test_process_epoch_provenance_data_has_correct_keys(
 def test_process_epoch_provenance_data_stub_flags(
     single_epoch_output: DetectorOutput,
 ):
-    """Stub sets all applied-effect flags to False and counts to 0."""
+    """Checks provenance applied-effect flags and counts.
+
+    charge_diffusion_applied is True because ChargeDiffusionModel.apply() is
+    always called in the signal chain. The other physics stages are stubs and
+    flag themselves as not applied (False) until physics is implemented.
+    """
     pd = single_epoch_output.provenance_data
+    assert pd["charge_diffusion_applied"] is True
     assert pd["ipc_applied"] is False
     assert pd["persistence_applied"] is False
     assert pd["nonlinearity_applied"] is False
@@ -216,3 +223,146 @@ def test_process_event_provenance_config_sha256_consistent(
     expected = get_config_sha256(small_cfg)
     for record in event_output.provenance_records:
         assert record.config_sha256 == expected
+
+
+# ---------------------------------------------------------------------------
+# Phase C — Input guard tests
+# ---------------------------------------------------------------------------
+
+def test_process_epoch_rejects_nan_input(small_detector: H4RG10Detector):
+    """ValueError on NaN anywhere in ideal_image_e."""
+    bad = np.ones((16, 16), dtype=np.float64) * 1_000.0
+    bad[3, 7] = np.nan
+    with pytest.raises(ValueError, match="non-finite"):
+        small_detector.process_epoch(bad, epoch_index=0, epoch_time_mjd=60_000.0)
+
+
+def test_process_epoch_rejects_negative_input(small_detector: H4RG10Detector):
+    """ValueError when ideal_image_e contains negative electron counts."""
+    bad = np.full((16, 16), -1.0, dtype=np.float64)
+    with pytest.raises(ValueError, match="negative"):
+        small_detector.process_epoch(bad, epoch_index=0, epoch_time_mjd=60_000.0)
+
+
+def test_process_epoch_rejects_1d_input(small_detector: H4RG10Detector):
+    """ValueError when ideal_image_e is 1-D (ndim != 2)."""
+    bad = np.ones(16 * 16, dtype=np.float64) * 1_000.0
+    with pytest.raises(ValueError, match="2-D"):
+        small_detector.process_epoch(bad, epoch_index=0, epoch_time_mjd=60_000.0)
+
+
+def test_process_epoch_rate_image_is_float64(small_detector: H4RG10Detector):
+    """Output rate_image is always float64 even when input dtype is integer."""
+    ideal = np.ones((16, 16), dtype=np.int32) * 1_000
+    output = small_detector.process_epoch(ideal, epoch_index=0, epoch_time_mjd=60_000.0)
+    assert output.rate_image.dtype == np.float64
+
+
+def test_process_epoch_cr_mask_shape_matches_rate_image(
+    single_epoch_output: DetectorOutput,
+):
+    """cr_mask must have the same shape as rate_image."""
+    assert single_epoch_output.cr_mask.shape == single_epoch_output.rate_image.shape
+
+
+def test_process_event_rejects_2d_cube(small_detector: H4RG10Detector):
+    """ValueError when ideal_cube_e is 2-D instead of 3-D."""
+    wrong = np.ones((16, 16), dtype=np.float64) * 500.0
+    ts = np.array([60_000.0])
+    with pytest.raises(ValueError, match="3-D"):
+        small_detector.process_event("ev", wrong, ts)
+
+
+# ---------------------------------------------------------------------------
+# Phase C — Saturation mask tests
+# ---------------------------------------------------------------------------
+
+def test_saturation_mask_correct_threshold(small_detector: H4RG10Detector):
+    """Pixels at exactly the saturation threshold must be flagged.
+
+    Uses _saturation_threshold directly (precomputed from frozen config) to
+    ensure the test is tied to the same value the implementation uses.
+    """
+    threshold = small_detector._saturation_threshold
+    ideal = np.full((16, 16), threshold, dtype=np.float64)
+    output = small_detector.process_epoch(ideal, epoch_index=0, epoch_time_mjd=60_000.0)
+    assert output.saturation_mask.all(), (
+        f"All pixels at threshold ({threshold}) should be masked"
+    )
+
+
+def test_saturation_mask_below_threshold_not_masked(small_detector: H4RG10Detector):
+    """Pixels strictly below the saturation threshold must not be flagged."""
+    threshold = small_detector._saturation_threshold
+    ideal = np.full((16, 16), threshold - 1.0, dtype=np.float64)
+    output = small_detector.process_epoch(ideal, epoch_index=0, epoch_time_mjd=60_000.0)
+    assert not output.saturation_mask.any(), (
+        f"No pixels at threshold-1 ({threshold - 1.0}) should be masked"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Phase C — Provenance / RNG snapshot tests
+# ---------------------------------------------------------------------------
+
+def test_process_epoch_provenance_random_state_json_serializable(
+    single_epoch_output: DetectorOutput,
+):
+    """random_state in provenance_data must be natively JSON-serializable."""
+    import json
+
+    rs = single_epoch_output.provenance_data["random_state"]
+    # Must not raise; numpy types (np.uint64, np.ndarray, etc.) would cause TypeError.
+    json.dumps(rs)
+
+
+def test_rng_state_serialization_is_snapshot(small_detector: H4RG10Detector):
+    """Provenance random_state is a static snapshot, not a live generator reference.
+
+    After Phase B, noise modules use child RNGs derived from the parent at
+    construction time.  The parent ``self._rng`` is therefore NOT advanced
+    naturally during ``process_epoch`` — all stochastic paths go through
+    the children.  We manually advance ``self._rng`` here so the assertion
+    is non-vacuous: if ``provenance_data["random_state"]`` were a live
+    reference to the generator object, it would reflect the new state after
+    the advance.  The test proves it does not.
+    """
+    import copy
+
+    ideal = np.ones((16, 16), dtype=np.float64) * 1_000.0
+    output = small_detector.process_epoch(ideal, epoch_index=0, epoch_time_mjd=60_000.0)
+
+    # Deep-copy the serialized state at the moment of capture.
+    state_at_capture = copy.deepcopy(output.provenance_data["random_state"])
+
+    # Explicitly advance the parent RNG — it is the generator whose state is
+    # snapshotted for provenance but is not consumed during process_epoch.
+    small_detector._rng.integers(0, 2**32, size=1_000)
+
+    # The snapshot must be byte-for-byte identical to what was captured before
+    # the advance, proving it is a serialized copy, not a live reference.
+    assert output.provenance_data["random_state"] == state_at_capture
+
+
+# ---------------------------------------------------------------------------
+# Phase C — Input-mutation independence test
+# ---------------------------------------------------------------------------
+
+def test_process_event_independence_from_input_mutation(
+    small_detector: H4RG10Detector,
+):
+    """Mutating ideal_cube_e after process_event does not corrupt the output.
+
+    process_epoch casts each slice with astype(float64, copy=True), so the
+    output rate_cube should be immune to in-place mutations of the source array.
+    """
+    ideal_cube = np.ones((3, 16, 16), dtype=np.float64) * 500.0
+    timestamps = np.array([60_000.0, 60_001.0, 60_002.0])
+    output = small_detector.process_event("ev", ideal_cube, timestamps)
+
+    rate_cube_before = output.rate_cube.copy()
+
+    # Overwrite the source array entirely.
+    ideal_cube[:] = 0.0
+
+    np.testing.assert_array_equal(output.rate_cube, rate_cube_before)

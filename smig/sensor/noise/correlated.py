@@ -73,6 +73,9 @@ class RTSNoise:
     def __init__(self, config: DetectorConfig, rng: np.random.Generator) -> None:
         self._config = config
         self._rng = rng
+        # Per-pixel two-state Markov chain states, lazily allocated on first
+        # apply() call.  Persists across epochs to model trap-switching history.
+        self._pixel_states: np.ndarray | None = None
 
     def apply(self, image: np.ndarray) -> np.ndarray:
         """Inject RTS noise into an image.
@@ -88,6 +91,10 @@ class RTSNoise:
             Image with RTS noise added (stub: copy of input).
 
         # TODO: Implement physical model — sample a two-state Markov chain
-        # per pixel and add the switching amplitude to the image.
+        # per pixel using self._rng, update self._pixel_states, and add the
+        # switching amplitude to the image.
         """
+        # Lazy allocation: dimensions only known at first call.
+        if self._pixel_states is None:
+            self._pixel_states = np.zeros(image.shape, dtype=np.int8)
         return image.copy()

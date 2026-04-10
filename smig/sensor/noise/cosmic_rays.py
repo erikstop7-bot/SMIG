@@ -33,7 +33,7 @@ class ClusteredCosmicRayInjector:
         self._config = config
         self._rng = rng
 
-    def apply(self, image: np.ndarray) -> tuple[np.ndarray, int]:
+    def apply(self, image: np.ndarray) -> tuple[np.ndarray, np.ndarray, int]:
         """Inject cosmic-ray hits into an image.
 
         Parameters
@@ -43,11 +43,13 @@ class ClusteredCosmicRayInjector:
 
         Returns
         -------
-        tuple[np.ndarray, int]
-            ``(modified_image, cosmic_ray_hit_count)``.
-            Stub: returns ``(copy of input, 0)``.
+        tuple[np.ndarray, np.ndarray, int]
+            ``(modified_image, cr_mask, cosmic_ray_hit_count)``.
+            ``cr_mask`` is a boolean array of the same shape as ``image``,
+            True at pixels struck by cosmic rays.
+            Stub: returns ``(copy of input, all-False mask, 0)``.
 
         # TODO: Implement physical model — sample hit positions, energies, and
         # cluster morphologies from empirical distributions, then deposit charge.
         """
-        return image.copy(), 0
+        return image.copy(), np.zeros(image.shape, dtype=bool), 0
