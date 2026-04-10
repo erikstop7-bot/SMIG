@@ -14,22 +14,35 @@ Design constraints
 * git_commit and container_digest are read once at tracker construction
   from the environment variables GIT_COMMIT_SHA and IMAGE_DIGEST
   respectively, with None as the fallback.
+* config_sha256, python_version, and numpy_version are anchored from the
+  first record appended.  All subsequent records must match exactly.
+* Strict drift enforcement: ANY mismatch between the tracker's anchored
+  metadata and an incoming record raises ValueError — including None vs.
+  non-None mismatches in either direction (no silent partial drift).
 * The JSON sidecar is written atomically: data is flushed and fsync'd to
   a temporary file, then os.replace() renames it to the target.  The temp
   file is always outside the with-block before os.replace() is called,
   which is required for correctness on Windows (os.replace() raises
   PermissionError if the file handle is still open).
+* The sidecar filename includes a 6-char SHA-256 hash of the raw event_id
+  appended to the sanitized name to guarantee uniqueness when two event IDs
+  share the same sanitized representation.
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
 import tempfile
 from pathlib import Path
+from typing import Any
 
 from .schema import ProvenanceRecord
+
+# Sentinel for uninitialized anchored metadata fields.
+_UNSET: Any = object()
 
 
 class ProvenanceTracker:
@@ -65,6 +78,10 @@ class ProvenanceTracker:
         self.container_digest: str | None = os.environ.get("IMAGE_DIGEST")
         self._records: list[ProvenanceRecord] = []
         self._seen_epochs: set[int] = set()
+        # Anchored from the first appended record; _UNSET until then.
+        self._config_sha256: Any = _UNSET
+        self._python_version: Any = _UNSET
+        self._numpy_version: Any = _UNSET
 
     # ------------------------------------------------------------------
     # Public API
@@ -85,9 +102,11 @@ class ProvenanceTracker:
         ValueError
             If a record with the same ``epoch_index`` has already been appended.
         ValueError
-            If ``record.git_commit`` or ``record.container_digest`` drifts from
-            the values captured at tracker construction (both must be non-None
-            for drift to be detected).
+            If any of the five consistency-anchored metadata fields
+            (``git_commit``, ``container_digest``, ``config_sha256``,
+            ``python_version``, ``numpy_version``) drifts from the tracker's
+            anchored value — including None vs. non-None mismatches in either
+            direction (no silent partial drift).
         """
         if record.event_id != self.event_id:
             raise ValueError(
@@ -101,25 +120,26 @@ class ProvenanceTracker:
                 f"'{self.event_id}'. Each epoch must have a unique index."
             )
 
-        if (
-            self.git_commit is not None
-            and record.git_commit is not None
-            and record.git_commit != self.git_commit
-        ):
-            raise ValueError(
-                f"Record git_commit '{record.git_commit}' does not match "
-                f"tracker git_commit '{self.git_commit}'."
-            )
+        # Anchor config_sha256, python_version, numpy_version from first record.
+        if self._config_sha256 is _UNSET:
+            self._config_sha256 = record.config_sha256
+            self._python_version = record.python_version
+            self._numpy_version = record.numpy_version
 
-        if (
-            self.container_digest is not None
-            and record.container_digest is not None
-            and record.container_digest != self.container_digest
+        # Strict equality checks — no silent partial drift allowed.
+        for field_name, tracker_val, record_val in (
+            ("git_commit", self.git_commit, record.git_commit),
+            ("container_digest", self.container_digest, record.container_digest),
+            ("config_sha256", self._config_sha256, record.config_sha256),
+            ("python_version", self._python_version, record.python_version),
+            ("numpy_version", self._numpy_version, record.numpy_version),
         ):
-            raise ValueError(
-                f"Record container_digest '{record.container_digest}' does not "
-                f"match tracker container_digest '{self.container_digest}'."
-            )
+            if tracker_val != record_val:
+                raise ValueError(
+                    f"Metadata drift detected for field '{field_name}': "
+                    f"tracker has {tracker_val!r} but record has {record_val!r}.  "
+                    "All epochs in an event must share identical environment metadata."
+                )
 
         self._seen_epochs.add(record.epoch_index)
         self._records.append(record)
@@ -127,9 +147,18 @@ class ProvenanceTracker:
     def write_sidecar(self, output_dir: Path) -> Path:
         """Atomically serialise all accumulated records to a JSON sidecar file.
 
-        The output filename is ``{event_id}_provenance.json`` inside
-        ``output_dir``.  The write sequence is:
+        The output filename is
+        ``{sanitized_event_id}_{6char_sha256}_provenance.json`` inside
+        ``output_dir``.  The 6-character suffix is the first 6 hex chars of
+        ``SHA-256(event_id.encode())`` and guarantees filename uniqueness even
+        when two event IDs share the same sanitized representation.
 
+        Top-level metadata (``git_commit``, ``container_digest``,
+        ``config_sha256``, ``python_version``, ``numpy_version``) is
+        sourced from the validated records, not from the tracker's potentially
+        unset environment state.
+
+        The write sequence is:
         1. Serialise payload to a NamedTemporaryFile in the same directory.
         2. ``flush()`` and ``fsync()`` while the file handle is still open.
         3. Close the file handle (exits the ``with`` block).
@@ -151,25 +180,40 @@ class ProvenanceTracker:
 
         Raises
         ------
+        ValueError
+            If no records have been appended (``_records`` is empty).
         NotADirectoryError
             If ``output_dir`` does not exist or is not a directory.
         """
+        if not self._records:
+            raise ValueError(
+                "No records to write; append at least one ProvenanceRecord "
+                "before calling write_sidecar."
+            )
+
         output_dir = Path(output_dir).resolve()
         if not output_dir.is_dir():
             raise NotADirectoryError(
                 f"output_dir does not exist or is not a directory: {output_dir}"
             )
 
-        # Sanitize event_id to prevent path-traversal in the filename.
+        # Sanitize event_id to prevent path-traversal in the filename, then
+        # append a 6-char SHA-256 hash of the raw event_id to guarantee
+        # uniqueness when two IDs share the same sanitized representation.
         safe_event_id = re.sub(r"[^a-zA-Z0-9_\-.]", "_", self.event_id)
-        target_path = output_dir / f"{safe_event_id}_provenance.json"
+        short_hash = hashlib.sha256(self.event_id.encode()).hexdigest()[:6]
+        target_path = output_dir / f"{safe_event_id}_{short_hash}_provenance.json"
 
         sorted_records = sorted(self._records, key=lambda r: r.epoch_index)
+        first = sorted_records[0]
 
         payload = {
             "event_id": self.event_id,
-            "git_commit": self.git_commit,
-            "container_digest": self.container_digest,
+            "git_commit": first.git_commit,
+            "container_digest": first.container_digest,
+            "config_sha256": first.config_sha256,
+            "python_version": first.python_version,
+            "numpy_version": first.numpy_version,
             "epoch_count": len(sorted_records),
             "records": [r.model_dump(mode="json") for r in sorted_records],
         }
