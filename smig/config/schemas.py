@@ -14,7 +14,6 @@ Pydantic v2 is required (>= 2.0).
 from __future__ import annotations
 
 import math
-from pathlib import Path
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -129,8 +128,9 @@ class ReadoutConfig(BaseModel):
         default=9,
         ge=2,
         description=(
-            "Number of non-destructive reads per ramp (including the first reset "
-            "read).  Must be >= 2 to allow at least one CDS difference.  "
+            "Total reads per ramp including the initial reset frame.  "
+            "(e.g., 9 total = 1 reset + 8 science samples).  "
+            "Must be >= 2 to allow at least one CDS difference.  "
             "Default of 9 gives (9 - 1) x 5.85 s = 46.8 s."
         ),
     )
@@ -155,7 +155,7 @@ class ReadoutConfig(BaseModel):
     @model_validator(mode="after")
     def _check_exposure_time_consistency(self) -> ReadoutConfig:
         expected = (self.n_ramp_reads - 1) * self.frame_time_s
-        if not math.isclose(self.exposure_time_s, expected, rel_tol=1e-9):
+        if not math.isclose(self.exposure_time_s, expected, rel_tol=1e-9, abs_tol=1e-6):
             raise ValueError(
                 f"exposure_time_s ({self.exposure_time_s}) must equal "
                 f"(n_ramp_reads - 1) * frame_time_s = "
@@ -247,14 +247,15 @@ class IPCConfig(BaseModel):
             "map inside FieldDependentIPC."
         ),
     )
-    ipc_kernel_path: Path | None = Field(
+    ipc_kernel_path: str | None = Field(
         default=None,
         description=(
             "Path to the HDF5 calibration file containing the field-dependent IPC "
             "kernel map.  If None and ipc_field_dependent is True, falls back to the "
             "uniform alpha kernel defined by ipc_alpha_center.  If provided, the "
             "kernel is loaded at FieldDependentIPC construction time using sca_id as "
-            "the HDF5 dataset key."
+            "the HDF5 dataset key.  Stored as a string so YAML-loaded configs do not "
+            "require explicit pathlib.Path construction."
         ),
     )
 
@@ -333,18 +334,19 @@ class PersistenceConfig(BaseModel):
 # ---------------------------------------------------------------------------
 
 class NonlinearityConfig(BaseModel):
-    """Polynomial detector nonlinearity model.
+    """Polynomial detector nonlinearity correction model.
 
-    The normalized measured response S_measured is related to the true
-    accumulated charge Q_norm = Q_electrons / full_well_electrons by::
+    Maps normalized charge $Q_{norm} = Q_{electrons} / Q_{FW}$ to a
+    dimensionless nonlinearity response factor $S_{measured}$::
 
-        S_measured = sum(coefficients[i] * Q_norm**i  for i in range(...))
+        S_measured = c_0 + c_1 * Q_norm + c_2 * Q_norm**2 + ...
 
-    S_measured is a dimensionless normalized response (not raw ADU), which
-    is why the constant term c_0 is approximately 1.0: at zero signal
-    (Q_norm = 0), the ideal detector returns S_measured = 1.0 * 0^0 = 1.0
-    ... equivalently, c_0 sets the small-signal gain normalization so that
-    S_measured ≈ Q_norm for low charge.  The default coefficients
+    Equivalently: $S_{measured} = c_0 + c_1(Q/Q_{FW}) + c_2(Q/Q_{FW})^2 + ...$
+
+    The correction is applied as a multiplicative factor on the accumulated
+    charge.  ``c_0 ≈ 1`` near zero signal, and the negative higher-order terms
+    encode the detector's sublinearity (measured response falls below the ideal
+    linear response at high charge).  The default coefficients
     (1.0, -2.7e-6, 7.8e-12) describe a mild sublinearity consistent with
     H4RG-10 laboratory measurements.
 
@@ -360,7 +362,9 @@ class NonlinearityConfig(BaseModel):
         description=(
             "Polynomial coefficients in ascending order of power, applied to "
             "Q_norm = e- / full_well_electrons.  "
-            "Index 0 = constant (c_0 ~ 1.0), index 1 = linear correction, etc."
+            "Index 0 = constant term (c_0 ≈ 1.0, sets the near-zero-signal "
+            "scale), index 1 = linear correction (c_1 < 0 encodes sublinearity), "
+            "index 2 = quadratic correction, etc."
         ),
     )
     saturation_flag_threshold: float = Field(
@@ -406,6 +410,106 @@ class EnvironmentConfig(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Sub-model: Noise sources
+# ---------------------------------------------------------------------------
+
+class NoiseConfig(BaseModel):
+    """Noise source parameters for the H4RG-10 detector.
+
+    Covers three noise components injected during the MULTIACCUM ramp:
+
+    1. **1/f correlated noise** — low-frequency drift along the read direction,
+       characterised by a power-law spectral index ``one_over_f_alpha`` and
+       amplitude ``one_over_f_amplitude``.
+
+    2. **Random Telegraph Signal (RTS) noise** — two-state flickering affecting
+       a sub-percent fraction of pixels, characterised by ``rts_pixel_fraction``
+       and ``rts_amplitude_range_e``.
+
+    3. **Cosmic ray injection** — energetic particles from the Galactic Cosmic Ray
+       (GCR) background at the Roman L2 orbit, characterised by
+       ``cr_rate_per_cm2_per_s`` and ``cr_cluster_size_range``.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    one_over_f_alpha: float = Field(
+        default=1.0,
+        gt=0.0,
+        description=(
+            "Power-law spectral index of the 1/f correlated noise component.  "
+            "alpha=1 gives classical 1/f noise; alpha=2 gives 1/f^2 (random walk).  "
+            "Typical H4RG-10 values fall in the range 0.8–1.2."
+        ),
+    )
+    one_over_f_amplitude: float = Field(
+        default=10.0,
+        ge=0.0,
+        description=(
+            "Amplitude of the 1/f noise component in electrons RMS per read, "
+            "normalised to a single non-destructive read.  "
+            "Set to 0.0 to disable 1/f noise injection."
+        ),
+    )
+    rts_pixel_fraction: float = Field(
+        default=0.001,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Fraction of detector pixels exhibiting Random Telegraph Signal (RTS) "
+            "noise (dimensionless, 0.0–1.0).  "
+            "0.001 = 0.1% of pixels, typical for H4RG-10 at ~95 K operating "
+            "temperature."
+        ),
+    )
+    rts_amplitude_range_e: tuple[float, float] = Field(
+        default=(5.0, 50.0),
+        description=(
+            "Half-amplitude range of the RTS switching signal in electrons "
+            "(min_e, max_e).  Each RTS pixel is assigned a uniform random "
+            "switching amplitude drawn from this range.  Must satisfy min_e < max_e."
+        ),
+    )
+    cr_rate_per_cm2_per_s: float = Field(
+        default=5.0,
+        gt=0.0,
+        description=(
+            "Cosmic ray event rate at the detector surface in events per cm^2 per "
+            "second.  Default 5.0 events / cm^2 / s is consistent with solar-minimum "
+            "Galactic Cosmic Ray (GCR) flux at the Roman L2 orbit."
+        ),
+    )
+    cr_cluster_size_range: tuple[int, int] = Field(
+        default=(1, 10),
+        description=(
+            "Minimum and maximum footprint of a single cosmic ray cluster in pixels "
+            "(min_pixels, max_pixels).  Each event is assigned a uniform random "
+            "cluster size drawn from this range.  "
+            "Must satisfy 1 <= min_pixels < max_pixels."
+        ),
+    )
+
+    @model_validator(mode="after")
+    def _check_range_ordering(self) -> NoiseConfig:
+        if self.rts_amplitude_range_e[0] >= self.rts_amplitude_range_e[1]:
+            raise ValueError(
+                f"rts_amplitude_range_e min ({self.rts_amplitude_range_e[0]}) "
+                f"must be strictly less than max ({self.rts_amplitude_range_e[1]})."
+            )
+        if self.cr_cluster_size_range[0] < 1:
+            raise ValueError(
+                f"cr_cluster_size_range min must be >= 1, "
+                f"got {self.cr_cluster_size_range[0]}."
+            )
+        if self.cr_cluster_size_range[0] >= self.cr_cluster_size_range[1]:
+            raise ValueError(
+                f"cr_cluster_size_range min ({self.cr_cluster_size_range[0]}) "
+                f"must be strictly less than max ({self.cr_cluster_size_range[1]})."
+            )
+        return self
+
+
+# ---------------------------------------------------------------------------
 # Top-level immutable detector configuration
 # ---------------------------------------------------------------------------
 
@@ -435,3 +539,4 @@ class DetectorConfig(BaseModel):
     persistence: PersistenceConfig = Field(default_factory=PersistenceConfig)
     nonlinearity: NonlinearityConfig = Field(default_factory=NonlinearityConfig)
     environment: EnvironmentConfig = Field(default_factory=EnvironmentConfig)
+    noise: NoiseConfig = Field(default_factory=NoiseConfig)
