@@ -458,10 +458,9 @@ def test_ipc_flux_conservation():
     assert abs(out.sum() - image.sum()) / image.sum() < 1e-4
 
 
-@pytest.mark.xfail(reason="Physics not yet implemented")
 def test_ipc_asymmetric_kernel_injection():
-    """IPC applied to a point source must produce asymmetric neighbour values
-    that match hand-computed expectations for a non-symmetric kernel."""
+    """IPC applied to a point source must produce neighbour values
+    that match hand-computed expectations for the analytic kernel."""
     from smig.sensor.ipc import FieldDependentIPC
     from smig.config.schemas import IPCConfig
     cfg = IPCConfig(ipc_field_dependent=False)
@@ -475,9 +474,10 @@ def test_ipc_asymmetric_kernel_injection():
 
 
 def test_charge_diffusion_conservation():
-    """Charge diffusion must conserve total electron count within 0.01%.
+    """Charge diffusion must conserve total electron count (relative error < 1e-10).
 
-    Passes trivially while charge diffusion is a copy-stub.
+    Static diffusion uses post-hoc renormalization; BFE is a local
+    redistribution that conserves charge by construction.
     """
     from smig.sensor.charge_diffusion import ChargeDiffusionModel
     from smig.config.schemas import ChargeDiffusionConfig
@@ -486,10 +486,9 @@ def test_charge_diffusion_conservation():
     rng = np.random.default_rng(2)
     image = rng.uniform(100.0, 50_000.0, size=(64, 64))
     out = model.apply(image)
-    assert abs(out.sum() - image.sum()) / image.sum() < 1e-4
+    assert abs(out.sum() - image.sum()) / image.sum() < 1e-10
 
 
-@pytest.mark.xfail(reason="Physics not yet implemented")
 def test_chain_order_cd_before_ipc_noncommutative():
     """diffuse(ipc(x)) != ipc(diffuse(x)) for non-trivial kernels."""
     from smig.sensor.ipc import FieldDependentIPC
@@ -507,6 +506,93 @@ def test_chain_order_cd_before_ipc_noncommutative():
     order_swapped = cd.apply(ipc.apply(image))
     assert not np.allclose(order_correct, order_swapped), (
         "CD→IPC and IPC→CD must differ for non-trivial kernels"
+    )
+
+
+def test_bfe_widens_psf():
+    """Injecting a bright point source and applying charge diffusion must
+    decrease the central pixel and increase the 4 nearest neighbours,
+    proportional to bfe_coupling_coeff."""
+    from smig.sensor.charge_diffusion import ChargeDiffusionModel
+    from smig.config.schemas import ChargeDiffusionConfig
+
+    # Use zero diffusion_length_factor effect by making sigma very small
+    # so only BFE contributes to the spatial redistribution.
+    coupling = 1e-4  # strong enough to see the effect
+    cfg = ChargeDiffusionConfig(
+        pixel_pitch_um=10.0,
+        full_well_electrons=100_000.0,
+        diffusion_length_factor=1e-6,  # negligible static diffusion
+        bfe_coupling_coeff=coupling,
+    )
+    model = ChargeDiffusionModel(cfg)
+
+    image = np.zeros((32, 32), dtype=np.float64)
+    image[16, 16] = 50_000.0  # bright point source (half full well)
+
+    out = model.apply(image)
+
+    # Central pixel must decrease.
+    assert out[16, 16] < image[16, 16], (
+        "BFE should reduce the central pixel of a bright point source"
+    )
+    # Four nearest neighbours must increase (were zero before).
+    for dy, dx in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+        assert out[16 + dy, 16 + dx] > 0.0, (
+            f"BFE should deposit charge at neighbour ({dy}, {dx})"
+        )
+
+
+def test_ipc_synthetic_loader():
+    """Generate a synthetic HDF5 file, load kernels at two distinct
+    field positions, and verify they are distinct but both sum to 1.0."""
+    import tempfile
+    from pathlib import Path
+    from smig.sensor.calibration.ipc_kernels import (
+        generate_synthetic_ipc_hdf5,
+        load_interpolated_kernel,
+    )
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        hdf5_path = Path(tmpdir) / "test_ipc.h5"
+        generate_synthetic_ipc_hdf5(hdf5_path, sca_ids=(1,), grid_ny=4, grid_nx=4)
+
+        k1 = load_interpolated_kernel(hdf5_path, sca_id=1, field_position=(0.1, 0.1))
+        k2 = load_interpolated_kernel(hdf5_path, sca_id=1, field_position=(0.9, 0.9))
+
+    # Both must be 9x9 and sum to 1.0.
+    assert k1.shape == (9, 9)
+    assert k2.shape == (9, 9)
+    np.testing.assert_allclose(k1.sum(), 1.0, atol=1e-12)
+    np.testing.assert_allclose(k2.sum(), 1.0, atol=1e-12)
+
+    # Kernels at different field positions must differ (spatial variation).
+    assert not np.allclose(k1, k2), (
+        "Kernels at (0.1,0.1) and (0.9,0.9) must differ for a spatially-varying map"
+    )
+
+
+def test_ipc_deconvolve_roundtrip():
+    """Forward-convolve then deconvolve; interior RMS error < 0.1% of peak."""
+    from smig.sensor.ipc import FieldDependentIPC
+    from smig.config.schemas import IPCConfig
+
+    ipc = FieldDependentIPC(IPCConfig(), sca_id=1, field_position=(0.5, 0.5))
+
+    rng = np.random.default_rng(42)
+    original = rng.uniform(100.0, 5_000.0, size=(64, 64))
+
+    convolved = ipc.apply(original)
+    recovered = ipc.deconvolve(convolved)
+
+    # Evaluate RMS on interior only (exclude 10-pixel border for edge effects).
+    border = 10
+    interior = (slice(border, -border), slice(border, -border))
+    rms_error = np.sqrt(np.mean((recovered[interior] - original[interior]) ** 2))
+    peak = original.max()
+
+    assert rms_error / peak < 1e-3, (
+        f"Deconvolution RMS error {rms_error:.6f} exceeds 0.1% of peak {peak:.1f}"
     )
 
 

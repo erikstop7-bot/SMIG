@@ -33,6 +33,10 @@ readout:
   frame_time_s: 5.85            # Full-array read time (4096x4096 at ~3.2 MHz pixel rate)
   exposure_time_s: 46.8         # (n_ramp_reads - 1) x frame_time_s = 8 x 5.85 s
 
+charge_diffusion:
+  diffusion_length_factor: 0.1   # sigma = pixel_pitch_um * factor (static Gaussian diffusion)
+  bfe_coupling_coeff: 1.0e-6     # BFE coupling: delta_Q = coeff * (Q/Q_FW) * Q per iteration
+
 ipc:
   ipc_kernel_size: 9            # 9x9 kernel (odd); captures up to next-nearest neighbours
   ipc_field_dependent: true     # Use HDF5 spatially-varying map when available
