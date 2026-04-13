@@ -490,7 +490,13 @@ def test_charge_diffusion_conservation():
 
 
 def test_chain_order_cd_before_ipc_noncommutative():
-    """diffuse(ipc(x)) != ipc(diffuse(x)) for non-trivial kernels."""
+    """diffuse(ipc(x)) != ipc(diffuse(x)) for non-trivial kernels.
+
+    With the physically correct sigma (= diffusion_length_factor in pixel
+    units, default 0.1 px), the diffusion kernel is narrow and the
+    non-commutativity signal is small.  A tight tolerance (rtol=1e-10)
+    is required to resolve the difference.
+    """
     from smig.sensor.ipc import FieldDependentIPC
     from smig.sensor.charge_diffusion import ChargeDiffusionModel
     from smig.config.schemas import ChargeDiffusionConfig, IPCConfig
@@ -504,7 +510,7 @@ def test_chain_order_cd_before_ipc_noncommutative():
     order_correct = ipc.apply(cd.apply(image))
     # Swapped order
     order_swapped = cd.apply(ipc.apply(image))
-    assert not np.allclose(order_correct, order_swapped), (
+    assert not np.allclose(order_correct, order_swapped, rtol=1e-10), (
         "CD→IPC and IPC→CD must differ for non-trivial kernels"
     )
 

@@ -41,7 +41,11 @@ class ChargeDiffusionModel:
 
     def __init__(self, config: ChargeDiffusionConfig) -> None:
         self._config = config
-        self._sigma = config.pixel_pitch_um * config.diffusion_length_factor
+        # diffusion_length_factor is the dimensionless ratio of diffusion
+        # length to pixel pitch.  gaussian_filter expects sigma in pixel
+        # (array-index) units, so:
+        #   sigma_pixels = (pixel_pitch_um * factor) / pixel_pitch_um = factor
+        self._sigma = config.diffusion_length_factor
 
     def apply_static_diffusion(self, image: np.ndarray) -> np.ndarray:
         """Apply a static Gaussian diffusion kernel.
@@ -148,7 +152,17 @@ class ChargeDiffusionModel:
         -------
         np.ndarray
             Diffused + BFE-adjusted image.
+
+        Raises
+        ------
+        ValueError
+            If ``image`` is not 2-D.
         """
+        if image.ndim != 2:
+            raise ValueError(
+                f"ChargeDiffusionModel.apply() requires a 2-D image, "
+                f"got ndim={image.ndim}."
+            )
         result = self.apply_static_diffusion(image)
         result = self.apply_bfe(result)
         return result

@@ -591,7 +591,7 @@ class DetectorConfig(BaseModel):
     electrical: ElectricalConfig = Field(default_factory=ElectricalConfig)
     readout: ReadoutConfig = Field(default_factory=ReadoutConfig)
     charge_diffusion: ChargeDiffusionTuning = Field(
-        default_factory=lambda: ChargeDiffusionTuning(),
+        default_factory=ChargeDiffusionTuning,
     )
     ipc: IPCConfig = Field(default_factory=IPCConfig)
     persistence: PersistenceConfig = Field(default_factory=PersistenceConfig)

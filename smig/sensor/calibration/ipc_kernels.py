@@ -187,6 +187,8 @@ def _find_bracket(coords: np.ndarray, val: float) -> tuple[int, float]:
         ``(index, fraction)`` where ``index`` is the lower bounding index
         and ``fraction`` is in [0, 1].
     """
+    if len(coords) < 2:
+        return 0, 0.0
     idx = np.searchsorted(coords, val, side="right") - 1
     idx = int(np.clip(idx, 0, len(coords) - 2))
     span = coords[idx + 1] - coords[idx]
