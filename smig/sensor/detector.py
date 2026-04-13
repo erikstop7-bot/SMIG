@@ -153,11 +153,17 @@ class H4RG10Detector:
         _cd_config = ChargeDiffusionConfig(
             pixel_pitch_um=config.geometry.pixel_pitch_um,
             full_well_electrons=config.electrical.full_well_electrons,
+            diffusion_length_factor=config.charge_diffusion.diffusion_length_factor,
+            bfe_coupling_coeff=config.charge_diffusion.bfe_coupling_coeff,
         )
         self._charge_diffusion = ChargeDiffusionModel(_cd_config)
-        # sca_id and field_position are passed explicitly; the HDF5 kernel loader
-        # (not yet implemented) will use sca_id as its dataset key.
-        self._ipc = FieldDependentIPC(config.ipc, sca_id=1, field_position=(0.0, 0.0))
+        # sca_id and field_position are passed from the IPC config; the HDF5
+        # kernel loader uses sca_id as its dataset key when ipc_kernel_path is set.
+        self._ipc = FieldDependentIPC(
+            config.ipc,
+            sca_id=config.ipc.sca_id,
+            field_position=(0.5, 0.5),
+        )
         self._persistence = DynamicPersistence(config.persistence)
         # NonLinearityModel must be created before MultiAccumSimulator: it is
         # injected into the readout simulator so NL can be applied per-read
@@ -325,7 +331,7 @@ class H4RG10Detector:
             "numpy_version": np.__version__,
             "config_sha256": self._config_sha256,
             "random_state": sanitize_rng_state(rng_state),
-            "ipc_applied": False,
+            "ipc_applied": True,
             "persistence_applied": False,
             "nonlinearity_applied": True,   # NL applied per-read inside simulate_ramp
             "charge_diffusion_applied": True,
