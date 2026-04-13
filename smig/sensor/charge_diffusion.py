@@ -1,14 +1,20 @@
 """
 smig/sensor/charge_diffusion.py
 ================================
-Charge diffusion and brighter-fatter effect (BFE) stub.
+Charge diffusion and brighter-fatter effect (BFE).
 
 Leaf module — must not import any sibling sensor module.
+
+Static diffusion is a fixed Gaussian kernel applied via
+``scipy.ndimage.gaussian_filter``.  The brighter-fatter effect is an
+iterative, signal-dependent charge redistribution to the 4 nearest
+neighbours (Jacobi-style, 3 iterations).
 """
 
 from __future__ import annotations
 
 import numpy as np
+from scipy.ndimage import gaussian_filter
 
 from smig.config.schemas import ChargeDiffusionConfig
 
@@ -20,26 +26,29 @@ class ChargeDiffusionModel:
     signal-dependent PSF broadening (brighter-fatter effect).
 
     Static diffusion is applied via a fixed Gaussian kernel computed from
-    ``config.pixel_pitch_um``.  BFE is applied as a signal-dependent
-    perturbation kernel using only the *current* accumulated charge in
-    ``image`` (per-ramp-read application is out of scope for this stub;
-    revisit when MULTIACCUM is implemented).
-
-    This stub is a no-op pass-through.
+    ``config.pixel_pitch_um * config.diffusion_length_factor``.  BFE is
+    applied as a signal-dependent perturbation kernel using only the
+    *current* accumulated charge in ``image``.
 
     Parameters
     ----------
     config:
         Charge diffusion sub-configuration built by the orchestrator from
-        ``DetectorConfig.geometry.pixel_pitch_um`` and
-        ``DetectorConfig.electrical.full_well_electrons``.
+        ``DetectorConfig.geometry.pixel_pitch_um``,
+        ``DetectorConfig.electrical.full_well_electrons``, and
+        ``DetectorConfig.charge_diffusion`` tuning parameters.
     """
 
     def __init__(self, config: ChargeDiffusionConfig) -> None:
         self._config = config
+        self._sigma = config.pixel_pitch_um * config.diffusion_length_factor
 
-    def apply(self, image: np.ndarray) -> np.ndarray:
-        """Apply charge diffusion and BFE to a charge image.
+    def apply_static_diffusion(self, image: np.ndarray) -> np.ndarray:
+        """Apply a static Gaussian diffusion kernel.
+
+        Uses ``scipy.ndimage.gaussian_filter`` with ``mode='reflect'``.
+        Post-hoc renormalization enforces strict flux conservation despite
+        edge truncation.
 
         Parameters
         ----------
@@ -49,9 +58,97 @@ class ChargeDiffusionModel:
         Returns
         -------
         np.ndarray
-            Diffused image (stub: copy of input).
-
-        # TODO: Implement physical model — Gaussian diffusion kernel +
-        # signal-dependent BFE kernel from Antilogus et al. (2014).
+            Diffused image with conserved total flux.
         """
-        return image.copy()
+        original_sum = image.sum()
+        result = gaussian_filter(image, sigma=self._sigma, mode="reflect")
+        # Post-hoc renormalization for strict flux conservation.
+        if original_sum > 0.0:
+            result *= original_sum / result.sum()
+        return result
+
+    def apply_bfe(self, image: np.ndarray) -> np.ndarray:
+        """Apply the brighter-fatter effect via iterative Jacobi redistribution.
+
+        For each pixel, a charge fraction proportional to the local
+        fill-fraction is redistributed to the 4 nearest neighbours:
+
+            f = Q / Q_FW
+            delta_Q = bfe_coupling_coeff * f * Q
+
+        The centre pixel loses 4 * delta_Q and each orthogonal neighbour
+        gains delta_Q.  Boundaries use reflection (``np.pad`` mode
+        ``'reflect'``).  Three Jacobi iterations are performed (updates
+        computed from a snapshot of the previous iteration's state).
+
+        Parameters
+        ----------
+        image:
+            2D array (ny, nx) of electron counts (post-static-diffusion).
+
+        Returns
+        -------
+        np.ndarray
+            BFE-adjusted image.  Charge is clipped to >= 0.
+        """
+        coupling = self._config.bfe_coupling_coeff
+        full_well = self._config.full_well_electrons
+
+        if coupling == 0.0:
+            return image.copy()
+
+        current = image.copy()
+        ny, nx = current.shape
+
+        for _ in range(3):
+            # Snapshot for Jacobi-style update (all updates from previous state).
+            prev = current.copy()
+
+            # Charge fraction and redistribution amount per pixel.
+            f = prev / full_well
+            delta_q = coupling * f * prev  # shape (ny, nx)
+
+            # Pad with reflection for boundary handling.
+            padded_delta = np.pad(delta_q, pad_width=1, mode="reflect")
+
+            # Accumulate neighbour contributions from the padded array.
+            # padded_delta indices are offset by 1 relative to current.
+            neighbour_sum = (
+                padded_delta[0:ny, 1 : nx + 1]      # top
+                + padded_delta[2 : ny + 2, 1 : nx + 1]  # bottom
+                + padded_delta[1 : ny + 1, 0:nx]     # left
+                + padded_delta[1 : ny + 1, 2 : nx + 2]  # right
+            )
+
+            # Centre pixel loses charge to 4 neighbours, gains from 4 neighbours.
+            current = prev - 4.0 * delta_q + neighbour_sum
+
+        # Clip to prevent unphysical negative electrons.
+        np.clip(current, 0.0, None, out=current)
+
+        # Post-hoc renormalization: reflection padding at boundaries can
+        # introduce a tiny flux imbalance; correct it to conserve charge.
+        original_sum = image.sum()
+        if original_sum > 0.0:
+            current *= original_sum / current.sum()
+        return current
+
+    def apply(self, image: np.ndarray) -> np.ndarray:
+        """Apply charge diffusion and BFE to a charge image.
+
+        Applies static Gaussian diffusion followed by the brighter-fatter
+        effect, in accordance with the fixed signal chain order.
+
+        Parameters
+        ----------
+        image:
+            2D array (ny, nx) of electron counts.
+
+        Returns
+        -------
+        np.ndarray
+            Diffused + BFE-adjusted image.
+        """
+        result = self.apply_static_diffusion(image)
+        result = self.apply_bfe(result)
+        return result

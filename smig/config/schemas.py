@@ -169,14 +169,15 @@ class ReadoutConfig(BaseModel):
 # ---------------------------------------------------------------------------
 
 class ChargeDiffusionConfig(BaseModel):
-    """Minimal configuration for the charge diffusion and brighter-fatter effect model.
+    """Configuration for the charge diffusion and brighter-fatter effect model.
 
     Extracted from the full DetectorConfig to enforce the interface boundary
     between the orchestrator (H4RG10Detector) and the leaf module
-    (ChargeDiffusionModel).  The orchestrator builds this from
-    ``config.geometry.pixel_pitch_um`` and
-    ``config.electrical.full_well_electrons`` — it is not a field of
-    ``DetectorConfig``.
+    (ChargeDiffusionModel).  The orchestrator builds this by combining
+    ``config.geometry.pixel_pitch_um``,
+    ``config.electrical.full_well_electrons``, and the tuning parameters
+    from ``config.charge_diffusion`` (diffusion_length_factor,
+    bfe_coupling_coeff).
     """
 
     model_config = ConfigDict(frozen=True, extra="forbid")
@@ -190,6 +191,60 @@ class ChargeDiffusionConfig(BaseModel):
         description=(
             "Full-well capacity in electrons (e-).  "
             "Used to normalise the BFE perturbation kernel."
+        ),
+    )
+    diffusion_length_factor: float = Field(
+        default=0.1,
+        gt=0.0,
+        description=(
+            "Dimensionless scale factor relating pixel pitch to the static "
+            "charge diffusion length.  The Gaussian diffusion sigma is "
+            "pixel_pitch_um * diffusion_length_factor."
+        ),
+    )
+    bfe_coupling_coeff: float = Field(
+        default=1e-6,
+        ge=0.0,
+        description=(
+            "Brighter-fatter coupling coefficient (dimensionless).  Controls "
+            "the fraction of charge redistributed to nearest neighbours per "
+            "BFE iteration: delta_Q = bfe_coupling_coeff * (Q / Q_FW) * Q."
+        ),
+    )
+
+
+# ---------------------------------------------------------------------------
+# Sub-model: Charge diffusion tuning (user-facing DetectorConfig section)
+# ---------------------------------------------------------------------------
+
+class ChargeDiffusionTuning(BaseModel):
+    """User-facing tuning knobs for the charge diffusion / BFE model.
+
+    This model appears as the ``charge_diffusion`` section of
+    ``DetectorConfig`` and ``roman_wfi.yaml``.  The orchestrator merges
+    these values with ``geometry.pixel_pitch_um`` and
+    ``electrical.full_well_electrons`` to build the full
+    ``ChargeDiffusionConfig`` passed to the leaf module.
+    """
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    diffusion_length_factor: float = Field(
+        default=0.1,
+        gt=0.0,
+        description=(
+            "Dimensionless scale factor relating pixel pitch to the static "
+            "charge diffusion length.  The Gaussian diffusion sigma is "
+            "pixel_pitch_um * diffusion_length_factor."
+        ),
+    )
+    bfe_coupling_coeff: float = Field(
+        default=1e-6,
+        ge=0.0,
+        description=(
+            "Brighter-fatter coupling coefficient (dimensionless).  Controls "
+            "the fraction of charge redistributed to nearest neighbours per "
+            "BFE iteration: delta_Q = bfe_coupling_coeff * (Q / Q_FW) * Q."
         ),
     )
 
@@ -535,6 +590,9 @@ class DetectorConfig(BaseModel):
     geometry: GeometryConfig = Field(default_factory=GeometryConfig)
     electrical: ElectricalConfig = Field(default_factory=ElectricalConfig)
     readout: ReadoutConfig = Field(default_factory=ReadoutConfig)
+    charge_diffusion: ChargeDiffusionTuning = Field(
+        default_factory=lambda: ChargeDiffusionTuning(),
+    )
     ipc: IPCConfig = Field(default_factory=IPCConfig)
     persistence: PersistenceConfig = Field(default_factory=PersistenceConfig)
     nonlinearity: NonlinearityConfig = Field(default_factory=NonlinearityConfig)
