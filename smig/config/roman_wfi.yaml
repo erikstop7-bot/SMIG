@@ -41,6 +41,8 @@ ipc:
   ipc_kernel_size: 9            # 9x9 kernel (odd); captures up to next-nearest neighbours
   ipc_field_dependent: true     # Use HDF5 spatially-varying map when available
   ipc_alpha_center: 0.02        # alpha ~2% coupling at SCA centre (Mosby et al. 2020)
+  sca_id: 1                     # SCA identifier (1–18); HDF5 dataset lookup key
+  ipc_kernel_path: null          # Path to HDF5 calibration file; null → analytic kernel
 
 persistence:
   tau_short_s: 100.0            # Short-lived trap population decay constant (s)
