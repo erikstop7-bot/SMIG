@@ -13,7 +13,7 @@ Pydantic v2 is required (>= 2.0).
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, field_validator
 
@@ -336,5 +336,47 @@ class ProvenanceRecord(BaseModel):
             "Peak resident memory consumed during this epoch's simulation in "
             "megabytes, as measured by the memory profiler.  "
             "None if memory profiling was not available."
+        ),
+    )
+
+    # ------------------------------------------------------------------
+    # Phase 2 extended provenance fields
+    # ------------------------------------------------------------------
+
+    psf_config_hash: str | None = Field(
+        default=None,
+        description=(
+            "SHA-256 hex digest of the canonical JSON serialisation of the "
+            "PSFConfig used for this epoch, or None if PSF provenance was not "
+            "captured (e.g. Phase 1 records without rendering)."
+        ),
+    )
+    n_neighbors_rendered: int = Field(
+        default=0,
+        ge=0,
+        description=(
+            "Number of neighbour stars rendered into the crowded-field stamp "
+            "after applying the brightness-cap filter.  "
+            "0 = no crowded-field renderer was used, or all neighbours were "
+            "excluded by the brightness cap."
+        ),
+    )
+    dia_method: Literal["alard_lupton", "sfft"] | None = Field(
+        default=None,
+        description=(
+            "Image subtraction algorithm used to produce the difference stamp "
+            "for this epoch.  "
+            "'alard_lupton': Alard & Lupton (1998) Gaussian kernel basis.  "
+            "'sfft': Saccadic Fast Fourier Transform (Hu et al. 2022).  "
+            "None if DIA was not applied (Phase 1 records)."
+        ),
+    )
+    reference_n_epochs: int = Field(
+        default=0,
+        ge=0,
+        description=(
+            "Number of pre-event reference epochs co-added to build the DIA "
+            "template image.  "
+            "0 if DIA was not applied (Phase 1 records)."
         ),
     )
