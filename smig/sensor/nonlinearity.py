@@ -28,9 +28,10 @@ class NonLinearityModel:
     sublinearity (measured response falls below ideal at high charge).
 
     After the polynomial is evaluated, any pixel whose output would
-    exceed ``saturation_flag_threshold * full_well_electrons`` is
-    hard-clipped to that level.  Hard clipping here combined with
-    saturation-read exclusion in the OLS slope fit is the intended design.
+    exceed ``full_well_electrons`` is hard-clipped to that physical ceiling.
+    ``saturation_flag_threshold`` is used **only** for data-quality flagging
+    in the ramp (``sat_reads`` mask in ``MultiAccumSimulator``) and does not
+    affect the measured signal produced by ``apply``.
 
     Parameters
     ----------
@@ -44,8 +45,23 @@ class NonLinearityModel:
     def __init__(self, config: NonlinearityConfig, full_well_electrons: float) -> None:
         self._config = config
         self._full_well_electrons = full_well_electrons
-        # Pre-compute saturation clip level (electrons).
+        # Pre-compute saturation flagging level (electrons).
+        # This threshold is used exclusively for DATA-QUALITY FLAGGING in
+        # simulate_ramp; it is NOT the hard clip ceiling.
         self._Q_sat: float = config.saturation_flag_threshold * full_well_electrons
+
+    @property
+    def saturation_flagging_threshold_e(self) -> float:
+        """Saturation flagging threshold in electrons.
+
+        This is ``saturation_flag_threshold * full_well_electrons`` and is
+        used only for pixel-level data-quality flagging in the MULTIACCUM
+        ramp (sat_reads mask).  It is intentionally distinct from the hard
+        clip ceiling, which is ``full_well_electrons``.
+
+        Prefer this public property over the private ``_Q_sat`` attribute.
+        """
+        return self._Q_sat
 
     def apply(self, image: np.ndarray) -> np.ndarray:
         """Apply the polynomial nonlinearity transfer function.
@@ -60,8 +76,10 @@ class NonLinearityModel:
         -------
         np.ndarray
             Nonlinearity-corrected signal in electrons, same shape and
-            dtype float64.  Pixels at or above the saturation threshold
-            are clipped to ``saturation_flag_threshold * full_well_electrons``.
+            dtype float64.  Signal is hard-clipped to ``full_well_electrons``
+            (the physical hard ceiling), not the saturation flag threshold.
+            The flag threshold is used only in ``simulate_ramp`` for
+            data-quality masking and must not affect the measured signal here.
         """
         Q_FW = self._full_well_electrons
         coefficients = self._config.coefficients  # ascending-order tuple
@@ -76,7 +94,9 @@ class NonLinearityModel:
         # Measured signal = physical charge * response factor.
         output = image * S_measured
 
-        # Hard saturation clip; in-place to avoid an extra allocation.
-        np.clip(output, 0.0, self._Q_sat, out=output)
+        # Hard clip at the physical full-well ceiling; in-place to avoid an
+        # extra allocation.  saturation_flag_threshold is for flagging only —
+        # clipping here at Q_sat would discard valid sub-saturation signal.
+        np.clip(output, 0.0, self._full_well_electrons, out=output)
 
         return output

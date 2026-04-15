@@ -157,12 +157,14 @@ class H4RG10Detector:
             bfe_coupling_coeff=config.charge_diffusion.bfe_coupling_coeff,
         )
         self._charge_diffusion = ChargeDiffusionModel(_cd_config)
-        # sca_id and field_position are passed from the IPC config; the HDF5
-        # kernel loader uses sca_id as its dataset key when ipc_kernel_path is set.
+        # sca_id is passed from the IPC config; the HDF5 kernel loader uses it
+        # as its dataset key when ipc_kernel_path is set.
+        # field_position: use config.ipc.field_position if that field is declared
+        # in IPCConfig in the future; otherwise FieldDependentIPC defaults to (0.5, 0.5).
         self._ipc = FieldDependentIPC(
             config.ipc,
             sca_id=config.ipc.sca_id,
-            field_position=(0.5, 0.5),
+            field_position=getattr(config.ipc, "field_position", None),
         )
         self._persistence = DynamicPersistence(config.persistence)
         # NonLinearityModel must be created before MultiAccumSimulator: it is
@@ -281,9 +283,32 @@ class H4RG10Detector:
             raise ValueError(
                 f"epoch_index must be >= 0, got {epoch_index}."
             )
+        if not np.isfinite(epoch_time_mjd):
+            raise ValueError(
+                f"epoch_time_mjd must be finite, got {epoch_time_mjd}."
+            )
+        if prev_epoch_time_mjd is not None:
+            if not np.isfinite(prev_epoch_time_mjd):
+                raise ValueError(
+                    f"prev_epoch_time_mjd must be finite, got {prev_epoch_time_mjd}."
+                )
+            if prev_epoch_time_mjd > epoch_time_mjd:
+                raise ValueError(
+                    f"prev_epoch_time_mjd ({prev_epoch_time_mjd}) must be <= "
+                    f"epoch_time_mjd ({epoch_time_mjd}); zero-delta is allowed."
+                )
 
-        # Capture RNG state snapshot BEFORE any operations (reproducibility anchor).
-        rng_state = self._rng.bit_generator.state
+        # Capture child-RNG states BEFORE any epoch draws so the epoch can be
+        # perfectly replayed from this initial state.
+        # BREAKING CHANGE: random_state is now a structured dict with one entry
+        # per child generator, not a flat parent-generator state dict.
+        rng_state: dict[str, Any] = {
+            "parent": sanitize_rng_state(self._rng.bit_generator.state),
+            "readout": sanitize_rng_state(self._readout._rng.bit_generator.state),
+            "one_over_f": sanitize_rng_state(self._onef_noise._rng.bit_generator.state),
+            "rts": sanitize_rng_state(self._rts_noise._rng.bit_generator.state),
+            "cosmic_rays": sanitize_rng_state(self._cr_injector._rng.bit_generator.state),
+        }
 
         # Inter-epoch time delta — single source of truth, derived from MJD only.
         # No separate delta_time_s parameter exists on this method.
@@ -332,7 +357,10 @@ class H4RG10Detector:
             "config_sha256": self._config_sha256,
             "random_state": sanitize_rng_state(rng_state),
             "ipc_applied": True,
-            "persistence_applied": False,
+            # DynamicPersistence.apply() is called unconditionally in the signal
+            # chain, so this flag is always True.  If a config toggle is added
+            # later (e.g. config.persistence.enabled), derive this flag from it.
+            "persistence_applied": True,
             "nonlinearity_applied": True,   # NL applied per-read inside simulate_ramp
             "charge_diffusion_applied": True,
             "saturated_pixel_count": saturated_pixel_count,
@@ -396,6 +424,15 @@ class H4RG10Detector:
         if len(timestamps_mjd) > 1 and not np.all(np.diff(timestamps_mjd) >= 0):
             raise ValueError(
                 "timestamps_mjd must be non-decreasing."
+            )
+
+        # Validate spatial geometry against config BEFORE the epoch loop.
+        cfg_ny = self._config.geometry.ny
+        cfg_nx = self._config.geometry.nx
+        if ideal_cube_e.shape[1:] != (cfg_ny, cfg_nx):
+            raise ValueError(
+                f"ideal_cube_e spatial shape {ideal_cube_e.shape[1:]!r} does not "
+                f"match configured geometry ({cfg_ny}, {cfg_nx})."
             )
 
         ny, nx = ideal_cube_e.shape[1], ideal_cube_e.shape[2]

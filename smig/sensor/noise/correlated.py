@@ -97,4 +97,11 @@ class RTSNoise:
         # Lazy allocation: dimensions only known at first call.
         if self._pixel_states is None:
             self._pixel_states = np.zeros(image.shape, dtype=np.int8)
+        elif self._pixel_states.shape != image.shape:
+            raise ValueError(
+                f"RTSNoise: input image shape changed unexpectedly.  "
+                f"Cached pixel-state shape is {self._pixel_states.shape!r} but "
+                f"received {image.shape!r}.  Each RTSNoise instance "
+                "must be used with a single fixed detector geometry."
+            )
         return image.copy()

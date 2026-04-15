@@ -142,7 +142,11 @@ def load_interpolated_kernel(
                 f"Available groups: {list(f.keys())}"
             )
         grp = f[grp_name]
-        kernels = grp["kernels"][:]      # (ny, nx, K, K)
+        # TODO: Memory optimization - slice specific neighborhood instead of
+        # loading full (ny, nx, 9, 9) array into RAM.  Replace the line below
+        # with h5py slicing: grp["kernels"][iy0:iy1+1, ix0:ix1+1, ...] once
+        # the bracket indices are computed before opening the file.
+        kernels = grp["kernels"][:]      # (ny, nx, K, K) — full array loaded
         field_x = grp["field_x"][:]      # (nx,)
         field_y = grp["field_y"][:]      # (ny,)
 
@@ -164,10 +168,23 @@ def load_interpolated_kernel(
         + ty * ((1.0 - tx) * k10 + tx * k11)
     )
 
-    # Renormalize to exactly 1.0.
+    # Safety check: interpolated kernel must have a positive, finite sum.
     kernel_sum = kernel.sum()
-    if kernel_sum > 0.0:
-        kernel /= kernel_sum
+    if not np.isfinite(kernel_sum):
+        raise ValueError(
+            f"Interpolated IPC kernel for SCA {sca_id} at field position "
+            f"({fx}, {fy}) has a non-finite sum ({kernel_sum}).  "
+            "Check the calibration HDF5 file for NaN/Inf values."
+        )
+    if kernel_sum <= 0.0:
+        raise ValueError(
+            f"Interpolated IPC kernel for SCA {sca_id} at field position "
+            f"({fx}, {fy}) has a non-positive sum ({kernel_sum}).  "
+            "The kernel cannot be normalised; check the calibration HDF5 file."
+        )
+
+    # Renormalize to exactly 1.0.
+    kernel /= kernel_sum
     return kernel
 
 

@@ -63,8 +63,9 @@ class ChargeDiffusionModel:
         original_sum = image.sum()
         result = gaussian_filter(image, sigma=self._sigma, mode="reflect")
         # Post-hoc renormalization for strict flux conservation.
+        # Epsilon guard prevents divide-by-zero when the image is all zeros.
         if original_sum > 0.0:
-            result *= original_sum / result.sum()
+            result *= original_sum / (result.sum() + 1e-12)
         return result
 
     def apply_bfe(self, image: np.ndarray) -> np.ndarray:
@@ -104,8 +105,9 @@ class ChargeDiffusionModel:
             # Snapshot for Jacobi-style update (all updates from previous state).
             prev = current.copy()
 
-            # Charge fraction and redistribution amount per pixel.
-            f = prev / full_well
+            # Charge fraction: cap at 1.0 to prevent over-saturation artefacts
+            # when charge slightly exceeds full_well due to BFE redistribution.
+            f = np.clip(prev / full_well, 0.0, 1.0)
             delta_q = coupling * f * prev  # shape (ny, nx)
 
             # Pad with reflection for boundary handling.
@@ -128,9 +130,10 @@ class ChargeDiffusionModel:
 
         # Post-hoc renormalization: reflection padding at boundaries can
         # introduce a tiny flux imbalance; correct it to conserve charge.
+        # Epsilon guard prevents divide-by-zero when the image is all zeros.
         original_sum = image.sum()
         if original_sum > 0.0:
-            current *= original_sum / current.sum()
+            current *= original_sum / (current.sum() + 1e-12)
         return current
 
     def apply(self, image: np.ndarray) -> np.ndarray:

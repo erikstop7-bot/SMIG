@@ -59,6 +59,13 @@ class DynamicPersistence:
         # Lazy allocation: dimensions only known at first call.
         if self._trap_state is None:
             self._trap_state = np.zeros(image.shape, dtype=np.float64)
+        elif self._trap_state.shape != image.shape:
+            raise ValueError(
+                f"DynamicPersistence: input image shape changed unexpectedly.  "
+                f"Cached trap-state shape is {self._trap_state.shape!r} but "
+                f"received {image.shape!r}.  Each DynamicPersistence instance "
+                "must be used with a single fixed detector geometry."
+            )
         # TODO: Apply exponential decay using delta_time_s and update
         # self._trap_state based on current image charge levels.
         return image.copy()

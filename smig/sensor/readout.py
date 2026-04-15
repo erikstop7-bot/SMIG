@@ -18,6 +18,8 @@ called from within this module.
 
 from __future__ import annotations
 
+from typing import Callable
+
 import numpy as np
 
 from smig.config.schemas import ReadoutConfig
@@ -46,10 +48,9 @@ class MultiAccumSimulator:
         Nonlinearity model injected by the orchestrator.  Applied per-read
         inside the ramp loop.
     rng:
-        NumPy random generator for all stochastic sampling.  Injected by
-        the orchestrator (child RNG derived from the event-level seed).
-        Falls back to a freshly seeded generator if omitted; prefer
-        explicit injection for reproducibility.
+        NumPy random generator for all stochastic sampling.  Must be an
+        explicitly injected, deterministic generator; ``None`` is not allowed.
+        The orchestrator derives this from a child of the event-level seed.
     """
 
     def __init__(
@@ -60,18 +61,26 @@ class MultiAccumSimulator:
         nonlinearity: NonLinearityModel | None = None,
         rng: np.random.Generator | None = None,
     ) -> None:
+        if rng is None:
+            raise ValueError(
+                "MultiAccumSimulator requires an explicitly injected RNG "
+                "(rng must not be None).  Pass a deterministic generator "
+                "derived from the event-level seed via SeedSequence.spawn()."
+            )
         self._config = config
         self._dark_current_e_per_s = dark_current_e_per_s
         self._read_noise_cds_electrons = read_noise_cds_electrons
         self._nonlinearity = nonlinearity
-        self._rng = rng if rng is not None else np.random.default_rng()
+        self._rng = rng
 
     # ------------------------------------------------------------------
     # Ramp construction
     # ------------------------------------------------------------------
 
     def simulate_ramp(
-        self, ideal_image_e: np.ndarray
+        self,
+        ideal_image_e: np.ndarray,
+        cr_injector: Callable[..., tuple[np.ndarray, np.ndarray, int]] | None = None,
     ) -> tuple[np.ndarray, np.ndarray]:
         """Build a 3D up-the-ramp sample cube.
 
@@ -91,6 +100,26 @@ class MultiAccumSimulator:
         ideal_image_e:
             2D array ``(ny, nx)`` of total ideal electron counts for the
             full exposure (photon signal only, no dark current).
+        cr_injector:
+            Optional callable for per-read cosmic-ray injection.  When
+            provided, it is called after each dark/photon accumulation step
+            and before saturation flagging, with signature::
+
+                cr_injector(accumulated: np.ndarray, read_idx: int)
+                    -> (modified_accumulated, cr_mask_2d, hit_count)
+
+            The injector deposits charge directly into ``accumulated`` (the
+            pre-NL, pre-noise physical charge buffer) so that subsequent
+            saturation checks and read-noise addition see the correct charge.
+
+            IMPORTANT: ``readout.py`` must NOT import ``cosmic_rays``
+            directly (star-topology constraint).  Pass the injector from
+            ``H4RG10Detector`` as a Callable, never import the class here.
+
+            Stub behaviour: when ``cr_injector`` is ``None`` (current
+            default), per-read CR injection is skipped and the 2D ``apply()``
+            call in the orchestrator's post-ramp path remains in effect
+            (see FIXME CR-1 in detector.py).
 
         Returns
         -------
@@ -100,9 +129,19 @@ class MultiAccumSimulator:
         sat_reads : np.ndarray
             3D bool array ``(n_reads, ny, nx)``; ``True`` where the
             accumulated physical charge met or exceeded the saturation
-            threshold at that read.  Use ``.any(axis=0)`` to obtain a 2D
-            per-pixel saturation flag.
+            flagging threshold at that read.  Use ``.any(axis=0)`` to
+            obtain a 2D per-pixel saturation flag.
+
+        Raises
+        ------
+        ValueError
+            If ``ideal_image_e`` is not 2-D or does not have 2 spatial axes.
         """
+        if ideal_image_e.ndim != 2:
+            raise ValueError(
+                f"simulate_ramp requires a 2-D input array, "
+                f"got ndim={ideal_image_e.ndim}."
+            )
         ny, nx = ideal_image_e.shape
         n_reads = self._config.n_ramp_reads
         frame_time = self._config.frame_time_s
@@ -117,9 +156,9 @@ class MultiAccumSimulator:
         # Per-read noise std: CDS noise / sqrt(2) gives per-sample std.
         per_read_noise_std = self._read_noise_cds_electrons / np.sqrt(2.0)
 
-        # Saturation level from injected NL model (electrons).
+        # Saturation flagging level from the public NL property (electrons).
         if self._nonlinearity is not None:
-            Q_sat = self._nonlinearity._Q_sat
+            Q_sat = self._nonlinearity.saturation_flagging_threshold_e
         else:
             Q_sat = np.inf
 
@@ -134,6 +173,11 @@ class MultiAccumSimulator:
                 accumulated += self._rng.poisson(photon_per_interval)
                 # Poisson-sample dark current increment (scalar rate, per-pixel draw).
                 accumulated += self._rng.poisson(dark_per_interval, size=(ny, nx))
+
+                # Per-read CR injection hook (star-topology: injector passed
+                # as Callable from orchestrator, never imported here).
+                if cr_injector is not None:
+                    accumulated, _cr_mask, _cr_count = cr_injector(accumulated, i)
 
             # Saturation flag on physical charge BEFORE noise (physically correct).
             sat_reads[i] = accumulated >= Q_sat
@@ -182,14 +226,23 @@ class MultiAccumSimulator:
             2D array ``(ny, nx)`` of fitted count rates in electrons per
             second.  Pixels where fewer than 2 good reads remain (e.g.
             saturated from the first science read) return 0.0.
+
+        Raises
+        ------
+        ValueError
+            If ``ramp_cube`` is not 3-D.
         """
+        if ramp_cube.ndim != 3:
+            raise ValueError(
+                f"fit_slope requires a 3-D ramp cube, got ndim={ramp_cube.ndim}."
+            )
         n_reads, ny, nx = ramp_cube.shape
         frame_time = self._config.frame_time_s
         t = np.arange(n_reads, dtype=np.float64) * frame_time  # (n_reads,)
 
-        # Saturation threshold for fallback (when sat_reads not provided).
+        # Saturation flagging threshold for fallback (when sat_reads not provided).
         if self._nonlinearity is not None:
-            Q_sat = self._nonlinearity._Q_sat
+            Q_sat = self._nonlinearity.saturation_flagging_threshold_e
         else:
             Q_sat = np.inf
 

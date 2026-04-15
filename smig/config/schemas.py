@@ -292,6 +292,19 @@ class IPCConfig(BaseModel):
             "a sanity-check reference value for the field-dependent map."
         ),
     )
+    ipc_diagonal_fraction: float = Field(
+        default=0.1,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Diagonal coupling strength relative to the orthogonal coupling alpha "
+            "(dimensionless).  The diagonal neighbour coupling is "
+            "``ipc_alpha_center * ipc_diagonal_fraction``.  "
+            "Must satisfy ``ipc_alpha_center <= 1 / (4 + 4 * ipc_diagonal_fraction)`` "
+            "to prevent a negative centre-pixel value in the analytic kernel.  "
+            "Default 0.1 (10 % of alpha) is the H4RG-10 laboratory reference value."
+        ),
+    )
     sca_id: int = Field(
         default=1,
         ge=1,
@@ -323,6 +336,25 @@ class IPCConfig(BaseModel):
                 "an even kernel has no well-defined centre pixel."
             )
         return val
+
+    @model_validator(mode="after")
+    def _check_alpha_center_bound(self) -> IPCConfig:
+        """Prevent analytic kernel from producing a negative centre pixel.
+
+        For the analytic kernel, the centre-pixel value is:
+            kernel[c, c] = 1 - alpha * (4 + 4 * ipc_diagonal_fraction)
+        which must be >= 0, giving the bound:
+            ipc_alpha_center <= 1 / (4 + 4 * ipc_diagonal_fraction)
+        """
+        bound = 1.0 / (4.0 + 4.0 * self.ipc_diagonal_fraction)
+        if self.ipc_alpha_center > bound:
+            raise ValueError(
+                f"ipc_alpha_center ({self.ipc_alpha_center}) must be <= "
+                f"1 / (4 + 4 * ipc_diagonal_fraction) = 1 / "
+                f"(4 + 4 * {self.ipc_diagonal_fraction}) = {bound:.6f}.  "
+                "Larger values produce a negative centre-pixel in the analytic kernel."
+            )
+        return self
 
 
 # ---------------------------------------------------------------------------

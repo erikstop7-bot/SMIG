@@ -181,21 +181,36 @@ class ProvenanceRecord(BaseModel):
     # Reproducibility: PRNG state
     # ------------------------------------------------------------------
 
-    random_state: dict[str, Any] = Field(
+    # BREAKING CHANGE (Phase 1 remediation): random_state now accepts both
+    # ``dict[str, Any]`` (new structured format) and ``str`` (legacy sidecar
+    # format).  The new dict format captures per-child-generator states with
+    # the keys ``parent``, ``readout``, ``one_over_f``, ``rts``,
+    # ``cosmic_rays`` — each value being the bit-generator state dict for that
+    # child RNG — so any epoch can be perfectly replayed from this snapshot.
+    # Old sidecar readers that stored the flat parent-RNG state dict (keys
+    # ``bit_generator``, ``state``) will continue to round-trip as ``dict``.
+    # Readers that serialised the state as a plain string pass through unchanged.
+    random_state: dict[str, Any] | str = Field(
         description=(
-            "Full NumPy bit-generator state snapshot captured immediately "
-            "before this epoch's stochastic stages (dark current, read noise, "
-            "cosmic rays, etc.).  Must contain at least the keys 'bit_generator' "
-            "and 'state' as returned by "
-            "``numpy.random.Generator.bit_generator.state``.  "
-            "NumPy types are sanitized to native Python before storage."
+            "Structured RNG state snapshot captured immediately *before* each "
+            "epoch's stochastic stages, allowing perfect replay.  "
+            "New format: dict with keys ``parent``, ``readout``, "
+            "``one_over_f``, ``rts``, ``cosmic_rays`` — each containing the "
+            "bit-generator state dict for that child generator.  "
+            "Legacy format (flat dict with ``bit_generator`` / ``state`` keys "
+            "or a plain string) is accepted for backward compatibility with "
+            "existing sidecar files.  "
+            "NumPy array/scalar types are sanitized to native Python before storage."
         ),
     )
 
     @field_validator("random_state", mode="before")
     @classmethod
-    def _sanitize_numpy_types(cls, v: dict[str, Any]) -> dict[str, Any]:
-        """Delegate to the module-level sanitize_rng_state function."""
+    def _sanitize_numpy_types(cls, v: dict[str, Any] | str) -> dict[str, Any] | str:
+        """Sanitize numpy types in dict-form state; pass strings through unchanged."""
+        if isinstance(v, str):
+            # Legacy sidecar format: plain string representation — accept as-is.
+            return v
         return sanitize_rng_state(v)
 
     # ------------------------------------------------------------------

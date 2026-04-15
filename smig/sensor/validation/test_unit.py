@@ -161,18 +161,17 @@ def test_process_epoch_provenance_data_stub_flags(
 ):
     """Checks provenance applied-effect flags and counts.
 
-    charge_diffusion_applied is True because ChargeDiffusionModel.apply() is
-    always called in the signal chain. The other physics stages are stubs and
-    flag themselves as not applied (False) until physics is implemented.
+    All four physics stages are unconditionally called in the signal chain,
+    so all *_applied flags are True.  persistence_applied was corrected from
+    False to True in Phase 1 remediation (DynamicPersistence.apply() is
+    always called).
     """
     pd = single_epoch_output.provenance_data
 
-    # Phase-1 stub check: updated to type checks to allow physics integration.
-    # When physics lands, reintroduce stronger semantics tests.
-    assert pd["charge_diffusion_applied"] is True  # Always True for Phase 1+; if diffusion is in the chain, it is applied.
-    assert isinstance(pd["ipc_applied"], bool)
-    assert isinstance(pd["persistence_applied"], bool)
-    assert isinstance(pd["nonlinearity_applied"], bool)
+    assert pd["charge_diffusion_applied"] is True
+    assert pd["ipc_applied"] is True
+    assert pd["persistence_applied"] is True  # Fixed: called unconditionally
+    assert pd["nonlinearity_applied"] is True
     assert pd["saturated_pixel_count"] == 0
     assert pd["cosmic_ray_hit_count"] == 0
 
@@ -190,9 +189,25 @@ def test_process_epoch_provenance_config_sha256(
 def test_process_epoch_provenance_random_state_structure(
     single_epoch_output: DetectorOutput,
 ):
+    """random_state is a structured dict with per-child-generator state snapshots.
+
+    Phase 1 remediation changed the format from a flat parent-RNG state dict
+    to a structured dict with keys: parent, readout, one_over_f, rts, cosmic_rays.
+    Each value is the bit-generator state dict for that child RNG.
+    """
     rs = single_epoch_output.provenance_data["random_state"]
     assert isinstance(rs, dict)
-    assert "bit_generator" in rs
+    expected_keys = {"parent", "readout", "one_over_f", "rts", "cosmic_rays"}
+    assert set(rs.keys()) == expected_keys, (
+        f"random_state keys {set(rs.keys())!r} != expected {expected_keys!r}"
+    )
+    for child_name, child_state in rs.items():
+        assert isinstance(child_state, dict), (
+            f"random_state[{child_name!r}] must be a dict, got {type(child_state)!r}"
+        )
+        assert "bit_generator" in child_state, (
+            f"random_state[{child_name!r}] missing 'bit_generator' key"
+        )
 
 
 # ---------------------------------------------------------------------------

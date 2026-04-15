@@ -54,11 +54,14 @@ class FieldDependentIPC:
         self,
         config: IPCConfig,
         sca_id: int,
-        field_position: tuple[float, float],
+        field_position: tuple[float, float] | None = None,
     ) -> None:
         self._config = config
         self._sca_id = sca_id
-        self._field_position = field_position
+        # Default to SCA centre when no field position is supplied.
+        self._field_position: tuple[float, float] = (
+            field_position if field_position is not None else (0.5, 0.5)
+        )
         self._kernel = self.build_kernel()
 
     def build_kernel(self) -> np.ndarray:
@@ -95,8 +98,10 @@ class FieldDependentIPC:
         kernel[c, c - 1] = alpha
         kernel[c, c + 1] = alpha
 
-        # Diagonal coupling (weaker, ~10% of alpha).
-        diag = alpha * 0.1
+        # Diagonal coupling: configurable fraction of the orthogonal coupling.
+        # The schema validator guarantees alpha <= 1/(4 + 4*diag_frac), so the
+        # centre pixel (1 - sum of neighbours) is always >= 0.
+        diag = alpha * self._config.ipc_diagonal_fraction
         kernel[c - 1, c - 1] = diag
         kernel[c - 1, c + 1] = diag
         kernel[c + 1, c - 1] = diag
