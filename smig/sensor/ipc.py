@@ -77,7 +77,10 @@ class FieldDependentIPC:
         np.ndarray
             9x9 float64 kernel normalised to sum = 1.0.
         """
-        if self._config.ipc_kernel_path is not None:
+        if (
+            self._config.ipc_field_dependent
+            and self._config.ipc_kernel_path is not None
+        ):
             kernel = load_interpolated_kernel(
                 path=Path(self._config.ipc_kernel_path),
                 sca_id=self._sca_id,
@@ -86,7 +89,8 @@ class FieldDependentIPC:
             self._validate_kernel_shape(kernel)
             return kernel
 
-        # Analytic uniform kernel construction.
+        # Analytic uniform kernel construction (used when ipc_field_dependent
+        # is False OR when no HDF5 calibration path is provided).
         ks = self._config.ipc_kernel_size
         kernel = np.zeros((ks, ks), dtype=np.float64)
         c = ks // 2
@@ -154,7 +158,17 @@ class FieldDependentIPC:
         -------
         np.ndarray
             IPC-convolved image.
+
+        Raises
+        ------
+        ValueError
+            If ``image`` is not 2-D.
         """
+        if image.ndim != 2:
+            raise ValueError(
+                f"FieldDependentIPC.apply() requires a 2-D image, "
+                f"got ndim={image.ndim}."
+            )
         pad = self._kernel.shape[0] // 2
         padded = np.pad(image, pad, mode="reflect")
         result = fftconvolve(padded, self._kernel, mode="same")
@@ -180,7 +194,17 @@ class FieldDependentIPC:
         -------
         np.ndarray
             Estimated pre-IPC image.
+
+        Raises
+        ------
+        ValueError
+            If ``image`` is not 2-D.
         """
+        if image.ndim != 2:
+            raise ValueError(
+                f"FieldDependentIPC.deconvolve() requires a 2-D image, "
+                f"got ndim={image.ndim}."
+            )
         pad = self._kernel.shape[0] // 2
         estimate = image.copy()
         for _ in range(n_iterations):
