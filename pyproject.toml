@@ -31,3 +31,8 @@ dev = [
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["smig*"]
+
+[tool.pytest.ini_options]
+markers = [
+    "slow: marks tests as slow (skips strict timing assertion in CI when CI env var is set)",
+]
