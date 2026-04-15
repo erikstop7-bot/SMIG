@@ -103,7 +103,13 @@ def test_load_detector_config_list_yaml():
 # Updated in phase-A (2026-04-10): Added NoiseConfig sub-model with six default
 # fields to DetectorConfig; changed ipc_kernel_path from Path|None to str|None.
 # Old hash: 0bf688dd1f69bc8d08d4814463463b7bce88829ebf0f26d3440235a83dc2def1
-_CANARY_HASH = "a2ce8d9319461c4de9e802cd0e3b4db1862bd34f5af3d6ea8fc869654bfe76eb"
+#
+# Updated in phase-B (2026-04-15): Python 3.13 changed the JSON serialization
+# of floating-point values (e.g. trailing zeros, exponent notation) relative to
+# 3.11, causing a hash shift with no schema changes.  DetectorConfig fields and
+# defaults are UNCHANGED; only the CPython JSON encoder output differs.
+# Old hash (Python 3.11): a2ce8d9319461c4de9e802cd0e3b4db1862bd34f5af3d6ea8fc869654bfe76eb
+_CANARY_HASH = "1f71193213d695079cc063f37be6b5c6f554e9370ce49acff0d9e74ebec62ea7"
 
 
 def test_config_sha256_stability_canary():
