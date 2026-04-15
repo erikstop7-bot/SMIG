@@ -57,23 +57,23 @@ Nodes (22): ProvenanceRecord, smig/provenance/schema.py ========================
 
 ### Community 5 - "Community 5"
 Cohesion: 0.12
-Nodes (20): FieldDependentIPC, smig/sensor/ipc.py ================== Field-dependent inter-pixel capacitance (I, Validate that a loaded IPC kernel has the expected shape.          Parameters, Apply IPC convolution to a charge image.          Uses ``scipy.signal.fftconvolv, Iterative Jansson-Van Cittert IPC deconvolution.          This method is for tes, Field-dependent inter-pixel capacitance (IPC) convolution.      Applies a spatia, Build or load a normalised 9x9 IPC kernel.          If ``config.ipc_kernel_path`, IPCConfig (+12 more)
+Nodes (20): FieldDependentIPC, smig/sensor/ipc.py ================== Field-dependent inter-pixel capacitance, Validate that a loaded IPC kernel has the expected shape.          Parameters, Apply IPC convolution to a charge image.          Uses ``scipy.signal.fftconvo, Iterative Jansson-Van Cittert IPC deconvolution.          This method is for t, Field-dependent inter-pixel capacitance (IPC) convolution.      Applies a spat, Build or load a normalised 9x9 IPC kernel.          If ``config.ipc_kernel_pat, IPCConfig (+12 more)
 
 ### Community 6 - "Community 6"
 Cohesion: 0.12
-Nodes (20): ChargeDiffusionModel, smig/sensor/charge_diffusion.py ================================ Charge diffusio, Apply charge diffusion and BFE to a charge image.          Applies static Gaussi, Charge diffusion and brighter-fatter effect (BFE) model.      Models lateral cha, Apply a static Gaussian diffusion kernel.          Uses ``scipy.ndimage.gaussian, Apply the brighter-fatter effect via iterative Jacobi redistribution.          F, ChargeDiffusionConfig, Configuration for the charge diffusion and brighter-fatter effect model.      Ex (+12 more)
+Nodes (20): ChargeDiffusionModel, smig/sensor/charge_diffusion.py ================================ Charge diffus, Apply charge diffusion and BFE to a charge image.          Applies static Gaus, Charge diffusion and brighter-fatter effect (BFE) model.      Models lateral c, Apply a static Gaussian diffusion kernel.          Uses ``scipy.ndimage.gaussi, Apply the brighter-fatter effect via iterative Jacobi redistribution., ChargeDiffusionConfig, Configuration for the charge diffusion and brighter-fatter effect model. (+12 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.1
-Nodes (8): All provenance timestamps are timezone-aware (UTC)., ValueError when ideal_image_e contains negative electron counts., Injecting a bright point source and applying charge diffusion must     decrease, H4RG10Detector constructs without error and stores the config., test_bfe_widens_psf(), test_detector_construction(), test_process_epoch_rejects_negative_input(), test_process_event_provenance_timestamps_are_aware()
+Nodes (8): All provenance timestamps are timezone-aware (UTC)., ValueError when ideal_image_e contains negative electron counts., Injecting a bright point source and applying charge diffusion must     decrease, H4RG10Detector constructs without error and stores the config., test_bfe_widens_psf(), test_detector_construction(), test_process_epoch_rejects_negative_input(), test_process_event_provenance_timestamps_are_aware()
 
 ### Community 8 - "Community 8"
 Cohesion: 0.13
-Nodes (11): ClusteredCosmicRayInjector, Deposit a single cosmic-ray event at a specified location.          Deterministi, Clustered cosmic-ray hit injector.      Simulates cosmic-ray strikes as spatiall, Inject cosmic-ray hits into a 2D image.          Parameters         ----------, Inject cosmic-ray hits into a single read of a 3D MULTIACCUM ramp.          Inte, Checks provenance applied-effect flags and counts.      All four physics stages, diffuse(ipc(x)) != ipc(diffuse(x)) for non-trivial kernels., sanitize_rng_state raises TypeError for non-dict inputs. (+3 more)
+Nodes (11): ClusteredCosmicRayInjector, Deposit a single cosmic-ray event at a specified location.          Deterministi, Clustered cosmic-ray hit injector.      Simulates cosmic-ray strikes as spatiall, Inject cosmic-ray hits into a 2D image.          Parameters         ----------, Inject cosmic-ray hits into a single read of a 3D MULTIACCUM ramp.          Inte, Checks provenance applied-effect flags and counts.      All four physics stage, diffuse(ipc(x)) != ipc(diffuse(x)) for non-trivial kernels.      With the phys, sanitize_rng_state raises TypeError for non-dict inputs. (+3 more)
 
 ### Community 9 - "Community 9"
 Cohesion: 0.25
-Nodes (8): _find_bracket(), generate_synthetic_ipc_hdf5(), load_interpolated_kernel(), smig/sensor/calibration/ipc_kernels.py ======================================= S, Load and bilinearly interpolate an IPC kernel from an HDF5 file.      Parameters, # TODO: Memory optimization - slice specific neighborhood instead of, Find the lower grid index and fractional offset for interpolation.      Paramete, Generate a synthetic HDF5 IPC kernel calibration file.      Creates spatially-va
+Nodes (8): _find_bracket(), generate_synthetic_ipc_hdf5(), load_interpolated_kernel(), smig/sensor/calibration/ipc_kernels.py =======================================, Load and bilinearly interpolate an IPC kernel from an HDF5 file.      Paramete, # TODO: Memory optimization - slice specific neighborhood instead of, Find the lower grid index and fractional offset for interpolation.      Parame, Generate a synthetic HDF5 IPC kernel calibration file.      Creates spatially-
 
 ### Community 10 - "Community 10"
 Cohesion: 0.25
@@ -85,20 +85,20 @@ Nodes (3): get_peak_memory_mb(), smig/sensor/memory_profiler.py ================
 
 ### Community 12 - "Community 12"
 Cohesion: 0.5
-Nodes (4): _make_valid_record(), Helper: build a minimal valid ProvenanceRecord for drift tests., ProvenanceTracker raises ValueError when record git_commit is None     but the t, test_tracker_rejects_silent_metadata_drift()
+Nodes (4): _make_valid_record(), Helper: build a minimal valid ProvenanceRecord for drift tests., ProvenanceTracker raises ValueError when record git_commit is None     but the, test_tracker_rejects_silent_metadata_drift()
 
 ### Community 13 - "Community 13"
 Cohesion: 1.0
-Nodes (1): Prevent analytic kernel from producing a negative centre pixel.          For the
+Nodes (1): Prevent analytic kernel from producing a negative centre pixel.          For t
 
 ### Community 14 - "Community 14"
 Cohesion: 1.0
 Nodes (1): Sanitize numpy types in dict-form state; pass strings through unchanged.
 
 ## Knowledge Gaps
-- **25 isolated node(s):** `smig/config/schemas.py ====================== Immutable, validated detector conf`, `Focal-plane geometry of a single H4RG-10 SCA.`, `Electrical characteristics governing signal range and read noise.`, `Non-destructive readout timing for Multi-Accumulation (MULTIACCUM) mode.      Th`, `Configuration for the charge diffusion and brighter-fatter effect model.      Ex` (+20 more)
+- **25 isolated node(s):** `smig/config/schemas.py ====================== Immutable, validated detector co`, `Focal-plane geometry of a single H4RG-10 SCA.`, `Electrical characteristics governing signal range and read noise.`, `Non-destructive readout timing for Multi-Accumulation (MULTIACCUM) mode.`, `Configuration for the charge diffusion and brighter-fatter effect model.` (+20 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **Thin community `Community 13`** (1 nodes): `Prevent analytic kernel from producing a negative centre pixel.          For the`
+- **Thin community `Community 13`** (1 nodes): `Prevent analytic kernel from producing a negative centre pixel.          For t`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 - **Thin community `Community 14`** (1 nodes): `Sanitize numpy types in dict-form state; pass strings through unchanged.`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
@@ -118,5 +118,5 @@ _Questions this graph is uniquely positioned to answer:_
   _`ProvenanceRecord` has 64 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 61 inferred relationships involving `H4RG10Detector` (e.g. with `smig.sensor.noise — Noise leaf modules for the H4RG-10 detector chain.` and `ChargeDiffusionConfig`) actually correct?**
   _`H4RG10Detector` has 61 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 62 inferred relationships involving `IPCConfig` (e.g. with `FieldDependentIPC` and `smig/sensor/ipc.py ================== Field-dependent inter-pixel capacitance (I`) actually correct?**
+- **Are the 62 inferred relationships involving `IPCConfig` (e.g. with `FieldDependentIPC` and `smig/sensor/ipc.py ================== Field-dependent inter-pixel capacitance`) actually correct?**
   _`IPCConfig` has 62 INFERRED edges - model-reasoned connections that need verification._
