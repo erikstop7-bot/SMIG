@@ -308,6 +308,14 @@
       "community": 3
     },
     {
+      "label": "smig.sensor.noise \u2014 Noise leaf modules for the H4RG-10 detector chain.",
+      "file_type": "rationale",
+      "source_file": "smig\\sensor\\noise\\__init__.py",
+      "source_location": "L1",
+      "id": "init_rationale_1",
+      "community": 2
+    },
+    {
       "label": "schema.py",
       "file_type": "code",
       "source_file": "smig\\provenance\\schema.py",
@@ -466,14 +474,6 @@
       "source_location": "L255",
       "id": "tracker_rationale_255",
       "community": 4
-    },
-    {
-      "label": "smig.sensor.noise \u2014 Noise leaf modules for the H4RG-10 detector chain.",
-      "file_type": "rationale",
-      "source_file": "smig\\sensor\\noise\\__init__.py",
-      "source_location": "L1",
-      "id": "init_rationale_1",
-      "community": 2
     },
     {
       "label": "ipc_kernels.py",
@@ -1697,7 +1697,7 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L250",
       "id": "test_unit_test_process_event_provenance_timestamps_are_aware",
-      "community": 7
+      "community": 2
     },
     {
       "label": "test_process_event_provenance_config_sha256_consistent()",
@@ -1833,7 +1833,7 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L476",
       "id": "test_unit_test_ipc_asymmetric_kernel_injection",
-      "community": 2
+      "community": 4
     },
     {
       "label": "test_charge_diffusion_conservation()",
@@ -1881,7 +1881,7 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L621",
       "id": "test_unit_test_cr_mask_covers_full_cluster",
-      "community": 4
+      "community": 6
     },
     {
       "label": "test_cr_hit_count_is_events_not_pixels()",
@@ -1897,7 +1897,7 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L654",
       "id": "test_unit_test_provenance_record_has_phase_b_fields",
-      "community": 6
+      "community": 7
     },
     {
       "label": "test_provenance_schema_rejects_non_hex_sha256()",
@@ -2057,7 +2057,7 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L251",
       "id": "test_unit_rationale_251",
-      "community": 7
+      "community": 2
     },
     {
       "label": "All records share the same config_sha256.",
@@ -2193,7 +2193,7 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L477",
       "id": "test_unit_rationale_477",
-      "community": 2
+      "community": 4
     },
     {
       "label": "Charge diffusion must conserve total electron count (relative error < 1e-10).",
@@ -2241,7 +2241,7 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L622",
       "id": "test_unit_rationale_622",
-      "community": 4
+      "community": 6
     },
     {
       "label": "A single 5-pixel cluster contributes 1 to cosmic_ray_hit_count.",
@@ -2257,7 +2257,7 @@
       "source_file": "smig\\sensor\\validation\\test_unit.py",
       "source_location": "L655",
       "id": "test_unit_rationale_655",
-      "community": 6
+      "community": 7
     },
     {
       "label": "ProvenanceRecord raises ValidationError when config_sha256 contains\r     non-hex",
@@ -7514,6 +7514,78 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\__init__.py",
+      "source_location": "L3",
+      "weight": 0.8,
+      "_src": "init_rationale_1",
+      "_tgt": "detector_detectoroutput",
+      "source": "init_rationale_1",
+      "target": "detector_detectoroutput",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\__init__.py",
+      "source_location": "L3",
+      "weight": 0.8,
+      "_src": "init_rationale_1",
+      "_tgt": "detector_eventoutput",
+      "source": "init_rationale_1",
+      "target": "detector_eventoutput",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\__init__.py",
+      "source_location": "L3",
+      "weight": 0.8,
+      "_src": "init_rationale_1",
+      "_tgt": "detector_h4rg10detector",
+      "source": "init_rationale_1",
+      "target": "detector_h4rg10detector",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\noise\\__init__.py",
+      "source_location": "L3",
+      "weight": 0.8,
+      "_src": "init_rationale_1",
+      "_tgt": "correlated_oneoverfnoise",
+      "source": "init_rationale_1",
+      "target": "correlated_oneoverfnoise",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\noise\\__init__.py",
+      "source_location": "L3",
+      "weight": 0.8,
+      "_src": "init_rationale_1",
+      "_tgt": "correlated_rtsnoise",
+      "source": "init_rationale_1",
+      "target": "correlated_rtsnoise",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "smig\\sensor\\noise\\__init__.py",
+      "source_location": "L4",
+      "weight": 0.8,
+      "_src": "init_rationale_1",
+      "_tgt": "cosmic_rays_clusteredcosmicrayinjector",
+      "source": "init_rationale_1",
+      "target": "cosmic_rays_clusteredcosmicrayinjector",
+      "confidence_score": 0.5
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "smig\\provenance\\schema.py",
@@ -9096,78 +9168,6 @@
       "source": "tracker_provenancetracker_len",
       "target": "tracker_rationale_255",
       "confidence_score": 1.0
-    },
-    {
-      "relation": "uses",
-      "confidence": "INFERRED",
-      "source_file": "smig\\sensor\\__init__.py",
-      "source_location": "L3",
-      "weight": 0.8,
-      "_src": "init_rationale_1",
-      "_tgt": "detector_detectoroutput",
-      "source": "init_rationale_1",
-      "target": "detector_detectoroutput",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "uses",
-      "confidence": "INFERRED",
-      "source_file": "smig\\sensor\\__init__.py",
-      "source_location": "L3",
-      "weight": 0.8,
-      "_src": "init_rationale_1",
-      "_tgt": "detector_eventoutput",
-      "source": "init_rationale_1",
-      "target": "detector_eventoutput",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "uses",
-      "confidence": "INFERRED",
-      "source_file": "smig\\sensor\\__init__.py",
-      "source_location": "L3",
-      "weight": 0.8,
-      "_src": "init_rationale_1",
-      "_tgt": "detector_h4rg10detector",
-      "source": "init_rationale_1",
-      "target": "detector_h4rg10detector",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "uses",
-      "confidence": "INFERRED",
-      "source_file": "smig\\sensor\\noise\\__init__.py",
-      "source_location": "L3",
-      "weight": 0.8,
-      "_src": "init_rationale_1",
-      "_tgt": "correlated_oneoverfnoise",
-      "source": "init_rationale_1",
-      "target": "correlated_oneoverfnoise",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "uses",
-      "confidence": "INFERRED",
-      "source_file": "smig\\sensor\\noise\\__init__.py",
-      "source_location": "L3",
-      "weight": 0.8,
-      "_src": "init_rationale_1",
-      "_tgt": "correlated_rtsnoise",
-      "source": "init_rationale_1",
-      "target": "correlated_rtsnoise",
-      "confidence_score": 0.5
-    },
-    {
-      "relation": "uses",
-      "confidence": "INFERRED",
-      "source_file": "smig\\sensor\\noise\\__init__.py",
-      "source_location": "L4",
-      "weight": 0.8,
-      "_src": "init_rationale_1",
-      "_tgt": "cosmic_rays_clusteredcosmicrayinjector",
-      "source": "init_rationale_1",
-      "target": "cosmic_rays_clusteredcosmicrayinjector",
-      "confidence_score": 0.5
     },
     {
       "relation": "contains",

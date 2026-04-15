@@ -1,7 +1,7 @@
-# Graph Report - .  (2026-04-14)
+# Graph Report - .  (2026-04-15)
 
 ## Corpus Check
-- 24 files · ~0 words
+- 26 files · ~0 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -65,7 +65,7 @@ Nodes (20): ChargeDiffusionModel, smig/sensor/charge_diffusion.py =============
 
 ### Community 7 - "Community 7"
 Cohesion: 0.1
-Nodes (8): All provenance timestamps are timezone-aware (UTC)., ValueError when ideal_image_e contains negative electron counts., Injecting a bright point source and applying charge diffusion must     decrease, H4RG10Detector constructs without error and stores the config., test_bfe_widens_psf(), test_detector_construction(), test_process_epoch_rejects_negative_input(), test_process_event_provenance_timestamps_are_aware()
+Nodes (8): ValueError when ideal_image_e contains negative electron counts., Injecting a bright point source and applying charge diffusion must     decrease, All Phase B fields must be declared in ProvenanceRecord.model_fields., H4RG10Detector constructs without error and stores the config., test_bfe_widens_psf(), test_detector_construction(), test_process_epoch_rejects_negative_input(), test_provenance_record_has_phase_b_fields()
 
 ### Community 8 - "Community 8"
 Cohesion: 0.13
