@@ -263,6 +263,10 @@ class STPSFProvider:
         np.ndarray
             2-D ``float64`` PSF array, ``sum() == 1.0 ± 1e-6``.
         """
+        # Resolve backend first so cache keys are stable (backend may switch to
+        # 'analytic' on first instrument init when STPSF data files are absent).
+        self._ensure_backend_resolved()
+
         sca = _normalize_sca_id(sca_id)
         qfp = _quantize_field_position(field_position)
         cache_key = self._mono_cache_key(sca, qfp, wavelength_um)
@@ -353,6 +357,8 @@ class STPSFProvider:
             raise ValueError(
                 f"Unsupported SED type {source_sed!r}. Only 'flat' is supported."
             )
+
+        self._ensure_backend_resolved()
 
         sca = _normalize_sca_id(sca_id)
         qfp = _quantize_field_position(field_position)
@@ -466,19 +472,42 @@ class STPSFProvider:
     # WebbPSF backend
     # ------------------------------------------------------------------
 
+    def _ensure_backend_resolved(self) -> None:
+        """Finalize self._backend before any cache key is computed.
+
+        Triggers lazy WebbPSF instrument construction so that a missing-data
+        OSError is caught here and permanently switches _backend to 'analytic'.
+        Subsequent calls are no-ops (backend is already resolved).
+        """
+        if self._backend == "webbpsf":
+            self._get_instrument()
+
     def _get_instrument(self) -> Any:
         """Lazily instantiate and return the WebbPSF Roman WFI instrument.
 
         Uses double-checked locking so only one thread pays the ~10 s
-        instantiation cost.
+        instantiation cost.  If the STPSF data files are missing, falls back
+        to the analytic backend permanently for this provider instance.
         """
+        if self._backend != "webbpsf":
+            return None
         if self._instrument is None:
             with self._instrument_lock:
                 if self._instrument is None:
-                    wfi = _webbpsf.roman.WFI()
-                    wfi.filter = self._config.filter_name
-                    wfi.options["output_mode"] = "oversampled"
-                    self._instrument = wfi
+                    try:
+                        wfi = _webbpsf.roman.WFI()
+                        wfi.filter = self._config.filter_name
+                        wfi.options["output_mode"] = "oversampled"
+                        self._instrument = wfi
+                    except (OSError, EnvironmentError, FileNotFoundError) as exc:
+                        import warnings
+                        warnings.warn(
+                            f"STPSF data files unavailable ({exc}); "
+                            "falling back to analytic PSF backend.",
+                            stacklevel=2,
+                        )
+                        self._backend = "analytic"
+                        return None
         return self._instrument
 
     def _compute_webbpsf_mono(

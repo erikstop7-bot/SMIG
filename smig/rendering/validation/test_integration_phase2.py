@@ -308,7 +308,7 @@ class TestRenderingFluxConservation:
         # Use jitter_seed=1 to get a deterministic PSF realization.
         psf = provider.get_psf(sca_id=1, field_position=(0.5, 0.5), jitter_seed=1)
 
-        stamp_size = 32
+        stamp_size = 128
         stamp = galsim.Image(stamp_size, stamp_size, scale=0.11)
 
         renderer = FiniteSourceRenderer()
@@ -353,10 +353,12 @@ class TestDetectorFluxConservation:
         rng = np.random.default_rng(1234)
         detector = H4RG10Detector(det, rng)
 
-        # Delta-function ideal image: all flux at one pixel.
+        # Delta-function ideal image: all flux at one pixel plus a baseline
+        # background to prevent negative-lambda Poisson draws from float noise.
         ideal_image = np.zeros((32, 32), dtype=np.float64)
         cy, cx = 16, 16
         ideal_image[cy, cx] = flux_e
+        ideal_image += 10.0
 
         det_output = detector.process_epoch(
             ideal_image_e=ideal_image,

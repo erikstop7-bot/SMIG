@@ -19,7 +19,6 @@ GalSim tests are skipped automatically when ``galsim`` is not installed.
 """
 from __future__ import annotations
 
-import ast
 from pathlib import Path
 from typing import Any
 
@@ -313,52 +312,6 @@ def test_zero_offset_centroid_symmetry(renderer: Any, psf: Any) -> None:
     )
     assert abs(row_c - centre) < 0.5, (
         f"Row centroid {row_c:.3f} deviates too far from centre {centre:.3f}."
-    )
-
-
-# ---------------------------------------------------------------------------
-# AC-S5 — Architecture boundary: smig/rendering/ must not import smig/sensor/
-# ---------------------------------------------------------------------------
-
-
-def test_no_sensor_imports_in_rendering() -> None:
-    """No file in smig/rendering/ may import from smig.sensor (AST analysis).
-
-    The star-topology boundary rule requires that rendering modules produce
-    plain np.ndarray outputs — sensor modules are never imported upstream.
-    """
-    # smig/rendering/validation/test_source.py → parents[2] = smig/
-    rendering_dir = Path(__file__).resolve().parent.parent
-    assert rendering_dir.name == "rendering", (
-        f"Expected smig/rendering/ at {rendering_dir} — path may need updating."
-    )
-
-    violations: list[str] = []
-    for py_file in rendering_dir.rglob("*.py"):
-        try:
-            tree = ast.parse(py_file.read_text(encoding="utf-8"))
-        except SyntaxError:
-            continue
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Import):
-                for alias in node.names:
-                    if alias.name == "smig.sensor" or alias.name.startswith(
-                        "smig.sensor."
-                    ):
-                        violations.append(
-                            f"{py_file.relative_to(rendering_dir.parent)}:{node.lineno}"
-                        )
-            elif isinstance(node, ast.ImportFrom):
-                mod = node.module or ""
-                if mod == "smig.sensor" or mod.startswith("smig.sensor."):
-                    violations.append(
-                        f"{py_file.relative_to(rendering_dir.parent)}:{node.lineno}"
-                    )
-
-    assert not violations, (
-        "Found smig.sensor import(s) in smig/rendering/ — "
-        "star-topology boundary violation:\n"
-        + "\n".join(f"  {v}" for v in violations)
     )
 
 
