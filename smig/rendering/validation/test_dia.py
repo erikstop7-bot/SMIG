@@ -440,3 +440,149 @@ class TestExtractStampValidation:
 
         with pytest.raises(ValueError, match="science_stamp_size"):
             pipeline.extract_stamp(tiny)
+
+
+# ---------------------------------------------------------------------------
+# Regression: odd science_stamp_size produces exact shape
+# ---------------------------------------------------------------------------
+
+class TestExtractStampOddSize:
+    def test_odd_science_stamp_size_shape(self, detector: DetectorConfig) -> None:
+        """extract_stamp returns exact (sci, sci) shape when sci is odd."""
+        ctx, sci = 64, 33  # odd science_stamp_size
+        cfg = DIAConfig(context_stamp_size=ctx, science_stamp_size=sci)
+        pipe = DIAPipeline(cfg, detector, np.random.default_rng(0))
+        diff = np.zeros((ctx, ctx), dtype=np.float64)
+
+        stamp = pipe.extract_stamp(diff)
+
+        assert stamp.shape == (sci, sci), (
+            f"Odd sci_size={sci}: expected ({sci},{sci}), got {stamp.shape}"
+        )
+
+    def test_odd_science_stamp_correct_center(self, detector: DetectorConfig) -> None:
+        """For odd sci_size the crop is geometrically centered on the input."""
+        ctx, sci = 64, 33
+        cfg = DIAConfig(context_stamp_size=ctx, science_stamp_size=sci)
+        pipe = DIAPipeline(cfg, detector, np.random.default_rng(0))
+        diff = np.arange(ctx * ctx, dtype=np.float64).reshape(ctx, ctx)
+
+        stamp = pipe.extract_stamp(diff)
+
+        center = ctx // 2
+        half = sci // 2
+        expected = diff[center - half : center - half + sci, center - half : center - half + sci]
+        np.testing.assert_array_equal(stamp, expected)
+
+
+# ---------------------------------------------------------------------------
+# Regression: oversized input produces correct centered crop
+# ---------------------------------------------------------------------------
+
+class TestExtractStampOversized:
+    def test_oversized_input_correct_center(self, detector: DetectorConfig) -> None:
+        """An input larger than context_stamp_size still produces a correct crop."""
+        ctx, sci = 64, 32
+        cfg = DIAConfig(context_stamp_size=ctx, science_stamp_size=sci)
+        pipe = DIAPipeline(cfg, detector, np.random.default_rng(0))
+
+        # Feed a 128×128 array (2× context size) — center derived from actual shape.
+        oversized = np.arange(128 * 128, dtype=np.float64).reshape(128, 128)
+        stamp = pipe.extract_stamp(oversized)
+
+        assert stamp.shape == (sci, sci), (
+            f"Oversized input: expected ({sci},{sci}), got {stamp.shape}"
+        )
+        center = 128 // 2
+        half = sci // 2
+        expected = oversized[center - half : center - half + sci, center - half : center - half + sci]
+        np.testing.assert_array_equal(stamp, expected)
+
+
+# ---------------------------------------------------------------------------
+# Regression: subtract raises ValueError on NaN/Inf inputs
+# ---------------------------------------------------------------------------
+
+class TestSubtractFiniteGuard:
+    def test_nan_in_science_raises(self, pipeline: DIAPipeline, dia_config: DIAConfig) -> None:
+        ctx = dia_config.context_stamp_size
+        sci = np.full((ctx, ctx), float("nan"))
+        ref = np.ones((ctx, ctx), dtype=np.float64)
+        with pytest.raises(ValueError, match="science_rate_image"):
+            pipeline.subtract(sci, ref)
+
+    def test_inf_in_science_raises(self, pipeline: DIAPipeline, dia_config: DIAConfig) -> None:
+        ctx = dia_config.context_stamp_size
+        sci = np.full((ctx, ctx), float("inf"))
+        ref = np.ones((ctx, ctx), dtype=np.float64)
+        with pytest.raises(ValueError, match="science_rate_image"):
+            pipeline.subtract(sci, ref)
+
+    def test_nan_in_reference_raises(self, pipeline: DIAPipeline, dia_config: DIAConfig) -> None:
+        ctx = dia_config.context_stamp_size
+        sci = np.ones((ctx, ctx), dtype=np.float64)
+        ref = np.full((ctx, ctx), float("nan"))
+        with pytest.raises(ValueError, match="reference_rate_image"):
+            pipeline.subtract(sci, ref)
+
+    def test_inf_in_reference_raises(self, pipeline: DIAPipeline, dia_config: DIAConfig) -> None:
+        ctx = dia_config.context_stamp_size
+        sci = np.ones((ctx, ctx), dtype=np.float64)
+        ref = np.full((ctx, ctx), float("-inf"))
+        with pytest.raises(ValueError, match="reference_rate_image"):
+            pipeline.subtract(sci, ref)
+
+
+# ---------------------------------------------------------------------------
+# Regression: build_reference raises on invalid backgrounds or t_exp_s <= 0
+# ---------------------------------------------------------------------------
+
+class TestBuildReferenceFiniteGuard:
+    def test_nan_in_epoch_raises(self, pipeline: DIAPipeline, dia_config: DIAConfig) -> None:
+        ctx = dia_config.context_stamp_size
+        bad_epoch = np.full((ctx, ctx), float("nan"))
+        with pytest.raises(ValueError, match="non-finite"):
+            pipeline.build_reference([bad_epoch], [1.0])
+
+    def test_inf_in_epoch_raises(self, pipeline: DIAPipeline, dia_config: DIAConfig) -> None:
+        ctx = dia_config.context_stamp_size
+        bad_epoch = np.full((ctx, ctx), float("inf"))
+        with pytest.raises(ValueError, match="non-finite"):
+            pipeline.build_reference([bad_epoch], [1.0])
+
+    def test_nan_background_raises(self, pipeline: DIAPipeline, dia_config: DIAConfig) -> None:
+        ctx = dia_config.context_stamp_size
+        epoch = np.ones((ctx, ctx), dtype=np.float64)
+        with pytest.raises(ValueError, match="non-finite"):
+            pipeline.build_reference([epoch], [float("nan")])
+
+    def test_inf_background_raises(self, pipeline: DIAPipeline, dia_config: DIAConfig) -> None:
+        ctx = dia_config.context_stamp_size
+        epoch = np.ones((ctx, ctx), dtype=np.float64)
+        with pytest.raises(ValueError, match="non-finite"):
+            pipeline.build_reference([epoch], [float("inf")])
+
+    def test_zero_t_exp_raises_in_build_reference(self, pipeline: DIAPipeline, dia_config: DIAConfig) -> None:
+        """build_reference raises ValueError when t_exp_s is 0."""
+        ctx = dia_config.context_stamp_size
+        epoch = np.ones((ctx, ctx), dtype=np.float64)
+        # Patch after construction to simulate a broken derived value.
+        original = pipeline._t_exp_s
+        pipeline._t_exp_s = 0.0
+        try:
+            with pytest.raises(ValueError, match="t_exp_s"):
+                pipeline.build_reference([epoch], [1.0])
+        finally:
+            pipeline._t_exp_s = original
+
+    def test_negative_t_exp_raises_in_build_reference(self, pipeline: DIAPipeline, dia_config: DIAConfig) -> None:
+        """build_reference raises ValueError when t_exp_s is negative."""
+        ctx = dia_config.context_stamp_size
+        epoch = np.ones((ctx, ctx), dtype=np.float64)
+        original = pipeline._t_exp_s
+        pipeline._t_exp_s = -1.0
+        try:
+            with pytest.raises(ValueError, match="t_exp_s"):
+                pipeline.build_reference([epoch], [1.0])
+        finally:
+            pipeline._t_exp_s = original

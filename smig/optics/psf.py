@@ -28,7 +28,6 @@ Design notes
 from __future__ import annotations
 
 import hashlib
-import logging
 import threading
 from collections import OrderedDict
 from datetime import datetime, timezone
@@ -41,8 +40,6 @@ from smig.config.optics_schemas import PSFConfig
 
 if TYPE_CHECKING:
     import galsim as _galsim_type
-
-logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Optional backend probes — ImportError deferred to STPSFProvider.__init__
@@ -119,11 +116,11 @@ def _quantize_field_position(
 
 
 class _BoundedCache:
-    """Thread-safe bounded cache using an insertion-ordered LRU eviction policy.
+    """Thread-safe bounded cache using an access-ordered LRU eviction policy.
 
-    Evicts the oldest (least-recently-inserted) entry when the limit is
-    exceeded.  Each ``put`` promotes the key to the end of the ordering, so
-    frequently written keys are protected from premature eviction.
+    Evicts the least-recently-accessed entry when the limit is exceeded.
+    Both ``get`` and ``put`` promote the key to the end of the ordering, so
+    frequently accessed keys are protected from premature eviction.
     """
 
     def __init__(self, maxsize: int) -> None:
@@ -138,7 +135,7 @@ class _BoundedCache:
             if key in self._data:
                 self.hits += 1
                 self._data.move_to_end(key)
-                return self._data[key]
+                return self._data[key].copy()
             self.misses += 1
             return None
 
@@ -226,6 +223,11 @@ class STPSFProvider:
     def cache_misses(self) -> int:
         """Number of in-process cache misses (memory cache only)."""
         return self._cache.misses
+
+    @property
+    def psf_config_hash(self) -> str:
+        """SHA-256 hex digest of the full PSFConfig used to construct this provider."""
+        return self._config_hash
 
     # ------------------------------------------------------------------
     # Public API
@@ -461,6 +463,7 @@ class STPSFProvider:
             f"fp=({qfp[0]:.4f},{qfp[1]:.4f})|"
             f"sed={source_sed}|"
             f"jseed={seed_str}|"
+            f"jitter_rms_mas={self._config.jitter_rms_mas:.6f}|"
             f"nwl={self._config.n_wavelengths}|"
             f"wlrange=({lo:.6f},{hi:.6f})|"
             f"cfg={self._config_hash}|"

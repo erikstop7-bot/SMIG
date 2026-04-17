@@ -37,7 +37,6 @@ sensor-physics leaf modules from ``smig.sensor.*`` (e.g. ``charge_diffusion``,
 from __future__ import annotations
 
 import gc
-import hashlib
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
@@ -45,6 +44,7 @@ import numpy as np
 
 from smig.config.optics_schemas import SimulationConfig
 from smig.config.schemas import DetectorConfig  # noqa: F401 — allowed import per spec
+from smig.config.seed import derive_event_seed, derive_stage_seed
 from smig.optics.psf import STPSFProvider
 from smig.provenance.schema import ProvenanceRecord
 from smig.rendering.crowding import CrowdedFieldRenderer
@@ -115,59 +115,6 @@ class EventSceneOutput:
 
 
 # ---------------------------------------------------------------------------
-# Deterministic seed helpers — SHA-256 only, never Python hash()
-# ---------------------------------------------------------------------------
-
-def _derive_event_seed(master_seed: int, event_id: str) -> int:
-    """Return a deterministic integer seed for one event.
-
-    Uses SHA-256 of ``"{master_seed}:{event_id}"`` encoded as UTF-8, taking
-    the first 8 bytes as a little-endian unsigned integer modulo 2³¹−1.
-    Never calls Python's ``hash()``, whose output is process-local.
-
-    Parameters
-    ----------
-    master_seed:
-        Top-level master seed passed to :class:`SceneSimulator`.
-    event_id:
-        Unique event identifier string (e.g. ``'ob230001'``).
-
-    Returns
-    -------
-    int
-        Deterministic seed in ``[0, 2**31 - 2]``.
-    """
-    data = f"{master_seed}:{event_id}".encode("utf-8")
-    digest = hashlib.sha256(data).digest()
-    return int.from_bytes(digest[:8], "little") % (2**31 - 1)
-
-
-def _derive_stage_seed(event_seed: int, stage_name: str) -> int:
-    """Return a deterministic per-stage integer seed.
-
-    Uses SHA-256 of ``"{event_seed}:{stage_name}"`` encoded as UTF-8.
-    Each stage name maps to an independent, reproducible seed so that adding
-    or removing stages never perturbs other stages.
-
-    Parameters
-    ----------
-    event_seed:
-        Event-level seed from :func:`_derive_event_seed`.
-    stage_name:
-        Canonical stage identifier (``'detector'``, ``'crowding'``,
-        ``'psf_jitter'``, ``'dia_reference'``, ``'dia_jitter'``).
-
-    Returns
-    -------
-    int
-        Deterministic seed in ``[0, 2**31 - 2]``.
-    """
-    data = f"{event_seed}:{stage_name}".encode("utf-8")
-    digest = hashlib.sha256(data).digest()
-    return int.from_bytes(digest[:8], "little") % (2**31 - 1)
-
-
-# ---------------------------------------------------------------------------
 # Synthetic neighbor catalog generator
 # ---------------------------------------------------------------------------
 
@@ -213,35 +160,6 @@ def _generate_catalog(
             "mag_w146": mag_w146.astype(np.float64),
         }
     )
-
-
-# ---------------------------------------------------------------------------
-# Internal helpers
-# ---------------------------------------------------------------------------
-
-def _count_filtered_neighbors(renderer: CrowdedFieldRenderer) -> int:
-    """Count catalog rows surviving the brightness-cap filter.
-
-    Replicates the filter logic inside ``render_static_field`` so that the
-    orchestrator can record the post-cap neighbor count in provenance without
-    modifying ``CrowdedFieldRenderer``'s public API.
-
-    Parameters
-    ----------
-    renderer:
-        A :class:`CrowdedFieldRenderer` instance whose catalog and brightness
-        cap have already been set at construction time.
-
-    Returns
-    -------
-    int
-        Number of neighbors that pass the brightness cap (i.e. would be
-        rendered).
-    """
-    cat = renderer._catalog
-    if renderer._brightness_cap_mag is not None:
-        cat = cat[cat["mag_w146"] <= renderer._brightness_cap_mag]
-    return int(len(cat))
 
 
 # ---------------------------------------------------------------------------
@@ -375,31 +293,31 @@ class SceneSimulator:
         pixel_scale = cfg.crowded_field.pixel_scale_arcsec
         sca_id = cfg.detector.ipc.sca_id
 
-        # --- 1. Deterministic seed derivation (SHA-256 only) ---
-        event_seed = _derive_event_seed(self._master_seed, event_id)
+        # --- 1. Deterministic seed derivation (canonical smig.config.seed) ---
+        event_seed = derive_event_seed(self._master_seed, event_id)
 
         detector_rng = np.random.default_rng(
-            _derive_stage_seed(event_seed, "detector")
+            derive_stage_seed(event_seed, "detector")
         )
         crowding_rng = np.random.default_rng(
-            _derive_stage_seed(event_seed, "crowding")
+            derive_stage_seed(event_seed, "crowding")
         )
 
         # Draw one integer seed per science epoch from the psf_jitter generator.
         psf_jitter_rng = np.random.default_rng(
-            _derive_stage_seed(event_seed, "psf_jitter")
+            derive_stage_seed(event_seed, "psf_jitter")
         )
         science_jitter_seeds: np.ndarray = psf_jitter_rng.integers(
             1, 2**31 - 1, size=n_science
         )
 
         dia_ref_rng = np.random.default_rng(
-            _derive_stage_seed(event_seed, "dia_reference")
+            derive_stage_seed(event_seed, "dia_reference")
         )
 
         # Draw one integer seed per reference epoch from the dia_jitter generator.
         dia_jitter_rng = np.random.default_rng(
-            _derive_stage_seed(event_seed, "dia_jitter")
+            derive_stage_seed(event_seed, "dia_jitter")
         )
         ref_jitter_seeds: np.ndarray = dia_jitter_rng.integers(
             1, 2**31 - 1, size=n_ref
@@ -420,20 +338,28 @@ class SceneSimulator:
         )
 
         # PSF config hash captured once — config is frozen, so hash is stable.
-        psf_config_hash: str = self._psf_provider._config_hash
+        psf_config_hash: str = self._psf_provider.psf_config_hash
 
         # Stamp centre in absolute detector pixel coordinates (centre of stamp).
         stamp_center: tuple[float, float] = (float(ctx) / 2.0, float(ctx) / 2.0)
 
         # --- 3. Build DIA reference from static-field-only reference epochs ---
+        ref_field_pos = (0.5, 0.5)
+        sci_field_pos = (0.5, 0.5)
+
         ref_scenes: list[np.ndarray] = []
         for j in range(n_ref):
+            ref_jitter_seed = int(ref_jitter_seeds[j])
             ref_psf = self._psf_provider.get_psf(
                 sca_id=sca_id,
-                field_position=(0.5, 0.5),
-                jitter_seed=int(ref_jitter_seeds[j]),
+                field_position=ref_field_pos,
+                jitter_seed=ref_jitter_seed,
             )
-            static_field = crowded_renderer.render_static_field(ref_psf, stamp_center)
+            static_field = crowded_renderer.render_static_field(
+                ref_psf,
+                stamp_center,
+                psf_fingerprint=(psf_config_hash, sca_id, ref_field_pos, ref_jitter_seed),
+            )
             ref_scenes.append(static_field)
 
         # Repeat the first science background for all reference epochs.
@@ -448,20 +374,26 @@ class SceneSimulator:
         ideal_cube_e = np.zeros((n_science, ny, nx), dtype=np.float64)
 
         for i, params in enumerate(source_params_sequence):
+            sci_jitter_seed = int(science_jitter_seeds[i])
             sci_psf = self._psf_provider.get_psf(
                 sca_id=sca_id,
-                field_position=(0.5, 0.5),
-                jitter_seed=int(science_jitter_seeds[i]),
+                field_position=sci_field_pos,
+                jitter_seed=sci_jitter_seed,
             )
             # Per-epoch static field: PSF jitter differs each epoch, so the
             # cache key changes; render_static_field re-renders correctly.
-            static_field = crowded_renderer.render_static_field(sci_psf, stamp_center)
+            static_field = crowded_renderer.render_static_field(
+                sci_psf,
+                stamp_center,
+                psf_fingerprint=(psf_config_hash, sca_id, sci_field_pos, sci_jitter_seed),
+            )
 
             # Initialise GalSim stamp with the static field, then accumulate source.
             galsim_stamp = _galsim.Image(
                 static_field.copy(),
                 scale=pixel_scale,
             )
+            del static_field
             source_renderer.render_source(
                 flux_e=float(params["flux_e"]),
                 centroid_offset_pix=params.get("centroid_offset_pix", (0.0, 0.0)),
@@ -494,6 +426,7 @@ class SceneSimulator:
         for i in range(n_science):
             diff_full = dia.subtract(event_output.rate_cube[i], reference)
             diff_crop = dia.extract_stamp(diff_full)
+            del diff_full
 
             sat_crop = (
                 event_output.saturation_cube[i][row_start:row_stop, col_start:col_stop]
@@ -509,7 +442,7 @@ class SceneSimulator:
             cr_stamps_list.append(cr_crop)
 
         # --- 7. Provenance update with Phase 2 fields ---
-        n_neighbors_rendered = _count_filtered_neighbors(crowded_renderer)
+        n_neighbors_rendered = crowded_renderer.count_neighbors_rendered()
 
         updated_records: list[ProvenanceRecord] = []
         for record in event_output.provenance_records:

@@ -21,6 +21,8 @@ from __future__ import annotations
 
 from typing import Literal
 
+from typing import Any
+
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from smig.config.schemas import DetectorConfig
@@ -37,7 +39,7 @@ class PSFConfig(BaseModel):
     line-of-sight jitter, and an optional on-disk PSF cache directory.
     """
 
-    model_config = ConfigDict(frozen=True, extra="forbid")
+    model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
 
     filter_name: str = Field(
         default="W146",
@@ -91,6 +93,13 @@ class PSFConfig(BaseModel):
         ),
     )
 
+    @field_validator("wavelength_range_um", mode="before")
+    @classmethod
+    def _coerce_wavelength_range(cls, v: Any) -> Any:
+        if isinstance(v, (list, tuple)):
+            return tuple(v)
+        return v
+
     @field_validator("wavelength_range_um")
     @classmethod
     def _check_wavelength_order(
@@ -118,7 +127,7 @@ class RenderingConfig(BaseModel):
     """
 
     # Fields are TBD for Phase 2 CrowdedFieldRenderer implementation.
-    model_config = ConfigDict(frozen=True, extra="forbid")
+    model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
 
 
 # ---------------------------------------------------------------------------
@@ -132,7 +141,7 @@ class CrowdedFieldConfig(BaseModel):
     radius, and optional source brightness cap.
     """
 
-    model_config = ConfigDict(frozen=True, extra="forbid")
+    model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
 
     stamp_size: int = Field(
         default=64,
@@ -162,11 +171,14 @@ class CrowdedFieldConfig(BaseModel):
     )
     neighbor_mag_limit: float = Field(
         default=26.0,
+        ge=-5.0,
+        le=40.0,
         description=(
             "Faintest AB magnitude of neighbour sources drawn into the crowded-field "
             "stamp.  Sources fainter than this limit are excluded.  "
             "Default 26.0 AB roughly matches the Roman WFI 5σ point-source depth "
-            "for a ~100 s exposure."
+            "for a ~100 s exposure.  AB magnitudes can be negative for very bright "
+            "sources, so the valid range is [-5.0, 40.0]."
         ),
     )
 
@@ -182,7 +194,7 @@ class DIAConfig(BaseModel):
     and the image subtraction algorithm.
     """
 
-    model_config = ConfigDict(frozen=True, extra="forbid")
+    model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
 
     n_reference_epochs: int = Field(
         default=30,

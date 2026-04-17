@@ -64,9 +64,15 @@ class CrowdedFieldRenderer:
     convolution for efficiency).
 
     Results are cached in an explicit per-instance dictionary keyed on a
-    stable ``(hash(psf_array_bytes), stamp_center, stamp_size, pixel_scale)``
-    tuple.  A second call with identical arguments returns the cached
-    ``np.ndarray`` without recomputation.
+    stable ``(psf_fingerprint, stamp_center, stamp_size, pixel_scale)``
+    tuple.  A second call with identical arguments returns a copy of the
+    cached ``np.ndarray`` without recomputation.  Callers should supply a
+    ``psf_fingerprint`` — a deterministic hashable value derived from the
+    PSF's configuration inputs (e.g. ``(psf_config_hash, sca_id,
+    field_position, jitter_seed)``) — so the key is stable across Python
+    objects and process restarts.  When ``psf_fingerprint`` is omitted,
+    ``id(psf)`` is used as a fallback (only correct when the same Python
+    object is consistently reused, as in unit tests).
 
     Parameters
     ----------
@@ -130,8 +136,9 @@ class CrowdedFieldRenderer:
         Enforces
         --------
         1. All required columns are present.
-        2. No NaN values in any required column.
+        2. No NaN or Inf values in any required column.
         3. Position columns (``x_pix``, ``y_pix``) are floating-point dtype.
+        4. ``flux_e`` is non-negative.
         """
         missing = [c for c in _REQUIRED_COLUMNS if c not in df.columns]
         if missing:
@@ -144,6 +151,20 @@ class CrowdedFieldRenderer:
         if nan_cols:
             raise ValueError(
                 f"neighbor_catalog contains NaN values in columns: {nan_cols}."
+            )
+
+        inf_cols = [
+            c for c in _REQUIRED_COLUMNS
+            if _pd.api.types.is_float_dtype(df[c]) and np.isinf(df[c]).any()
+        ]
+        if inf_cols:
+            raise ValueError(
+                f"neighbor_catalog contains Inf values in columns: {inf_cols}."
+            )
+
+        if (df["flux_e"] < 0.0).any():
+            raise ValueError(
+                "neighbor_catalog contains negative values in column 'flux_e'."
             )
 
         for col in _POSITION_COLUMNS:
@@ -163,6 +184,7 @@ class CrowdedFieldRenderer:
         self,
         psf: "_galsim_type.InterpolatedImage",
         stamp_center_detector_pix: tuple[float, float],
+        psf_fingerprint: tuple | str | None = None,
     ) -> np.ndarray:
         """Render all catalog neighbors into a stamp centred on
         *stamp_center_detector_pix*.
@@ -174,8 +196,8 @@ class CrowdedFieldRenderer:
 
         Stars fainter than ``brightness_cap_mag`` (when set) are excluded.
 
-        The result is stored in ``self._static_field_cache`` and returned
-        immediately on subsequent calls with identical arguments.
+        The result is stored in ``self._static_field_cache`` and a copy is
+        returned immediately on subsequent calls with identical arguments.
 
         Parameters
         ----------
@@ -185,6 +207,16 @@ class CrowdedFieldRenderer:
             ``(x, y)`` absolute detector-pixel coordinates of the stamp
             centre.  Offsets are computed as
             ``dx = star.x_pix - stamp_center_x``.
+        psf_fingerprint:
+            A deterministic, hashable value that uniquely identifies the
+            PSF's physics — typically
+            ``(psf_config_hash, sca_id, field_position, jitter_seed)``.
+            Using this avoids both expensive array serialisation and the
+            memory-address instability of ``id(psf)``.  When ``None``
+            (default), ``id(psf)`` is used as a fallback, which is only
+            correct when the same Python object is consistently reused
+            (acceptable in unit tests; **not** correct in production where
+            ``STPSFProvider`` creates a new object per call).
 
         Returns
         -------
@@ -193,15 +225,19 @@ class CrowdedFieldRenderer:
             containing rendered neighbor flux in electrons.  Never returns
             a GalSim Image object.
         """
-        # Stable cache key — all components are hashable scalars or tuples.
+        # Build a deterministic cache key. Use the caller-supplied fingerprint
+        # when available; fall back to id(psf) only for tests where the same
+        # Python object is reused across calls.
+        psf_key = psf_fingerprint if psf_fingerprint is not None else id(psf)
         cache_key: tuple = (
-            hash(psf.image.array.tobytes()),
+            psf_key,
             stamp_center_detector_pix,
             self._stamp_size,
             self._pixel_scale,
         )
         if cache_key in self._static_field_cache:
-            return self._static_field_cache[cache_key]
+            # Return a copy so callers cannot corrupt the cached array in-place.
+            return self._static_field_cache[cache_key].copy()
 
         # --- Filter by brightness cap (mag_w146 metadata only) ---
         cat = self._catalog
@@ -217,12 +253,16 @@ class CrowdedFieldRenderer:
 
         if len(cat) > 0:
             center_x, center_y = stamp_center_detector_pix
+            # Extract columns as contiguous numpy arrays to avoid pandas Series overhead.
+            x_arr = cat["x_pix"].to_numpy()
+            y_arr = cat["y_pix"].to_numpy()
+            flux_arr = cat["flux_e"].to_numpy()
             # Build shifted DeltaFunction profiles for every star.
             profiles: list[Any] = []
-            for _, star in cat.iterrows():
-                dx_pix = float(star["x_pix"]) - center_x
-                dy_pix = float(star["y_pix"]) - center_y
-                delta = _galsim.DeltaFunction(flux=float(star["flux_e"]))
+            for x, y, flux in zip(x_arr, y_arr, flux_arr):
+                dx_pix = float(x) - center_x
+                dy_pix = float(y) - center_y
+                delta = _galsim.DeltaFunction(flux=float(flux))
                 # shift() takes arcsec; convert from pixels.
                 profiles.append(
                     delta.shift(dx_pix * self._pixel_scale, dy_pix * self._pixel_scale)
@@ -236,3 +276,21 @@ class CrowdedFieldRenderer:
         result = np.array(field_image.array, dtype=np.float64)
         self._static_field_cache[cache_key] = result
         return result
+
+    def count_neighbors_rendered(self) -> int:
+        """Return the number of catalog stars that pass the brightness-cap filter.
+
+        Replicates the filter applied inside :meth:`render_static_field` so the
+        orchestrator can record the post-cap neighbor count in provenance without
+        accessing private attributes.
+
+        Returns
+        -------
+        int
+            Number of stars in the catalog with ``mag_w146 <= brightness_cap_mag``
+            (or all stars when no cap is set).
+        """
+        cat = self._catalog
+        if self._brightness_cap_mag is not None:
+            cat = cat[cat["mag_w146"] <= self._brightness_cap_mag]
+        return int(len(cat))

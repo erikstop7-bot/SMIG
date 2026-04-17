@@ -6,7 +6,10 @@ Deterministic, hierarchical seed derivation for reproducible Phase 2 simulations
 Contract
 --------
 * Same inputs always produce the same seed (determinism).
-* Different inputs always produce different seeds (independence).
+* Different inputs are highly likely to produce different seeds, but mathematical
+  collision immunity is impossible: the 256-bit SHA-256 digest is reduced to a
+  31-bit GalSim seed space (2**31 - 1 possible values), so collisions are
+  mathematically unavoidable with sufficiently many distinct inputs.
 * All output seeds are strictly positive 32-bit integers: 0 < seed < 2**31.
   This satisfies GalSim's requirement that ``galsim.BaseDeviate(seed)`` receives
   a positive integer — GalSim silently misuses a seed of 0.
@@ -16,6 +19,10 @@ Implementation notes
 SHA-256 (from :mod:`hashlib`) is used for all hashing.  Python's built-in
 ``hash()`` is intentionally avoided because it is salted per-process by
 ``PYTHONHASHSEED`` and therefore non-reproducible across interpreter invocations.
+
+The hash payload is serialized with :func:`json.dumps` (canonical separators,
+sorted keys) to avoid the ambiguity that arises when a colon-delimited string
+format is used and a namespace or argument itself contains a colon character.
 
 Seed normalisation
 ------------------
@@ -41,6 +48,7 @@ numerically identical arguments.
 from __future__ import annotations
 
 import hashlib
+import json
 
 # Maximum exclusive bound for GalSim-compatible seed range.
 _GALSIM_SEED_MAX = 2**31  # exclusive upper bound: seeds live in [1, 2**31 - 1]
@@ -83,7 +91,13 @@ def derive_event_seed(
     >>> assert s1 == s2                          # deterministic
     >>> assert 0 < s1 < 2**31                   # GalSim-safe range
     """
-    payload = f"{namespace}:{master_seed}:{event_id}".encode("utf-8")
+    if not event_id:
+        raise ValueError("event_id must be a non-empty string.")
+    payload = json.dumps(
+        {"namespace": namespace, "master_seed": master_seed, "event_id": event_id},
+        separators=(",", ":"),
+        sort_keys=True,
+    ).encode("utf-8")
     digest = hashlib.sha256(payload).hexdigest()
     value = int(digest, 16)
     return 1 + (value % _MODULUS)
@@ -124,7 +138,13 @@ def derive_stage_seed(
     >>> assert s_psf != s_noise                  # independent
     >>> assert 0 < s_psf < 2**31               # GalSim-safe range
     """
-    payload = f"{namespace}:{event_seed}:{stage_name}".encode("utf-8")
+    if not stage_name:
+        raise ValueError("stage_name must be a non-empty string.")
+    payload = json.dumps(
+        {"namespace": namespace, "event_seed": event_seed, "stage_name": stage_name},
+        separators=(",", ":"),
+        sort_keys=True,
+    ).encode("utf-8")
     digest = hashlib.sha256(payload).hexdigest()
     value = int(digest, 16)
     return 1 + (value % _MODULUS)

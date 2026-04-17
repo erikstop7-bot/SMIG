@@ -28,6 +28,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+import numpy as np
+
 if TYPE_CHECKING:
     import galsim as _galsim_type
 
@@ -108,6 +110,21 @@ class FiniteSourceRenderer:
         None
             Draws into *stamp* in-place; returns nothing.
         """
+        # --- Input validation ---
+        if not np.isfinite(flux_e) or flux_e < 0.0:
+            raise ValueError(
+                f"flux_e must be finite and non-negative; got {flux_e!r}."
+            )
+        dx_off, dy_off = centroid_offset_pix
+        if not np.isfinite(dx_off) or not np.isfinite(dy_off):
+            raise ValueError(
+                f"centroid_offset_pix must be finite; got {centroid_offset_pix!r}."
+            )
+        if not np.isfinite(rho_star_arcsec) or rho_star_arcsec < 0.0:
+            raise ValueError(
+                f"rho_star_arcsec must be finite and non-negative; got {rho_star_arcsec!r}."
+            )
+
         pixel_scale: float = stamp.scale  # arcsec / pixel
 
         # --- Choose base profile based on source size ---

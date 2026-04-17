@@ -72,6 +72,11 @@ class DIAPipeline:
             (detector_config.readout.n_ramp_reads - 1)
             * detector_config.readout.frame_time_s
         )
+        if self._t_exp_s <= 0.0:
+            raise ValueError(
+                f"Derived exposure time t_exp_s={self._t_exp_s!r} must be > 0. "
+                "Check readout.n_ramp_reads (must be >= 2) and readout.frame_time_s."
+            )
         self._read_noise_e: float = (
             detector_config.electrical.read_noise_cds_electrons
         )
@@ -141,8 +146,23 @@ class DIAPipeline:
                     f"ideal_electrons_epochs[{i}] has shape {arr.shape}; "
                     f"expected {expected_shape} (context_stamp_size={ctx})."
                 )
+            if not np.all(np.isfinite(arr)):
+                raise ValueError(
+                    f"ideal_electrons_epochs[{i}] contains non-finite values (NaN/Inf)."
+                )
+
+        for i, bg in enumerate(backgrounds_e_per_s):
+            if not np.isfinite(bg):
+                raise ValueError(
+                    f"backgrounds_e_per_s[{i}]={bg!r} is non-finite (NaN/Inf)."
+                )
 
         t = self._t_exp_s
+        if t <= 0.0:
+            raise ValueError(
+                f"t_exp_s={t!r} must be > 0 before division. "
+                "Check readout.n_ramp_reads (must be >= 2) and readout.frame_time_s."
+            )
         rn = self._read_noise_e
         dk = self._dark_e_per_s
 
@@ -151,7 +171,7 @@ class DIAPipeline:
 
         for ideal_e, bg_e_per_s in zip(ideal_electrons_epochs, backgrounds_e_per_s):
             # Convert ideal electrons to rate space (e-/s)
-            rate_image = ideal_e.astype(np.float64) / t + bg_e_per_s
+            rate_image = ideal_e.astype(np.float64, copy=False) / t + bg_e_per_s
 
             # Expected noise variance in electrons (scalar per epoch)
             # Omits source Poisson noise for MVP; see module docstring.
@@ -232,8 +252,17 @@ class DIAPipeline:
                 f"reference_rate_image.shape {reference_rate_image.shape}."
             )
 
-        sci = science_rate_image.astype(np.float64)
-        ref = reference_rate_image.astype(np.float64)
+        if not np.all(np.isfinite(science_rate_image)):
+            raise ValueError(
+                "science_rate_image contains non-finite values (NaN/Inf)."
+            )
+        if not np.all(np.isfinite(reference_rate_image)):
+            raise ValueError(
+                "reference_rate_image contains non-finite values (NaN/Inf)."
+            )
+
+        sci = science_rate_image.astype(np.float64, copy=False)
+        ref = reference_rate_image.astype(np.float64, copy=False)
 
         # Kernel size: 2 * ceil(4 * sigma_max) + 1 = 33 px for sigma_max=4.0
         sigma_max = max(self._AL_SIGMAS)
@@ -308,14 +337,18 @@ class DIAPipeline:
                 f"smaller than science_stamp_size={sci_size}."
             )
 
-        # Dynamic crop: center on context_stamp_size // 2
-        center = ctx_size // 2
+        # Derive center from actual input dimensions so oversized arrays are
+        # handled correctly regardless of config.context_stamp_size.
+        center_r = h // 2
+        center_c = w // 2
         half = sci_size // 2
-        row_start = center - half
-        row_stop = center + half
-        col_start = center - half
-        col_stop = center + half
+        row_start = center_r - half
+        col_start = center_c - half
+        # Use row_start + sci_size (not center + half) so odd sci_size is exact.
+        row_stop = row_start + sci_size
+        col_stop = col_start + sci_size
 
+        # Copy ensures the parent array can be freed by the GC after this call.
         return difference_image[row_start:row_stop, col_start:col_stop].copy()
 
     # ------------------------------------------------------------------

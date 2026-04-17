@@ -60,7 +60,9 @@ def sanitize_rng_state(state: dict[str, Any]) -> dict[str, Any]:
         if isinstance(obj, np.generic):
             return obj.item()
         if isinstance(obj, dict):
-            return {k: _convert(val) for k, val in obj.items()}
+            return {k: _convert(val) for k, val in sorted(obj.items())}
+        if isinstance(obj, set):
+            return sorted([_convert(item) for item in obj])
         if isinstance(obj, (list, tuple)):
             converted = (_convert(item) for item in obj)
             return type(obj)(converted)

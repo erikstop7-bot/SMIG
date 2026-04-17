@@ -270,14 +270,18 @@ def test_single_star_at_edge_does_not_raise() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_cache_hit_returns_same_object(renderer: Any, psf: Any) -> None:
-    """Second call with identical args returns the exact same cached array."""
+def test_cache_hit_returns_copy_with_equal_values(renderer: Any, psf: Any) -> None:
+    """Second call with identical args returns an equal array copy, not same object.
+
+    The cache returns copies so callers cannot corrupt cached results in place.
+    """
     result1 = renderer.render_static_field(psf, (512.0, 512.0))
     result2 = renderer.render_static_field(psf, (512.0, 512.0))
-    assert result1 is result2, (
-        "Second call with same PSF and centre must return the cached object "
-        "(result1 is result2)."
+    assert result1 is not result2, (
+        "Cache should return independent copies, not the same object."
     )
+    np.testing.assert_array_equal(result1, result2)
+    assert len(renderer._static_field_cache) == 1, "Cache should have exactly one entry."
 
 
 def test_cache_miss_on_different_centre(renderer: Any, psf: Any) -> None:
@@ -502,3 +506,64 @@ def test_total_flux_increases_with_more_stars() -> None:
         f"20 stars should produce more flux than 5 stars: "
         f"flux5={flux5:.1f}, flux20={flux20:.1f}"
     )
+
+
+# ---------------------------------------------------------------------------
+# Regression: non-finite and negative catalog value rejection
+# ---------------------------------------------------------------------------
+
+
+def test_nan_in_flux_e_raises() -> None:
+    """CrowdedFieldRenderer raises ValueError when flux_e contains NaN."""
+    from smig.rendering.crowding import CrowdedFieldRenderer
+
+    bad_cat = _pd.DataFrame({
+        "x_pix": [512.0, 513.0],
+        "y_pix": [512.0, 512.0],
+        "flux_e": [500.0, float("nan")],
+        "mag_w146": [20.0, 21.0],
+    })
+    with pytest.raises(ValueError, match="NaN"):
+        CrowdedFieldRenderer(bad_cat)
+
+
+def test_inf_in_flux_e_raises() -> None:
+    """CrowdedFieldRenderer raises ValueError when flux_e contains Inf."""
+    from smig.rendering.crowding import CrowdedFieldRenderer
+
+    bad_cat = _pd.DataFrame({
+        "x_pix": [512.0],
+        "y_pix": [512.0],
+        "flux_e": [float("inf")],
+        "mag_w146": [20.0],
+    })
+    with pytest.raises(ValueError, match="Inf"):
+        CrowdedFieldRenderer(bad_cat)
+
+
+def test_inf_in_position_raises() -> None:
+    """CrowdedFieldRenderer raises ValueError when x_pix contains Inf."""
+    from smig.rendering.crowding import CrowdedFieldRenderer
+
+    bad_cat = _pd.DataFrame({
+        "x_pix": [float("inf")],
+        "y_pix": [512.0],
+        "flux_e": [500.0],
+        "mag_w146": [20.0],
+    })
+    with pytest.raises(ValueError, match="Inf"):
+        CrowdedFieldRenderer(bad_cat)
+
+
+def test_negative_flux_e_raises() -> None:
+    """CrowdedFieldRenderer raises ValueError when flux_e is negative."""
+    from smig.rendering.crowding import CrowdedFieldRenderer
+
+    bad_cat = _pd.DataFrame({
+        "x_pix": [512.0],
+        "y_pix": [512.0],
+        "flux_e": [-100.0],
+        "mag_w146": [20.0],
+    })
+    with pytest.raises(ValueError, match="negative"):
+        CrowdedFieldRenderer(bad_cat)

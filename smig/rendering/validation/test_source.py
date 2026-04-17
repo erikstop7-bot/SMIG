@@ -355,3 +355,57 @@ def test_construction_without_galsim_raises(monkeypatch: Any) -> None:
             src_mod.FiniteSourceRenderer()
     finally:
         src_mod._GALSIM_AVAILABLE = orig
+
+
+# ---------------------------------------------------------------------------
+# Regression: finite input guards
+# ---------------------------------------------------------------------------
+
+
+def test_negative_flux_e_raises(renderer: Any, psf: Any) -> None:
+    """render_source raises ValueError for negative flux_e."""
+    stamp = _make_stamp(64)
+    with pytest.raises(ValueError, match="flux_e"):
+        renderer.render_source(-1.0, (0.0, 0.0), 0.1, None, psf, stamp)
+
+
+def test_nan_flux_e_raises(renderer: Any, psf: Any) -> None:
+    """render_source raises ValueError for NaN flux_e."""
+    stamp = _make_stamp(64)
+    with pytest.raises(ValueError, match="flux_e"):
+        renderer.render_source(float("nan"), (0.0, 0.0), 0.1, None, psf, stamp)
+
+
+def test_inf_flux_e_raises(renderer: Any, psf: Any) -> None:
+    """render_source raises ValueError for Inf flux_e."""
+    stamp = _make_stamp(64)
+    with pytest.raises(ValueError, match="flux_e"):
+        renderer.render_source(float("inf"), (0.0, 0.0), 0.1, None, psf, stamp)
+
+
+def test_nan_centroid_offset_raises(renderer: Any, psf: Any) -> None:
+    """render_source raises ValueError for non-finite centroid_offset_pix."""
+    stamp = _make_stamp(64)
+    with pytest.raises(ValueError, match="centroid_offset_pix"):
+        renderer.render_source(500.0, (float("nan"), 0.0), 0.1, None, psf, stamp)
+
+
+def test_inf_centroid_offset_raises(renderer: Any, psf: Any) -> None:
+    """render_source raises ValueError for Inf in centroid_offset_pix."""
+    stamp = _make_stamp(64)
+    with pytest.raises(ValueError, match="centroid_offset_pix"):
+        renderer.render_source(500.0, (0.0, float("inf")), 0.1, None, psf, stamp)
+
+
+def test_negative_rho_star_raises(renderer: Any, psf: Any) -> None:
+    """render_source raises ValueError for negative rho_star_arcsec."""
+    stamp = _make_stamp(64)
+    with pytest.raises(ValueError, match="rho_star_arcsec"):
+        renderer.render_source(500.0, (0.0, 0.0), -0.1, None, psf, stamp)
+
+
+def test_nan_rho_star_raises(renderer: Any, psf: Any) -> None:
+    """render_source raises ValueError for NaN rho_star_arcsec."""
+    stamp = _make_stamp(64)
+    with pytest.raises(ValueError, match="rho_star_arcsec"):
+        renderer.render_source(500.0, (0.0, 0.0), float("nan"), None, psf, stamp)

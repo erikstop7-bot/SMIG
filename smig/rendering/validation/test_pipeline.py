@@ -409,6 +409,69 @@ class TestArchitectureBoundary:
         from smig.config.schemas import DetectorConfig  # noqa: F401
         assert True  # Reaching here means the import works.
 
+    def test_canonical_seed_functions_imported(self) -> None:
+        """pipeline.py must import derive_event_seed/derive_stage_seed from smig.config.seed."""
+        import smig.rendering.pipeline as pipeline_mod
+        from smig.config.seed import derive_event_seed, derive_stage_seed
+        assert getattr(pipeline_mod, "derive_event_seed", None) is derive_event_seed, (
+            "pipeline.py must import derive_event_seed from smig.config.seed"
+        )
+        assert getattr(pipeline_mod, "derive_stage_seed", None) is derive_stage_seed, (
+            "pipeline.py must import derive_stage_seed from smig.config.seed"
+        )
+
+    def test_local_seed_helpers_removed(self) -> None:
+        """The old local _derive_event_seed / _derive_stage_seed must not exist."""
+        import smig.rendering.pipeline as pipeline_mod
+        assert not hasattr(pipeline_mod, "_derive_event_seed"), (
+            "_derive_event_seed local helper was not deleted from pipeline.py"
+        )
+        assert not hasattr(pipeline_mod, "_derive_stage_seed"), (
+            "_derive_stage_seed local helper was not deleted from pipeline.py"
+        )
+
+    def test_count_filtered_neighbors_removed(self) -> None:
+        """The old _count_filtered_neighbors helper must not exist in pipeline.py."""
+        import smig.rendering.pipeline as pipeline_mod
+        assert not hasattr(pipeline_mod, "_count_filtered_neighbors"), (
+            "_count_filtered_neighbors was not removed from pipeline.py"
+        )
+
+
+# ---------------------------------------------------------------------------
+# Additional: CrowdedFieldRenderer public accessor
+# ---------------------------------------------------------------------------
+
+class TestCrowdedFieldRendererPublicAccessor:
+    """Verify count_neighbors_rendered() is public and correct."""
+
+    def test_count_neighbors_rendered_no_cap(self, sim_config: SimulationConfig) -> None:
+        from smig.rendering.crowding import CrowdedFieldRenderer
+        n_stars = 5
+        rng = np.random.default_rng(0)
+        cat = pd.DataFrame({
+            "x_pix": rng.uniform(0.0, 32.0, n_stars),
+            "y_pix": rng.uniform(0.0, 32.0, n_stars),
+            "flux_e": np.ones(n_stars) * 100.0,
+            "mag_w146": np.linspace(18.0, 22.0, n_stars),
+        })
+        renderer = CrowdedFieldRenderer(cat, stamp_size=32)
+        assert renderer.count_neighbors_rendered() == n_stars
+
+    def test_count_neighbors_rendered_with_cap(self, sim_config: SimulationConfig) -> None:
+        from smig.rendering.crowding import CrowdedFieldRenderer
+        rng = np.random.default_rng(1)
+        n_stars = 6
+        cat = pd.DataFrame({
+            "x_pix": rng.uniform(0.0, 32.0, n_stars),
+            "y_pix": rng.uniform(0.0, 32.0, n_stars),
+            "flux_e": np.ones(n_stars) * 100.0,
+            "mag_w146": np.array([18.0, 19.0, 20.0, 21.0, 22.0, 23.0]),
+        })
+        renderer = CrowdedFieldRenderer(cat, brightness_cap_mag=20.5)
+        # Stars with mag_w146 <= 20.5: 18, 19, 20 → 3 stars
+        assert renderer.count_neighbors_rendered() == 3
+
 
 # ---------------------------------------------------------------------------
 # Additional: input validation
