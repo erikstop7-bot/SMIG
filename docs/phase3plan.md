@@ -18,16 +18,16 @@
 
 These apply to all six prompts. The agent should internalize them once.
 
-1. **Repo test layout:** Existing tests live under `smig/*/validation/`. Phase 3 tests MUST follow this (e.g., `smig/catalogs/validation/test_adapter.py`). `scripts/` tests live at `scripts/test_*.py`. Ensure `pyproject.toml` (or `pytest.ini`) has `smig/**/validation` in `testpaths` and registers the `slow` and `integration` markers.
+1. **Repo test layout:** Existing tests live under smig/*/validation/. Phase 3 tests MUST follow this (e.g., smig/catalogs/validation/test_adapter.py). scripts/ tests live at scripts/test_*.py. Run tests with pytest -v.
 2. **Baseline regression:** Run `pytest -v` before starting; ensure baseline_count + new_phase_tests pass afterward.
-3. **Dependency policy:** No new runtime dependencies without explicit approval. Exceptions explicitly approved for Phase 3: VBBinaryLensing (runtime, Prompt 3.2), MulensModel (test-only, Prompt 3.2), and matplotlib (dev-only, Prompt 3.6). No pydantic anywhere in Phase 3.
-4. **Frozen upstream:** `smig/rendering/*`, `smig/optics/*`, `smig/sensor/*`, `smig/config/seed.py`, and `smig/provenance/schema.py` are frozen. Phase 3.6 permits a one-line bugfix only via an explicit commit labeled `phase3.6 hotfix: <risk-id>: <rationale>`, requiring a full suite rerun and a note in the acceptance report.
+3. **Dependency policy:** No new runtime dependencies without explicit approval. Exceptions explicitly approved for Phase 3: VBBinaryLensing (runtime, Prompt 3.2), MulensModel (test-only, Prompt 3.2), and matplotlib (dev-only, Prompt 3.6). Pydantic/PyYAML policy: PyYAML is already a core repo dependency; use it. Do not introduce new Phase 3 Pydantic models; use stdlib dataclasses for new models. You may load/read existing Phase 2 Pydantic models via sanctioned utilities.
+4. **Frozen upstream:** smig/rendering/*, smig/optics/*, smig/sensor/*, smig/config/seed.py, and smig/provenance/schema.py are frozen, with one explicit exception: Prompt 3.5 is authorized to add an optional neighbor_catalog parameter to smig/rendering/pipeline.py. Phase 3.6 permits a one-line bugfix only via an explicit commit labeled phase3.6 hotfix: <risk-id>: <rationale>, requiring a full suite rerun and a note in the acceptance report.
 5. **Interface freezes:** Dataclasses emitted for downstream use MUST be `@dataclass(frozen=True)`. `StarRecord`, `MicrolensingEvent`, and `LabelVector` are strictly immutable: mutations raise `FrozenInstanceError`. Default `Mapping` fields use `field(default_factory=lambda: MappingProxyType({}))`. **Exception:** `DatasetManifest` in 3.4 is an append-only builder and may control its own mutation; it is NOT declared `frozen=True`.
 6. **Shell acceptance command hygiene:** For checks where the result must be empty, prefer `! grep -qrnE "pattern" path` (fails loudly if a match is found). Reserve `|| true` only for informational greps inside `set -e` scripts where you deliberately want to continue. Use `test -f <path>` for file existence, `pytest` for tests, `python -c` for import smokes.
 7. **Output artifacts:** Generated artifacts (PNGs, HDF5 shards, manifests) go to `outputs/` and `datasets/`. Both directories are gitignored. Only committed code, fixtures under `smig/*/validation/fixtures/`, and docs enter version control.
 8. **Docs allowed:** Prompts may create `docs/phase3_*.md` files. These are part of the deliverable, not scope creep.
 9. **Scope exclusions (all phases):** No lens orbital motion, no xallarap, no 2L2S / binary sources, no astrometric microlensing centroid shifts, no non-zero annual parallax in smoke configs, no ML training, no live Roman cadence modeling. Parallax fields exist on the dataclass but default to 0. Single-band F146 for Phase 3.
-10. **Stop-and-ask triggers:** Adding any new dependency, deleting any existing file, modifying any frozen module, changing CI configuration, modifying `scripts/validate_splits.py`.
+10. **Stop-and-ask triggers:** Adding any new dependency beyond the Phase 3 whitelist in Global Rule 3, deleting any existing file, modifying any frozen module, changing CI configuration, modifying scripts/validate_splits.py.
 
 ---
 
@@ -64,6 +64,7 @@ You are a senior astrophysics software engineer expert in Galactic population sy
 - `data/catalogs/bandpasses/roman_F146.csv` — committed Roman F146 throughput
 - `data/catalogs/bandpasses/f146_zero_point.yaml` — machine-readable F146 AB zero-point (single source of truth)
 - `docs/phase3_photometry_reference.md` — human provenance: pinned numeric value mirrored from YAML, retrieval date, URL, STScI version
+- pyproject.toml — explicitly authorized to add pytest configuration (testpaths and markers)
 
 **OUT OF SCOPE (DO NOT MODIFY):**
 - `smig/rendering/*`, `smig/optics/*`, `smig/sensor/*` — frozen
@@ -90,30 +91,30 @@ You are a senior astrophysics software engineer expert in Galactic population sy
 Complete in order:
 
 1. **Read first, then code.** Before writing anything, `grep` the repo for: `_REQUIRED_COLUMNS` in `smig/rendering/crowding.py`; `_generate_catalog` in `smig/rendering/pipeline.py`; `plate_scale` or equivalent plate-scale constant. Paste the `_REQUIRED_COLUMNS` value as a doc comment at the top of `adapter.py`.
+2. Configure Pytest: Update the existing [tool.pytest.ini_options] section in pyproject.toml. Add/update testpaths = ["smig", "scripts"] and merge in the new markers to the existing ones: markers = ["slow: marks tests as slow", "integration: marks integration tests"].
 
-2. **`base.py` — frozen `StarRecord`** with fields: `galactic_l_deg: float`, `galactic_b_deg: float`, `distance_kpc: float`, `mass_msun: float`, `teff_K: float`, `log_g: float`, `metallicity_feh: float`, `mag_F146_ab: float`, `mag_other_ab: Mapping[str, float] = field(default_factory=lambda: MappingProxyType({}))`, `source_id: str`, `catalog_tile_id: str`. Abstract `CatalogProvider` with `sample_field(l_deg, b_deg, fov_deg, rng: np.random.Generator) -> list[StarRecord]` and `list_bands() -> tuple[str, ...]`. Define `MissingColumnError(Exception)`.
+3. **`base.py` — frozen `StarRecord`** with fields: `galactic_l_deg: float`, `galactic_b_deg: float`, `distance_kpc: float`, `mass_msun: float`, `teff_K: float`, `log_g: float`, `metallicity_feh: float`, `mag_F146_ab: float`, `mag_other_ab: Mapping[str, float] = field(default_factory=lambda: MappingProxyType({}))`, `source_id: str`, `catalog_tile_id: str`. Abstract `CatalogProvider` with `sample_field(l_deg, b_deg, fov_deg, rng: np.random.Generator) -> list[StarRecord]` and `list_bands() -> tuple[str, ...]`. Define `MissingColumnError(Exception)`.
 
-3. **`photometry.py`** — `mag_ab_to_electrons(mag_ab: float, band: str, exposure_s: float) -> float`. Loads the exact numeric zero point from `data/catalogs/bandpasses/f146_zero_point.yaml` (machine-readable YAML, single source of truth). Unknown band raises `ValueError`. Document the total-electrons semantics in the docstring.
+4. **`photometry.py`** — `mag_ab_to_electrons(mag_ab: float, band: str, exposure_s: float) -> float`. Loads the exact numeric zero point from `data/catalogs/bandpasses/f146_zero_point.yaml` (machine-readable YAML, single source of truth). Unknown band raises `ValueError`. Document the total-electrons semantics in the docstring.
 
-4. **`data/catalogs/bandpasses/f146_zero_point.yaml`** — Commit the machine-readable zero-point file. Structure: `f146_ab_zero_point: <value>` plus any provenance metadata fields (`retrieval_date`, `source_url`, `stscI_bandpass_version`).
+5. **`data/catalogs/bandpasses/f146_zero_point.yaml`** — Commit the machine-readable zero-point file. Structure: `f146_ab_zero_point: <value>` plus any provenance metadata fields (retrieval_date, source_url, stsci_bandpass_version).
+6. **`docs/phase3_photometry_reference.md`** — Human provenance doc. Mirror the numeric value from the YAML, plus retrieval date, source URL, and STScI Roman bandpass version identifier. Clearly label this as a human-readable mirror; `photometry.py` is the code authority.
 
-5. **`docs/phase3_photometry_reference.md`** — Human provenance doc. Mirror the numeric value from the YAML, plus retrieval date, source URL, and STScI Roman bandpass version identifier. Clearly label this as a human-readable mirror; `photometry.py` is the code authority.
+7. **`wcs.py`** — galactic_to_sca_pixel(l_deg, b_deg, sca_id, field_center_l_deg, field_center_b_deg) -> tuple[float, float]. Uses astropy.coordinates.SkyCoord for Galactic→ICRS and the repo's existing plate-scale constant for the SCA affine. Pixel origin convention: For Phase 3 datasets, the field center (l, b) MUST map exactly to (128.0, 128.0), representing the center of the Phase 2 256x256 context stamp.
 
-6. **`wcs.py`** — `galactic_to_sca_pixel(l_deg, b_deg, sca_id, field_center_l_deg, field_center_b_deg) -> tuple[float, float]`. Uses `astropy.coordinates.SkyCoord` for Galactic→ICRS and the repo's existing plate-scale constant for the SCA affine.
+8. **`besancon.py`** — `BesanconProvider(catalog_path: Path)` supporting CSV and FITS output from the Besançon web-form query. Document the exact expected column schema in the module docstring. Validate on load.
 
-7. **`besancon.py`** — `BesanconProvider(catalog_path: Path)` supporting CSV and FITS output from the Besançon web-form query. Document the exact expected column schema in the module docstring. Validate on load.
+9. **`roman_bulge.py`** — `RomanBulgeProvider(catalog_path: Path)` with Penny et al. 2019 FITS column schema.
 
-8. **`roman_bulge.py`** — `RomanBulgeProvider(catalog_path: Path)` with Penny et al. 2019 FITS column schema.
+10. **`synthetic.py`** — `SyntheticCatalogProvider` exposing the `CatalogProvider` interface. Duplicates logic from `_generate_catalog` if needed. Document in the class docstring: "Phase 3.1 does NOT wire real catalogs into SceneSimulator. Phase 2's `pipeline._generate_catalog` remains the active code path until Phase 3.5 worker integration."
 
-9. **`synthetic.py`** — `SyntheticCatalogProvider` exposing the `CatalogProvider` interface. Duplicates logic from `_generate_catalog` if needed. Document in the class docstring: "Phase 3.1 does NOT wire real catalogs into SceneSimulator. Phase 2's `pipeline._generate_catalog` remains the active code path until Phase 3.5 worker integration."
+11. **`adapter.py`** — `project_to_sca_dataframe(stars: list[StarRecord], sca_id: int, field_center_l_deg: float, field_center_b_deg: float, exposure_s: float) -> pd.DataFrame`. Returns a DataFrame with columns exactly matching `CrowdedFieldRenderer._REQUIRED_COLUMNS` and appropriate dtypes. The `flux_e` column holds total integrated electrons (from `mag_ab_to_electrons`). The `mag_w146` column holds F146 AB magnitudes.
 
-10. **`adapter.py`** — `project_to_sca_dataframe(stars: list[StarRecord], sca_id: int, field_center_l_deg: float, field_center_b_deg: float, exposure_s: float) -> pd.DataFrame`. Returns a DataFrame with columns exactly matching `CrowdedFieldRenderer._REQUIRED_COLUMNS` and appropriate dtypes. The `flux_e` column holds total integrated electrons (from `mag_ab_to_electrons`). The `mag_w146` column holds F146 AB magnitudes.
+12. **`sampler.py`** — `sample_field(provider, l_deg, b_deg, fov_deg, rng)` orchestrator. Cache key via `hashlib.sha256(repr((provider.__class__.__name__, round(l_deg, 6), round(b_deg, 6), round(fov_deg, 6))).encode()).hexdigest()`. Cache root configurable via `SMIG_CATALOG_CACHE` env var (default `~/.smig/catalog_cache/`).
 
-11. **`sampler.py`** — `sample_field(provider, l_deg, b_deg, fov_deg, rng)` orchestrator. Cache key via `hashlib.sha256(repr((provider.__class__.__name__, round(l_deg, 6), round(b_deg, 6), round(fov_deg, 6))).encode()).hexdigest()`. Cache root configurable via `SMIG_CATALOG_CACHE` env var (default `~/.smig/catalog_cache/`).
+13. **`__main__.py`** — `python -m smig.catalogs --l 1.0 --b -3.0 --fov 0.28 --provider synthetic` prints the projected DataFrame's head and column dtypes.
 
-12. **`__main__.py`** — `python -m smig.catalogs --l 1.0 --b -3.0 --fov 0.28 --provider synthetic` prints the projected DataFrame's head and column dtypes.
-
-13. **Validation tests `smig/catalogs/validation/`:**
+14. **Validation tests `smig/catalogs/validation/`:**
     - `test_base.py`: `StarRecord` frozenness (mutation raises `FrozenInstanceError`); default `mag_other_ab` is an immutable view.
     - `test_photometry.py`: `mag_ab_to_electrons(zero_point_mag, "F146", 139.8)` returns ≈ `exposure_s` (by definition of AB zero point); unknown band raises `ValueError`.
     - `test_wcs.py`: Field center `(l, b)` maps to the stamp center pixel exactly; pixel offsets for off-center stars scale linearly with angular offset per the plate-scale constant, verified for a grid of angular offsets up to 1 deg. No inverse round-trip is required.
@@ -197,7 +198,7 @@ You are a senior microlensing physicist and numerical-methods engineer. You are 
 - **FSPL LD policy:** `strict_ld_grid=True` is the default; out-of-grid raises `ClaretGridError`. `strict_ld_grid=False` permits nearest-neighbor fallback AND sets `MicrolensingEvent.ld_fallback_used = True`. This flag is set **at event construction time** in `priors.sample_event(...)` — compute the LD coefficient (and detect whether fallback is needed) before constructing the frozen `MicrolensingEvent` so the flag can be written at freeze time. `.magnification()` does NOT mutate `ld_fallback_used` after construction.
 - **Interface freeze gate at end of phase.** `MicrolensingEvent` field list, `SourceProperties` field list, and `.magnification(t_mjd, band, source_props)` signature become LOCKED. State this explicitly in `event.py`'s module docstring. Any later change is a versioned migration.
 - **θ_E single source of truth.** `priors.sample_event(...)` computes `theta_E_mas` from sampled `(M_lens, D_L, D_S)` exactly once and writes it to the frozen `MicrolensingEvent`. Consumers read, never re-compute.
-- **ρ derivation:** use `log_g` (exact). Source physical radius `R_star = sqrt(G · M_star / g)` where `g = 10**log_g` (cgs). Angular source radius `θ_* = R_star / D_S`. Then `rho = θ_* / θ_E`. Document this chain with consistent unit conventions (cgs throughout or SI with explicit conversions at each step) in `priors.py` and in the design doc. **Do NOT use Stefan-Boltzmann** — mass and Teff alone do not determine radius.
+- **ρ derivation:** use log_g (exact). Source physical radius R_star = sqrt(G · M_star / g) strictly in SI units. You must explicitly convert log_g (cgs) to m/s², and mass_msun to kg. Then derive angular source radius θ_* = R_star / D_S and rho = θ_* / θ_E. Document this exact SI conversion chain in priors.py and the design doc. Do NOT use Stefan-Boltzmann — mass and Teff alone do not determine radius.
 - **`event_class` assignment logic:** PSPL when `q == 0` and `rho < 1e-3`; FSPL_STAR when `q == 0` and `rho >= 1e-3`; for `q > 0`, assign binary topology from (q, s) using Cassan 2008 close/resonant/wide boundaries as documented in the design doc. Map topologies to `PLANETARY_CAUSTIC` (q < 0.03) / `STELLAR_BINARY` (q >= 0.03). `HIGH_MAGNIFICATION_CUSP` when any binary event has peak static impact parameter u0 < 0.05; this classification **takes precedence** over `PLANETARY_CAUSTIC` and `STELLAR_BINARY` (i.e., if u0 < 0.05, `event_class = HIGH_MAGNIFICATION_CUSP` regardless of topology). Document this precedence rule explicitly in the design doc.
 - **Over-engineering guardrail:** Implement only what this phase requires. No orbital motion, no xallarap, no 2L2S, no astrometric centroid shifts, no non-zero parallax activation.
 - **Stop and ask before:** Adding any runtime dependency beyond VBBinaryLensing (MulensModel is test-extra only), modifying `smig/config/seed.py` or `smig/provenance/schema.py`, deleting any existing file, modifying any file outside the IN SCOPE list.
@@ -243,7 +244,11 @@ After the doc is committed:
     - `tE_days` follows from θ_E and μ_rel
     - If binary: log-uniform `q ∈ [1e-5, 1.0]`, log-uniform `s ∈ [0.3, 3.0]`, uniform `α ∈ [0, 2π)`
     - Uniform `u0 ∈ [0, 1.5]`
-    - Source radius from `log_g`: `R_star = sqrt(G * mass_msun / 10**log_g)` in consistent units per design doc; convert to AU; then `θ_* = R_star / D_S`; then `rho = θ_* / theta_E`
+    - Source radius from log_g: compute strictly in SI units.
+    1. g_si = (10 ** log_g) / 100.0 (convert cgs to m/s²)
+    2. M_star_kg = mass_msun * 1.98847e30
+    3. R_star_m = sqrt(G * M_star_kg / g_si)
+    4. Convert R_star_m to AU, compute angular radius θ_* = R_star_au / D_S_kpc (managing rad/mas conversions), then rho = θ_* / theta_E_mas.
     - Compute LD coefficient (and detect fallback) via `limb_darkening.get_coefficient(...)` before constructing the frozen event, so `ld_fallback_used` can be set at freeze time
     - Assign `event_class` per the logic in Rules of Engagement (including `HIGH_MAGNIFICATION_CUSP` precedence)
     - Return the fully-populated frozen event
@@ -368,7 +373,7 @@ You are a senior integration engineer connecting astrophysical physics to an alr
 
 3. **Export** `bind_event_to_source` from `smig/microlensing/__init__.py`.
 
-4. **Null test:** Construct a PSPL event with u0 = 100.0. Bind, run through SceneSimulator, extract the DIA difference cube. Calculate the empirical noise scale σ using the scaled Median Absolute Deviation (sigma = 1.4826 * MAD via scipy.stats.median_abs_deviation(..., scale='normal')) of the difference stamp. Assert np.median(abs(dia_cube) / sigma) < 0.8 and P99.5 < 4.0. (Note: Pure Gaussian noise has a median absolute deviation ratio of ~0.67, so < 0.8 allows for minor interpolation artifacts while strictly bounding the residual).
+4. **Null test:** Construct a PSPL event with u0 = 100.0. Bind, run through SceneSimulator, extract the DIA difference cube. Calculate the empirical noise scale σ using the scaled Median Absolute Deviation via sigma = scipy.stats.median_abs_deviation(dia_cube, axis=None, scale='normal') of the difference stamp. (Note: scale='normal' inherently applies the 1.4826 factor, do not multiply it twice). Assert np.median(abs(dia_cube) / sigma) < 0.8 and P99.5 < 4.0. (Note: Pure Gaussian noise has a median absolute deviation ratio of ~0.67, so < 0.8 allows for minor interpolation artifacts while strictly bounding the residual).
 5. **PSPL peak test:** Construct a PSPL event with u0 = 1e-3. Bind across 11 epochs. Extract the output `flux_e` values directly from the generated `source_params_sequence` dicts (do NOT attempt to read `ideal_cube_e` from `SceneSimulator`). Assert `flux_e[peak] / flux_e[baseline]` matches the analytic `A_peak / A_baseline` ratio within 2%.
 
 6. **Contract test (`test_binding.py::test_return_type_is_list_of_dict`):**
@@ -527,11 +532,12 @@ You are a senior distributed-systems engineer specializing in deterministic para
 - **Validator path:** `scripts/validate_splits.py` is the hard gate.
 - **Determinism definition:** Same master seed + same config + same codebase ⇒ same **decoded HDF5 array payloads** and **sorted-canonical manifest JSON** (byte-equal after sorting). NOT byte-identical HDF5 files.
 - **Atomic writes:** Write to `*.tmp` → fsync → atomic rename. Never append to a partially valid shard on resume; always start a fresh shard and record continuity in the checkpoint.
-- **IPC payload discipline:** Workers return `(stamps: np.ndarray shape (n_epochs, 64, 64) float32, labels: LabelVector, starfield_seed: int, event_id: str)` — **small**. Workers MUST NOT return the full `ideal_cube_e` or any 256×256 array; those are released inside `SceneSimulator` per the Phase 2 memory lifecycle.
+- **IPC payload discipline:** IPC payload discipline: Workers return (stamps: np.ndarray shape (n_science_epochs, 64, 64) float32, label_dict: dict, starfield_seed: int, event_id: str) — small. Workers MUST NOT return the full `ideal_cube_e` or any 256×256 array; those are released inside `SceneSimulator` per the Phase 2 memory lifecycle.
 
 ### Target Files
 
 **IN SCOPE:**
+- `smig/rendering/pipeline.py` — explicitly authorized for one narrow dependency-injection signature extension
 - `smig/datasets/config.py` — `PhaseConfig` dataclass (stdlib `@dataclass` + YAML loader)
 - `smig/datasets/generator.py` — `DatasetBuilder`
 - `smig/datasets/writer.py` — atomic `ShardWriter`
@@ -543,13 +549,13 @@ You are a senior distributed-systems engineer specializing in deterministic para
 - `docs/phase3_5_orchestrator_design.md`
 
 **OUT OF SCOPE (DO NOT MODIFY):**
-- All upstream frozen modules, including `smig/datasets/labels.py`, `splits.py`, `schema.py`, `manifest.py`
+- All *other* frozen upstream modules, including `smig/datasets/labels.py`, `splits.py`, `schema.py`, `manifest.py`
 - `scripts/validate_splits.py` — read-only
-
+- 
 ### Rules of Engagement
 - **Design doc before code.** `docs/phase3_5_orchestrator_design.md` MUST cover:
   1. Event ID enumeration algorithm: `event_id_i = f"{master_seed:016x}-{i:08d}"` for `i in range(n_events)`, sorted for submission.
-  2. Worker lifecycle: receives `(event_id, master_seed, config_dict)` as a single payload tuple, returns `(stamps, label_dict, starfield_seed, event_id)`, exits cleanly after each task (stateless across tasks). Workers are top-level picklable functions — no lambdas, no closures, no per-worker cached state.
+  2.Worker lifecycle: receives (event_id, master_seed, config_dict, exposure_s, n_science_epochs) as a single payload tuple, returns (stamps, label_dict, starfield_seed, event_id) exits cleanly after each task (stateless across tasks). Workers are top-level picklable functions — no lambdas, no closures, no per-worker cached state.
   3. Deterministic result collection: `ProcessPoolExecutor.map` with `chunksize=1` preserves submission order; results collected in `event_id` order before shard write.
   4. Shard boundary semantics: one writer per shard, no concurrent append, discard `.tmp` on crash, fresh shard on resume.
   5. Checkpoint protocol: SQLite WAL mode, insert after fsync+rename only.
@@ -566,36 +572,39 @@ You are a senior distributed-systems engineer specializing in deterministic para
 - **Worker payload size cap:** `stamps` MUST be `float32 shape (n_epochs, 64, 64)` only. Test asserts the returned `stamps.nbytes <= 4 * n_epochs * 64 * 64 + 1024` (small allocator slack).
 - **No autoscaling, no cluster scheduler, no dynamic pools.** Single-machine `ProcessPoolExecutor`.
 - **CI install assumption:** Orchestrator tests require `pip install -e '.[phase2]'` for GalSim and WebbPSF. Document this in the design doc and in the CLI `--help` text.
-- **Stop and ask before:** Adding dependencies, modifying any frozen upstream interface, deleting any Phase 3.4 file.
+- **Catalog Injection Seam:** You are explicitly authorized to make one narrow modification to `smig/rendering/pipeline.py`. Modify `SceneSimulator.simulate_event()` to accept an optional `neighbor_catalog: pd.DataFrame | None = None`. If provided, use it to instantiate `CrowdedFieldRenderer`; if `None`, fall back to the existing `_generate_catalog()` logic so Phase 2 tests do not break.
+- **Stop and ask before:** Adding dependencies, modifying any *other* frozen upstream interface, deleting any Phase 3.4 file.
 
 ### Execution Tasks
 
 1. **`docs/phase3_5_orchestrator_design.md` first.** Commit before writing any code. Opus 4.7 plan mode earns its keep here.
 
-2. **`config.py`** — `PhaseConfig` as a stdlib `@dataclasses.dataclass` with manual type validation. Load from YAML via `yaml.safe_load`. **Do NOT use Pydantic.** Fields: `n_events`, `shard_size`, `n_workers`, `n_epochs`, `exposure_s`, `master_seed`, `field_center_l_deg`, `field_center_b_deg`, `catalog_provider: Literal["synthetic", "besancon", "roman_bulge"]`, `event_class_distribution: dict[EventClass, float]`, `output_dir: Path`.
-
+2. **`config.py`** — PhaseConfig as a stdlib @dataclasses.dataclass with manual type validation. Load from YAML via yaml.safe_load. Do NOT use Pydantic. Fields: simulation_config_path: Path, output_dir: Path, n_events, shard_size, n_workers, n_science_epochs, cadence_days, observation_start_mjd, sky_background_e_per_s, master_seed, field_center_l_deg, field_center_b_deg, catalog_provider: Literal["synthetic", "besancon", "roman_bulge"], event_class_distribution: dict[EventClass, float].
 3. **`checkpoint.py`** — `Checkpoint(db_path: Path)` with WAL. Methods `.record_complete(event_id, shard_id, row_index, split)`, `.completed_event_ids() -> set[str]`, `.next_shard_id() -> int`, `.close()`. Idempotent inserts (`INSERT OR IGNORE`).
 
-4. **`writer.py`** — `ShardWriter(path: Path, shard_id: int, expected_n: int, n_epochs: int)` context manager. Writes to `{path}.tmp`, pre-allocates parallel datasets per `smig.datasets.schema`, chunk shape from `schema.science_stamp_chunks(n_epochs)`, compression `schema.HDF5_COMPRESSION`. `__exit__` on success: flush → close → `os.fsync` → `os.rename`. `__exit__` on exception: close HDF5 → delete `.tmp`. Writes file attributes (`schema_version`, `shard_id`, `n_epochs`, `smig_version`, `writer_backend`).
+4. **`writer.py`** — ShardWriter(path: Path, shard_id: int, expected_n: int, n_science_epochs: int) context manager. Writes to {path}.tmp, pre-allocates parallel datasets per smig.datasets.schema, chunk shape from schema.science_stamp_chunks(n_science_epochs), compression schema.HDF5_COMPRESSION. __exit__ on success: flush → close → os.fsync → os.rename. __exit__ on exception: close HDF5 → delete .tmp. Writes file attributes (schema_version, shard_id, n_epochs (using the n_science_epochs value), smig_version, writer_backend).
 
-5. **`worker.py`** — Top-level picklable function `generate_event(payload: tuple[str, int, dict]) -> tuple[np.ndarray, dict, int, str]` returning `(stamps, label_dict, starfield_seed, event_id)`. The payload tuple is `(event_id, master_seed, config_dict)`. Inside:
-    - `event_id, master_seed, config_dict = payload`
+5. **`worker.py`** — Top-level picklable function `generate_event(payload: tuple[str, int, dict, float, int]) -> tuple[np.ndarray, dict, int, str]` returning `(stamps, label_dict, starfield_seed, event_id)`. The payload tuple is `(event_id, master_seed, phase3_config_dict, exposure_s, n_science_epochs)`. Inside:
+    - `event_id, master_seed, phase3_config_dict, exposure_s, n_science_epochs = payload`
     - `event_seed = derive_event_seed(master_seed, event_id)`
     - Stage RNGs via `derive_stage_seed(event_seed, stage_name)` for: `"catalog_sample"`, `"microlensing_sample"`, `"detector"`
-    - `starfield_seed = int(derive_stage_seed(event_seed, "starfield")) % (2**53)` — clamp to JSON-safe range (< 2⁵³ fits in HDF5 `uint64` and Python JSON int)
-    - Sample catalog field → pick source star → sample microlensing event → bind to source params sequence
-
-Load SimulationConfig from smig/config/simulation.yaml (using the Phase 2 load_simulation_config utility) to instantiate SceneSimulator(sim_config, master_seed).
-
-Run SceneSimulator.simulate_event → extract the 64×64×n_epochs science DIA stamps
+    - `starfield_seed = int(derive_stage_seed(event_seed, "starfield"))` (already a JSON-safe 31-bit integer).
+    - Load `SimulationConfig` dynamically using `phase3_config_dict["simulation_config_path"]` and instantiate `SceneSimulator(sim_config, master_seed)`.
+- Read `sca_id = sim_config.detector.ipc.sca_id`.
+- Sample catalog field → pick source star.
+- Project the remaining field stars into a DataFrame via `smig.catalogs.adapter.project_to_sca_dataframe(..., sca_id=sca_id)`.
+- Sample microlensing event → bind to source params sequence.
+- Construct required Phase 2 arrays: `timestamps_mjd = phase3_config_dict["observation_start_mjd"] + np.arange(n_science_epochs, dtype=np.float64) * phase3_config_dict["cadence_days"]` and `backgrounds_e_per_s = np.full(n_science_epochs, phase3_config_dict["sky_background_e_per_s"], dtype=np.float32)`.
+- Run `SceneSimulator.simulate_event(event_id, source_params_sequence, timestamps_mjd, backgrounds_e_per_s, neighbor_catalog=projected_dataframe)` → extract the `64×64×n_science_epochs` science DIA stamps. No file I/O or HDF5 access.
     - Assemble `LabelVector`, return `(stamps_float32, label_vector.to_label_dict(), starfield_seed, event_id)`
-    - No file I/O in the worker. No HDF5 access.
-
 6. **`generator.py`** — `DatasetBuilder(config: PhaseConfig, resume: bool = False).build() -> None`:
-    - Enumerate `event_id` list per the design-doc algorithm
-    - Load `Checkpoint`; subtract completed ids (if `resume=True`)
-    - Group remaining into shards of `config.shard_size`
-    - Build payload list: `payloads = [(event_id, config.master_seed, dataclasses.asdict(config)) for event_id in shard_event_ids]`
+    - Enumerate `event_id` list per the design-doc algorithm. Load Checkpoint; subtract completed ids (if resume=True). Group remaining into shards.
+    - Load the Phase 2 config: sim_config = load_simulation_config(config.simulation_config_path). Calculate effective exposure from the Phase 2 readout spec: exposure_s = (sim_config.detector.readout.n_ramp_reads - 1) * sim_config.detector.readout.frame_time_s. (Or safely extract exposure_time_s directly if present on readout).
+    - Build payload list: payloads = [(event_id, config.master_seed, dataclasses.asdict(config), exposure_s, config.n_science_epochs) for event_id in shard_event_ids].
+    - For each shard: executor.map(generate_event, payloads, chunksize=1); collect results keyed by event_id; iterate in sorted event_id order; open ShardWriter, write rows, close, checkpoint each event, emit incremental manifest.
+    - On KeyboardInterrupt / SystemExit: current shard's .tmp is discarded by ShardWriter.__exit__; checkpoint state survives. On worker exception: mark event as failed in failed_events.jsonl; continue.
+
+Build payload list: payloads = [(event_id, config.master_seed, dataclasses.asdict(config), exposure_s, config.n_science_epochs) for event_id in shard_event_ids].
     - For each shard: `executor.map(generate_event, payloads, chunksize=1)`; collect results keyed by `event_id`; iterate in sorted `event_id` order; open `ShardWriter`, write rows, close, checkpoint each event, emit incremental manifest
     - On `KeyboardInterrupt` / `SystemExit`: current shard's `.tmp` is discarded by `ShardWriter.__exit__`; checkpoint state survives; re-run with `--resume` starts fresh shard.
     - On worker exception: mark event as failed in a separate `failed_events.jsonl` file; continue; surface a summary at end.
@@ -607,14 +616,13 @@ Run SceneSimulator.simulate_event → extract the 64×64×n_epochs science DIA s
     ```
     `--help` lists required CI extras (`pip install -e '.[phase2]'`).
 
-8. configs/phase3_smoke.yaml — output_dir: outputs/phase3_smoke, n_events: 16, shard_size: 8, n_workers: 4, n_epochs: 30 (or whatever the repo's existing Phase 2 cadence standard is — read and match), exposure_s: 139.8, master_seed: 20260416, field_center_l_deg: 1.0, field_center_b_deg: -3.0, catalog_provider: synthetic, event_class_distribution: {PSPL: 0.5, FSPL_STAR: 0.2, PLANETARY_CAUSTIC: 0.2, STELLAR_BINARY: 0.1}.
-
+8. configs/phase3_smoke.yaml — simulation_config_path: smig/config/simulation.yaml, output_dir: outputs/phase3_smoke, n_events: 16, shard_size: 8, n_workers: 4, n_science_epochs: 30, cadence_days: 0.0104, observation_start_mjd: 60000.0, sky_background_e_per_s: 0.5, master_seed: 20260416, field_center_l_deg: 1.0, field_center_b_deg: -3.0, catalog_provider: synthetic, event_class_distribution: {PSPL: 0.5, FSPL_STAR: 0.2, PLANETARY_CAUSTIC: 0.2, STELLAR_BINARY: 0.1}.
 9. **Validation tests:**
     - `test_writer.py`: Atomic rename on success; `.tmp` deleted on exception; reading pre-allocated datasets before close raises.
     - `test_checkpoint.py`: WAL concurrency smoke; idempotent insert.
     - test_resume.py: Mocked crash — patch os.rename (or the underlying HDF5 dataset .resize() / write method) to raise SystemExit partway through shard 1. Do NOT patch __exit__ itself, so the actual cleanup logic runs. Run builder; assert .tmp gone, checkpoint has only shard 0 events; re-run with `resume=True`; final decoded arrays and sorted-canonical manifest JSON match an uninterrupted run of the same config.
     - `test_determinism.py`: Two independent `.build()` calls with identical config into different output dirs. Assert `np.testing.assert_array_equal` on all science stamps and label datasets across the two shard sets; sorted-canonical manifest JSONs byte-equal. `@pytest.mark.slow`.
-    - `test_worker_payload.py`: Run one `generate_event` directly (not via pool); assert `stamps.shape == (n_epochs, 64, 64)`, `stamps.dtype == np.float32`, `stamps.nbytes <= 4 * n_epochs * 64 * 64 + 1024`.
+    - `test_worker_payload.py`: Run one generate_event directly (not via pool); assert stamps.shape == (n_science_epochs, 64, 64), stamps.dtype == np.float32, stamps.nbytes <= 4 * n_science_epochs * 64 * 64 + 1024.
     - `test_generator.py`: 16-event smoke finishes; `scripts/validate_splits.py` exits 0 on resulting manifest. `@pytest.mark.slow`. Timing is informational-only (log but do not assert).
 
 ### Acceptance Criteria
@@ -721,7 +729,7 @@ You are a senior scientific software validation engineer. You are executing **Ph
    - `test_out_of_grid_fallback_provenance`: `strict_ld_grid=False` + out-of-grid at construction → nearest-neighbor used AND returned `MicrolensingEvent.ld_fallback_used == True` on the frozen event
 
 4. **`test_binary_suzuki2016.py` — Risk 1:**
-   - Load 5 events from `smig/datasets/validation/` full path: `data/microlensing/reference_events/suzuki2016_sample.json`
+   -Load 5 events from data/microlensing/reference_events/suzuki2016_sample.json
    - Compute magnification at published peak times via pinned VBBL
    - Assert peak magnification matches published values within 1e-3 relative error
    - On 2 non-caustic-crossing events: cross-check MulensModel via `pytest.importorskip("MulensModel")` to <1e-3
@@ -745,10 +753,10 @@ You are a senior scientific software validation engineer. You are executing **Ph
    - Resume with fresh `DatasetBuilder`; assert final decoded arrays equal and sorted-canonical manifests byte-equal vs an uninterrupted run
 
 8. **`test_memory_ramp_peak.py` — Python allocation proxy for Phase 2 memory invariant:**
-   - Determine the ramp-size budget from Phase 2's MultiAccumSimulator docstring (in smig/sensor/readout.py). Load the actual SimulationConfig object from smig/config/simulation.yaml using your config utilities, and extract the detector.geometry and n_reads fields directly from the Pydantic model to compute ramp_bytes = 4 (float32) * nx * ny * n_reads.
-   - `tracemalloc.start()` around one call to `SceneSimulator.simulate_event()`
+   - Determine the ramp-size budget from Phase 2's `MultiAccumSimulator` docstring (in `smig/sensor/readout.py`). Load `SimulationConfig` from `smig/config/simulation.yaml`, and explicitly extract `sim_config.detector.geometry.nx`, `sim_config.detector.geometry.ny`, and `sim_config.detector.readout.n_ramp_reads` from the Pydantic model to compute `ramp_bytes = 4 (float32) * nx * ny * n_ramp_reads`.
+   - `tracemalloc.start()` around one call to `SceneSimulator.simulate_event()`.
    - Assert `peak_traced_allocations <= 2.5 * ramp_bytes` (2.5× allows for PSF stamp overhead; the 2.5× headroom is documented in a comment). **Important:** this measures Python allocator peak allocations, not OS-level RSS; the comment must state this explicitly.
-   - Mark `@pytest.mark.integration` so small containers can skip cleanly
+   - Mark `@pytest.mark.integration` so small containers can skip cleanly.
 
 9. **`test_null_and_peak_binding_e2e.py` — End-to-end integration wrapper:**
    - Import `bind_event_to_source` and run the null + PSPL-peak tests through the full orchestrator path (one-event smoke build). Acts as an integration guard; module-level binding tests in 3.3 remain authoritative.
