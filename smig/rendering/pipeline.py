@@ -406,6 +406,7 @@ class SceneSimulator:
             ideal_cube_e[i] = np.clip(galsim_stamp.array, 0.0, None)
 
         # --- 5. Detector processing (hold ideal_cube_e until process_event returns) ---
+        np.clip(ideal_cube_e, 0.0, None, out=ideal_cube_e)
         event_output = detector.process_event(event_id, ideal_cube_e, timestamps_mjd)
         # Memory contract: free the full cube BEFORE DIA allocates its buffers.
         del ideal_cube_e

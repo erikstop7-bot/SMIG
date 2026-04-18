@@ -148,7 +148,9 @@ class MultiAccumSimulator:
 
         # Per-frame-interval photon increment: total photon signal / (n-1) frames.
         # n_ramp_reads >= 2 is enforced by schema, so (n_reads - 1) >= 1.
-        photon_per_interval = ideal_image_e / (n_reads - 1)
+        # Floor to zero: FFT-based IPC/charge-diffusion convolutions can produce
+        # tiny sub-zero ringing artifacts that cause poisson() to raise.
+        photon_per_interval = np.maximum(ideal_image_e / (n_reads - 1), 0.0)
 
         # Scalar dark current increment per frame interval (electrons).
         dark_per_interval = self._dark_current_e_per_s * frame_time

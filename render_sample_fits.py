@@ -13,8 +13,8 @@ def main():
 
     # 2. Generate a synthetic neighbor catalog for the crowded field
     # (Simulating a moderately dense Bulge field)
-    np.random.seed(42)
-    n_stars = 150
+    np.random.seed(9090898)
+    n_stars = 25
     neighbor_catalog = pd.DataFrame({
         "x_pix": np.random.uniform(0, 256, n_stars),
         "y_pix": np.random.uniform(0, 256, n_stars),
@@ -44,7 +44,7 @@ def main():
 
     # 4. Initialize the orchestrator
     print("Initializing SceneSimulator (this will warm up the STPSF cache)...")
-    simulator = SceneSimulator(config, master_seed=999)
+    simulator = SceneSimulator(config, master_seed=5000)
 
     # Inject the mock catalog into the renderer's state (since Phase 3 catalogs aren't wired yet)
     # Note: Depending on your exact pipeline.py init, you may need to pass the catalog in differently.
@@ -71,16 +71,21 @@ def main():
 
     # Depending on how EventSceneOutput is structured, extract the cubes.
     # Assuming standard attribute names based on the spec:
+    # 6. Save outputs to FITS
+    output_dir = Path("sample_fits_output")
+    output_dir.mkdir(exist_ok=True)
+
     for i in range(epochs):
-        # Full 256x256 detector rate image (e-/s)
-        full_rate_fits = output_dir / f"epoch_{i}_rate_256x256.fits"
-        fits.writeto(full_rate_fits, event_output.rate_cube[i], overwrite=True)
-        
-        # 64x64 DIA difference stamp
-        # (Assuming your pipeline returns the extracted stamps in a list or array)
-        if hasattr(event_output, 'dia_stamps'):
+        # 1. Save the RAW 256x256 rate image (if your pipeline exposes rate_cube)
+        if hasattr(event_output, 'rate_cube') and event_output.rate_cube is not None:
+            rate_fits = output_dir / f"epoch_{i}_rate_256x256.fits"
+            fits.writeto(rate_fits, event_output.rate_cube[i], overwrite=True)
+
+        # 2. Save the 64x64 DIA difference stamp
+        # (Based on your previous audit, Claude named this 'difference_stamps')
+        if hasattr(event_output, 'difference_stamps') and event_output.difference_stamps is not None:
             dia_fits = output_dir / f"epoch_{i}_dia_64x64.fits"
-            fits.writeto(dia_fits, event_output.dia_stamps[i], overwrite=True)
+            fits.writeto(dia_fits, event_output.difference_stamps[i], overwrite=True)
 
     print(f"Success! FITS files saved to {output_dir.absolute()}")
 

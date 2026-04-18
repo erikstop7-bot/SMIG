@@ -33,6 +33,8 @@ where = ["."]
 include = ["smig*"]
 
 [tool.pytest.ini_options]
+testpaths = ["smig", "scripts"]
 markers = [
     "slow: marks tests as slow (skips strict timing assertion in CI when CI env var is set)",
+    "integration: marks integration tests",
 ]

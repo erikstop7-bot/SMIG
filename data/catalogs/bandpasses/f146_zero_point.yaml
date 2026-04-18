@@ -1,0 +1,23 @@
+# Roman WFI F146 AB zero-point — machine-readable single source of truth.
+#
+# DEFINITION: An AB magnitude of f146_ab_zero_point corresponds to a source
+# that produces exactly 1 electron per second on a Roman WFI detector.
+#   flux_e_per_s = 10 ** ((f146_ab_zero_point - mag_ab) / 2.5)
+#
+# This value is the authoritative numeric constant used by
+# smig/catalogs/photometry.py.  The human-readable provenance mirror is
+# docs/phase3_photometry_reference.md — update BOTH if this value changes.
+#
+f146_ab_zero_point: 26.64
+
+# Provenance metadata (informational; code uses only f146_ab_zero_point above)
+retrieval_date: "2024-01-15"
+source_url: "https://roman.gsfc.nasa.gov/science/Roman_Reference_Information.html"
+stsci_bandpass_version: "Roman_WFI_F146_2023"
+notes: >
+  Derived from STScI Roman Exposure Time Calculator (ETC) v2.0 for a flat
+  AB-spectrum source with the WFI wide-field imaging mode.  The value
+  corresponds to the total system throughput including the primary mirror
+  (2.4 m, ~3.97 m² effective area), detector QE, filter transmission, and
+  all other optical elements.  Valid for the centre of SCA01; per-SCA
+  variation is <0.05 mag and is not modelled in Phase 3.1.

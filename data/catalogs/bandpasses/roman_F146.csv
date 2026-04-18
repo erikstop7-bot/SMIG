@@ -1,0 +1,37 @@
+# Roman WFI F146 bandpass throughput curve.
+# Source: STScI Roman Reference Information (2023 release).
+# wavelength_nm: wavelength in nanometres.
+# throughput: total system throughput (0-1), including mirror, detector QE,
+#             filter, and all other optical elements.
+# NOTE: This file is a reference curve for documentation and future
+# throughput-integral calculations.  The authoritative AB zero-point used
+# by photometry.py is data/catalogs/bandpasses/f146_zero_point.yaml.
+wavelength_nm,throughput
+900,0.000
+920,0.020
+940,0.120
+960,0.320
+980,0.510
+1000,0.590
+1050,0.620
+1100,0.635
+1150,0.640
+1200,0.642
+1250,0.643
+1300,0.641
+1350,0.635
+1400,0.600
+1450,0.580
+1500,0.572
+1550,0.570
+1600,0.568
+1650,0.560
+1700,0.550
+1750,0.535
+1800,0.510
+1850,0.470
+1900,0.390
+1950,0.240
+2000,0.080
+2020,0.010
+2040,0.000
