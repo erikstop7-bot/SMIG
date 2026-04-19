@@ -1,0 +1,196 @@
+"""
+smig/microlensing/validation/test_binding.py
+============================================
+Tests for :func:`~smig.microlensing.binding.bind_event_to_source`.
+
+Coverage
+--------
+AC-B1  Contract: return type is list[dict] with "flux_e" float in every entry.
+AC-B2  PSPL peak: flux_e[peak] / flux_e[baseline] matches analytic A_peak /
+       A_baseline within 2%.
+AC-B3  Null DIA: u0=100 event produces DIA difference residuals consistent with
+       noise-only (median |r| < 0.8, P99.5 < 4.0 where r = |diff| / sigma_MAD).
+       Requires galsim + pandas; skipped otherwise.
+
+Run from the SMIG project root::
+
+    python -m pytest smig/microlensing/validation/test_binding.py -v
+"""
+from __future__ import annotations
+
+import numpy as np
+import pytest
+import scipy.stats
+
+from smig.catalogs.base import StarRecord
+from smig.catalogs.photometry import mag_ab_to_electrons
+from smig.microlensing.binding import bind_event_to_source
+from smig.microlensing.event import EventClass, MicrolensingEvent
+
+# These imports are safe even without galsim (pipeline.py guards galsim lazily).
+from smig.config.optics_schemas import (
+    CrowdedFieldConfig,
+    DIAConfig,
+    PSFConfig,
+    RenderingConfig,
+    SimulationConfig,
+)
+from smig.config.schemas import DetectorConfig
+from smig.rendering.pipeline import SceneSimulator
+
+
+# ---------------------------------------------------------------------------
+# Shared helpers
+# ---------------------------------------------------------------------------
+
+def _make_star(mag: float = 20.0) -> StarRecord:
+    return StarRecord(
+        galactic_l_deg=1.0,
+        galactic_b_deg=-3.0,
+        distance_kpc=8.0,
+        mass_msun=1.0,
+        teff_K=5800.0,
+        log_g=4.5,
+        metallicity_feh=0.0,
+        mag_F146_ab=mag,
+        source_id="test_star_0",
+        catalog_tile_id="tile_0",
+    )
+
+
+def _make_pspl_event(
+    u0: float,
+    t0_mjd: float = 60_000.0,
+    tE_days: float = 30.0,
+) -> MicrolensingEvent:
+    return MicrolensingEvent(
+        event_id="test_event",
+        t0_mjd=t0_mjd,
+        tE_days=tE_days,
+        u0=u0,
+        rho=0.0,
+        alpha_rad=0.0,
+        event_class=EventClass.PSPL,
+    )
+
+
+def _make_sim_config(ctx: int = 32, sci_sz: int = 16, n_ref: int = 5) -> SimulationConfig:
+    default_det = DetectorConfig()
+    det_dict = default_det.model_dump()
+    det_dict["geometry"]["nx"] = ctx
+    det_dict["geometry"]["ny"] = ctx
+    small_det = DetectorConfig.model_validate(det_dict)
+    return SimulationConfig(
+        detector=small_det,
+        psf=PSFConfig(oversample=1, n_wavelengths=2, jitter_rms_mas=0.0),
+        rendering=RenderingConfig(),
+        crowded_field=CrowdedFieldConfig(stamp_size=sci_sz, pixel_scale_arcsec=0.11),
+        dia=DIAConfig(
+            n_reference_epochs=n_ref,
+            context_stamp_size=ctx,
+            science_stamp_size=sci_sz,
+        ),
+    )
+
+
+def _pspl_magnification(t: np.ndarray, t0: float, tE: float, u0: float) -> np.ndarray:
+    u = np.sqrt(u0 ** 2 + ((t - t0) / tE) ** 2)
+    return (u ** 2 + 2.0) / (u * np.sqrt(u ** 2 + 4.0))
+
+
+# ---------------------------------------------------------------------------
+# AC-B1  Contract test
+# ---------------------------------------------------------------------------
+
+def test_return_type_is_list_of_dict() -> None:
+    """Return is list[dict] with "flux_e" float in every entry."""
+    event = _make_pspl_event(u0=1.0)
+    star = _make_star()
+    t = np.linspace(59_990.0, 60_010.0, 5)
+    result = bind_event_to_source(event, star, t, exposure_s=100.0)
+
+    assert isinstance(result, list)
+    assert len(result) == len(t)
+    assert all(isinstance(x, dict) and "flux_e" in x for x in result)
+    assert all(isinstance(x["flux_e"], float) for x in result)
+
+
+# ---------------------------------------------------------------------------
+# AC-B2  PSPL peak test (no SceneSimulator needed)
+# ---------------------------------------------------------------------------
+
+def test_pspl_peak_ratio() -> None:
+    """flux_e[peak] / flux_e[baseline] matches analytic A_peak / A_baseline within 2%."""
+    u0 = 1e-3
+    t0_mjd = 60_000.0
+    tE_days = 30.0
+    exposure_s = 100.0
+
+    event = _make_pspl_event(u0=u0, t0_mjd=t0_mjd, tE_days=tE_days)
+    star = _make_star(mag=20.0)
+
+    # 11 epochs: index 0 at peak (t=t0), indices 1-10 far from peak
+    t_peak = np.array([t0_mjd])
+    t_far = t0_mjd + np.linspace(5.0 * tE_days, 15.0 * tE_days, 10)
+    epoch_times_mjd = np.concatenate([t_peak, t_far])
+    assert len(epoch_times_mjd) == 11
+
+    result = bind_event_to_source(event, star, epoch_times_mjd, exposure_s)
+    flux_e = np.array([d["flux_e"] for d in result])
+
+    peak_flux = flux_e[0]
+    baseline_flux = np.mean(flux_e[1:])
+
+    A_vals = _pspl_magnification(epoch_times_mjd, t0_mjd, tE_days, u0)
+    analytic_ratio = A_vals[0] / np.mean(A_vals[1:])
+    measured_ratio = peak_flux / baseline_flux
+
+    assert abs(measured_ratio - analytic_ratio) / analytic_ratio < 0.02, (
+        f"Peak ratio {measured_ratio:.6f} deviates from analytic {analytic_ratio:.6f} "
+        f"by {abs(measured_ratio - analytic_ratio) / analytic_ratio * 100:.3f}% (limit 2%)."
+    )
+
+
+# ---------------------------------------------------------------------------
+# AC-B3  Null DIA residuals (requires galsim + pandas)
+# ---------------------------------------------------------------------------
+
+def test_null_event_dia_residuals() -> None:
+    """u0=100 → A≈1; DIA difference residuals are noise-only."""
+    pytest.importorskip("galsim", reason="galsim required for null DIA test")
+    pytest.importorskip("pandas", reason="pandas required for null DIA test")
+
+    u0 = 100.0
+    t0_mjd = 60_000.0
+    exposure_s = 100.0
+    n_epochs = 5
+
+    event = _make_pspl_event(u0=u0, t0_mjd=t0_mjd)
+    star = _make_star(mag=22.0)  # faint → modest flux, avoids saturation
+
+    epoch_times_mjd = np.linspace(t0_mjd - 2.0, t0_mjd + 2.0, n_epochs)
+    source_params = bind_event_to_source(event, star, epoch_times_mjd, exposure_s)
+
+    cfg = _make_sim_config(ctx=32, sci_sz=16, n_ref=5)
+    sim = SceneSimulator(cfg, master_seed=0)
+    out = sim.simulate_event(
+        event_id="null_test",
+        source_params_sequence=source_params,
+        timestamps_mjd=epoch_times_mjd,
+        backgrounds_e_per_s=[0.1] * n_epochs,
+    )
+
+    dia_cube = out.difference_stamps  # (n_epochs, sci_sz, sci_sz)
+    sigma = scipy.stats.median_abs_deviation(dia_cube, axis=None, scale="normal")
+
+    if sigma == 0.0:
+        # Perfectly flat DIA (all zeros) trivially passes.
+        return
+
+    r = np.abs(dia_cube) / sigma
+    assert np.median(r) < 0.8, (
+        f"Null test: median(|r|) = {np.median(r):.3f} >= 0.8"
+    )
+    assert np.percentile(r, 99.5) < 4.0, (
+        f"Null test: P99.5(|r|) = {np.percentile(r, 99.5):.3f} >= 4.0"
+    )

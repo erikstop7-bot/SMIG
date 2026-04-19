@@ -21,11 +21,17 @@ _BACKEND_NAME = "VBBinaryLensing"
 _PINNED_VERSION = "3.7.0"
 
 # Module-level assertion: fails loudly at import time if installed version drifts.
-_installed = importlib.metadata.version(_PINNED_DIST)
-assert _installed == _PINNED_VERSION, (
-    f"VBBinaryLensing version mismatch: installed {_installed!r} != pinned "
-    f"{_PINNED_VERSION!r}. Update pyproject.toml and _PINNED_VERSION together."
-)
+# Wrapped in try/except so that PSPL/FSPL tests can run in envs where the C
+# extension wheel cannot be built (e.g. WSL2 without a suitable C++ toolchain).
+# Binary-event tests guard themselves with pytest.importorskip("VBBinaryLensing").
+try:
+    _installed = importlib.metadata.version(_PINNED_DIST)
+    assert _installed == _PINNED_VERSION, (
+        f"VBBinaryLensing version mismatch: installed {_installed!r} != pinned "
+        f"{_PINNED_VERSION!r}. Update pyproject.toml and _PINNED_VERSION together."
+    )
+except importlib.metadata.PackageNotFoundError:
+    _installed = None
 
 
 def get_primary_backend() -> tuple[str, str]:
