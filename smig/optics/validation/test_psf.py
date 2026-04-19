@@ -615,3 +615,4 @@ def test_polychromatic_normalization(provider: Any) -> None:
     if hasattr(result, "image"):
         total = float(result.image.array.sum())
         assert abs(total - 1.0) < 1e-5
+

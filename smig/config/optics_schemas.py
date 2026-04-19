@@ -41,11 +41,13 @@ class PSFConfig(BaseModel):
 
     model_config = ConfigDict(frozen=True, extra="forbid", strict=True)
 
+    # W146 is SMIG's user-facing label for the wide band; STPSF expects F146.
+    # smig/optics/psf._resolve_stpsf_filter_name handles the alias translation.
     filter_name: str = Field(
         default="W146",
         description=(
             "Roman WFI filter identifier (e.g. 'W146', 'F062', 'F087').  "
-            "Passed directly to WebbPSF's RomanWFI instrument object."
+            "Passed to WebbPSF's RomanWFI instrument object (W146 is aliased to F146)."
         ),
     )
     oversample: int = Field(

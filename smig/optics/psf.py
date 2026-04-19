@@ -76,6 +76,21 @@ _MEMORY_CACHE_MAX: int = 200                 # Max PSF arrays in in-process cach
 # ---------------------------------------------------------------------------
 
 
+# SMIG uses "W146" as the wide-band label; STPSF expects the STScI name "F146".
+_STPSF_FILTER_ALIAS: dict[str, str] = {
+    "W146": "F146",
+}
+
+
+def _resolve_stpsf_filter_name(filter_name: str) -> str:
+    """Map a SMIG filter label to the name expected by the STPSF/WebbPSF WFI object.
+
+    Returns the input unchanged when it is already a valid STPSF filter name.
+    The mapping is only consulted in the WebbPSF code path.
+    """
+    return _STPSF_FILTER_ALIAS.get(filter_name, filter_name)
+
+
 def _normalize_sca_id(sca_id: str | int) -> str:
     """Normalize an SCA identifier to canonical ``'SCA{n:02d}'`` format.
 
@@ -499,7 +514,7 @@ class STPSFProvider:
                 if self._instrument is None:
                     try:
                         wfi = _webbpsf.roman.WFI()
-                        wfi.filter = self._config.filter_name
+                        wfi.filter = _resolve_stpsf_filter_name(self._config.filter_name)
                         wfi.options["output_mode"] = "oversampled"
                         self._instrument = wfi
                     except (OSError, EnvironmentError, FileNotFoundError) as exc:
